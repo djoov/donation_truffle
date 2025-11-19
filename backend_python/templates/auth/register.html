@@ -1,36 +1,248 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="card" style="max-width: 500px; margin: 40px auto;">
-    <div class="section-header" style="text-align: center;">
-        <h2><i class="fa-solid fa-user-plus"></i> Daftar Baru</h2>
-        <p>Bergabung sebagai Donatur atau Kreator.</p>
-    </div>
 
-    <form method="POST">
-        <label>Username</label>
-        <input type="text" name="username" class="input-field" required>
-
-        <label>Email</label>
-        <input type="email" name="email" class="input-field" required>
-
-        <label>Password</label>
-        <input type="password" name="password" class="input-field" required>
-
-        <label>Daftar Sebagai</label>
-        <select name="role" class="input-field" style="height: 50px;">
-            <option value="donor">Donatur (Ingin Berdonasi)</option>
-            <option value="creator">Kreator (Ingin Galang Dana)</option>
-        </select>
-
-        <label>Wallet Address (Opsional)</label>
-        <input type="text" name="wallet_address" class="input-field" placeholder="0x...">
-
-        <button type="submit" class="button button-full">Buat Akun</button>
-    </form>
+<!-- Wrapper untuk centering vertikal & horizontal -->
+<div style="display: flex; align-items: center; justify-content: center; min-height: 80vh; padding: 20px;">
     
-    <p style="text-align: center; margin-top: 15px; font-size: 0.9rem;">
-        Sudah punya akun? <a href="/login" style="color: var(--primary);">Login</a>
-    </p>
+    <!-- Card Besar Split Layout -->
+    <div class="auth-card" style="display: flex; flex-wrap: wrap; background: white; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; max-width: 1000px; width: 100%; border: 1px solid #eee;">
+        
+        <!-- BAGIAN KIRI: FORMULIR -->
+        <div style="flex: 1; min-width: 350px; padding: 50px;">
+            <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+                <h2 style="font-size: 2rem; margin-bottom: 10px;">Bergabunglah! <span style="font-size: 1.5rem;">🚀</span></h2>
+                <p style="color: #666;">Buat akun untuk mulai berdonasi atau menggalang dana.</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 12px; margin-bottom: 20px; border-radius: 8px; font-size: 0.9rem;
+                                    background: {{ '#e8f5e9' if category == 'success' else '#ffebee' }};
+                                    color: {{ '#2e7d32' if category == 'success' else '#c62828' }};">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 600; font-size: 0.9rem; color: #333;">Username</label>
+                    <input type="text" name="username" class="input-field" placeholder="Nama pengguna unik" required style="margin-top: 5px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 600; font-size: 0.9rem; color: #333;">Email Address</label>
+                    <input type="email" name="email" class="input-field" placeholder="contoh@email.com" required style="margin-top: 5px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 600; font-size: 0.9rem; color: #333;">Password</label>
+                    <input type="password" name="password" class="input-field" placeholder="Minimal 8 karakter" required style="margin-top: 5px;">
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; font-size: 0.9rem; color: #333;">Daftar Sebagai</label>
+                        <select name="role" class="input-field" style="margin-top: 5px; height: 50px;">
+                            <option value="donor">Donatur</option>
+                            <option value="creator">Kreator</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                         <label style="font-weight: 600; font-size: 0.9rem; color: #333;">Wallet (Opsional)</label>
+                         <input type="text" name="wallet_address" class="input-field" placeholder="0x..." style="margin-top: 5px;">
+                    </div>
+                </div>
+
+                <button type="submit" class="button button-full" style="margin-top: 10px; height: 50px; font-size: 1rem;">Daftar Sekarang</button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 25px; font-size: 0.9rem; color: #666;">
+                Sudah punya akun? <a href="/login" style="color: var(--primary); font-weight: 600; text-decoration: none;">Login di sini</a>
+            </p>
+        </div>
+
+        <!-- BAGIAN KANAN: MASKOT 3D -->
+        <div class="mascot-container" style="flex: 1; min-width: 350px; background: linear-gradient(135deg, #FFF 0%, #FFF3E0 100%); position: relative; min-height: 500px;">
+             <!-- Canvas untuk Three.js -->
+             <canvas id="register-mascot-canvas" style="width: 100%; height: 100%; display: block; outline: none;"></canvas>
+             
+             <!-- Teks Dekorasi -->
+             <div style="position: absolute; bottom: 40px; left: 0; right: 0; text-align: center; pointer-events: none;">
+                 <h3 style="color: #D32F2F; opacity: 0.8; font-size: 1.2rem;">"Siap Berbagi Kebaikan?"</h3>
+             </div>
+        </div>
+    </div>
 </div>
+
+
+<!-- SCRIPTS 3D -->
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+
+    function initMascot() {
+        const canvas = document.getElementById('register-mascot-canvas');
+        const container = document.querySelector('.mascot-container');
+        
+        if (!canvas || !container) return;
+
+        // --- Scene Setup ---
+        const scene = new THREE.Scene();
+        scene.background = null; // Transparan agar ikut background CSS
+        
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        
+        // [PERUBAHAN DI SINI]
+        // Sebelumnya 6, sekarang 8 agar maskot terlihat lebih kecil (zoomed out)
+        camera.position.z = 8; 
+        camera.position.y = 0;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        // --- MODELING RUBAH ---
+        const mascotGroup = new THREE.Group();
+        scene.add(mascotGroup);
+
+        const furColor = new THREE.Color(0xFF8800);
+        const creamColor = new THREE.Color(0xFFFDD0);
+        const noseColor = new THREE.Color(0x222222);
+
+        const mainFurMat = new THREE.MeshStandardMaterial({ color: furColor, roughness: 0.5 });
+        const creamFurMat = new THREE.MeshStandardMaterial({ color: creamColor, roughness: 0.6 });
+        const noseMat = new THREE.MeshStandardMaterial({ color: noseColor, roughness: 0.3 });
+
+        // Kepala
+        const head = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), mainFurMat);
+        head.scale.set(1.1, 0.95, 1.0);
+        mascotGroup.add(head);
+
+        // Moncong
+        const snout = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), creamFurMat);
+        snout.position.set(0, -0.3, 0.85);
+        snout.scale.set(1, 0.8, 1.2);
+        head.add(snout);
+
+        // Pipi
+        const cheekGeo = new THREE.SphereGeometry(0.45, 32, 32);
+        const cheekL = new THREE.Mesh(cheekGeo, creamFurMat);
+        cheekL.position.set(-0.6, -0.35, 0.5); cheekL.scale.set(1, 0.8, 0.8); head.add(cheekL);
+        const cheekR = new THREE.Mesh(cheekGeo, creamFurMat);
+        cheekR.position.set(0.6, -0.35, 0.5); cheekR.scale.set(1, 0.8, 0.8); head.add(cheekR);
+
+        // Hidung
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), noseMat);
+        nose.position.set(0, 0.1, 0.45); nose.scale.set(1.5, 1, 1); snout.add(nose);
+
+        // Telinga
+        const earGeo = new THREE.ConeGeometry(0.35, 0.9, 32);
+        const earInnerGeo = new THREE.ConeGeometry(0.2, 0.6, 32);
+        
+        const earL = new THREE.Mesh(earGeo, mainFurMat);
+        earL.position.set(-0.6, 0.85, 0); earL.rotation.z = 0.3; earL.rotation.x = -0.1; head.add(earL);
+        const earLInner = new THREE.Mesh(earInnerGeo, creamFurMat);
+        earLInner.position.set(0, -0.1, 0.18); earL.add(earLInner);
+
+        const earR = new THREE.Mesh(earGeo, mainFurMat);
+        earR.position.set(0.6, 0.85, 0); earR.rotation.z = -0.3; earR.rotation.x = -0.1; head.add(earR);
+        const earRInner = new THREE.Mesh(earInnerGeo, creamFurMat);
+        earRInner.position.set(0, -0.1, 0.18); earR.add(earRInner);
+
+        // Mata & Pupil
+        const eyeWhiteGeo = new THREE.SphereGeometry(0.28, 32, 32);
+        const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.1 });
+        const pupilGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+
+        const eyeL = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+        eyeL.position.set(-0.35, 0.05, 0.82); eyeL.scale.set(1, 1.1, 0.5); head.add(eyeL);
+        const pupilL = new THREE.Mesh(pupilGeo, pupilMat);
+        pupilL.position.z = 0.25; eyeL.add(pupilL);
+
+        const eyeR = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+        eyeR.position.set(0.35, 0.05, 0.82); eyeR.scale.set(1, 1.1, 0.5); head.add(eyeR);
+        const pupilR = new THREE.Mesh(pupilGeo, pupilMat);
+        pupilR.position.z = 0.25; eyeR.add(pupilR);
+
+        // Alis
+        const browGeo = new THREE.CapsuleGeometry(0.05, 0.3, 4, 8);
+        const browMat = new THREE.MeshStandardMaterial({ color: furColor });
+        const browL = new THREE.Mesh(browGeo, browMat);
+        browL.rotation.z = Math.PI / 2 + 0.2; browL.position.set(-0.35, 0.4, 0.85); head.add(browL);
+        const browR = new THREE.Mesh(browGeo, browMat);
+        browR.rotation.z = Math.PI / 2 - 0.2; browR.position.set(0.35, 0.4, 0.85); head.add(browR);
+
+        // Pencahayaan
+        const ambientLight = new THREE.HemisphereLight(0xffffff, 0xffeedd, 0.6); scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.5); mainLight.position.set(5, 10, 7); scene.add(mainLight);
+        const rimLight = new THREE.DirectionalLight(0xffaa00, 0.5); rimLight.position.set(-5, 5, -5); scene.add(rimLight);
+
+        // Interaksi Mouse
+        let mouseX = 0; let mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+            mouseX = (event.clientX - windowHalfX) / windowHalfX;
+            mouseY = (event.clientY - windowHalfY) / windowHalfY;
+        });
+
+        window.addEventListener('resize', () => {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+
+        // Animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+
+            // Gerakan Mata
+            const pupilLimit = 0.15;
+            const targetPupilX = Math.max(-pupilLimit, Math.min(pupilLimit, mouseX * 0.3));
+            const targetPupilY = Math.max(-pupilLimit, Math.min(pupilLimit, -mouseY * 0.3));
+            pupilL.position.x = THREE.MathUtils.lerp(pupilL.position.x, targetPupilX, 0.15);
+            pupilL.position.y = THREE.MathUtils.lerp(pupilL.position.y, targetPupilY, 0.15);
+            pupilR.position.x = THREE.MathUtils.lerp(pupilR.position.x, targetPupilX, 0.15);
+            pupilR.position.y = THREE.MathUtils.lerp(pupilR.position.y, targetPupilY, 0.15);
+
+            // Gerakan Kepala
+            const targetHeadRotX = -mouseY * 0.25;
+            const targetHeadRotY = mouseX * 0.35;
+            mascotGroup.rotation.x = THREE.MathUtils.lerp(mascotGroup.rotation.x, targetHeadRotX, 0.08);
+            mascotGroup.rotation.y = THREE.MathUtils.lerp(mascotGroup.rotation.y, targetHeadRotY, 0.08);
+
+            // Floating
+            mascotGroup.position.y = Math.sin(time * 1.5) * 0.1;
+            earL.rotation.z = 0.3 + Math.sin(time * 3) * 0.05;
+            earR.rotation.z = -0.3 - Math.cos(time * 2.5) * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    // Init saat load
+    if (document.readyState === 'complete') initMascot();
+    else window.addEventListener('load', initMascot);
+</script>
+
 {% endblock %}
