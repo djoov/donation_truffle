@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
+        
+        <!-- Bagian Kiri: Info Utama -->
+        <div style="flex: 2; min-width: 300px;">
+            <!-- Status Badge -->
+            <div style="margin-bottom: 15px;">
+                {% if c.is_active %}
+                    <span class="badge badge-active">Aktif</span>
+                {% else %}
+                    <span class="badge badge-ended">Selesai / Tidak Aktif</span>
+                {% endif %}
+                <span class="badge" style="background: #f0f0f0; color: #666;">Status Chain: {{ c.status_label }}</span>
+            </div>
+
+            <h1 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;">{{ c.title }}</h1>
+            
+            <div style="color: var(--text-gray); font-size: 0.95rem; margin-bottom: 20px;">
+                <p><i class="fa-solid fa-user-circle"></i> <strong>Creator:</strong> <span style="font-family: monospace;">{{ c.creator }}</span></p>
+                <p><i class="fa-regular fa-calendar"></i> <strong>Deadline:</strong> {{ c.deadline }}</p>
+            </div>
+
+            <!-- Progress Stats -->
+            <div style="background: var(--bg-body); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                <h3 style="margin-bottom: 10px; color: var(--text-dark);">Total Donasi Terkumpul</h3>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-dark);">
+                    {{ c.totalDonations }} <span style="font-size: 1rem; color: var(--primary);">ETH</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bagian Kanan: Aksi -->
+        <div style="flex: 1; min-width: 280px; background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 style="margin-bottom: 15px;">Dukung Kampanye Ini</h3>
+            
+            {% if c.is_active %}
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
+                    Donasi Anda akan langsung tercatat di Smart Contract secara transparan.
+                </p>
+                <a href="/ui/donate/{{ c.id }}" class="button button-full">
+                    <i class="fa-solid fa-heart"></i> Donasi Sekarang
+                </a>
+            {% else %}
+                <div style="text-align: center; padding: 20px; color: #888;">
+                    <i class="fa-solid fa-lock" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>Kampanye ini telah berakhir atau belum disetujui.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/" style="text-decoration: none; color: var(--text-gray); font-weight: 500;">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
+    </a>
+</div>
+
+{% endblock %}

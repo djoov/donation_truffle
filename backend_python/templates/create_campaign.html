@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="section-header" style="text-align: center;">
+        <h2><i class="fa-solid fa-bullhorn"></i> Buat Kampanye Baru</h2>
+        <p>Galang dana untuk tujuan mulia Anda secara transparan.</p>
+    </div>
+
+    <!-- Pesan Sukses/Eror -->
+    {% if success %}
+    <div style="background: #E8F5E9; color: #2E7D32; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+        <i class="fa-solid fa-check-circle"></i> Kampanye berhasil dibuat! <br>
+        <small>Hash Transaksi: {{ tx_hash }}</small>
+        <br>
+        <a href="/" style="color: #2E7D32; font-weight: bold; margin-top: 10px; display: inline-block;">Kembali ke Home</a>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div style="background: #FFEBEE; color: #C62828; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> Error: {{ error }}
+    </div>
+    {% endif %}
+
+    <form action="/ui/create" method="POST">
+        <label for="title">Judul Kampanye</label>
+        <input type="text" name="title" class="input-field" placeholder="Contoh: Bantuan Banjir Demak" required>
+
+        <label for="duration">Durasi (Menit)</label>
+        <input type="number" name="duration" class="input-field" placeholder="Contoh: 60" required>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;"><i class="fa-solid fa-key"></i> <strong>Otorisasi Transaksi:</strong></p>
+
+        <label for="from">Wallet Address (Creator)</label>
+        <input type="text" name="from" class="input-field" placeholder="0x..." required>
+
+        <label for="private_key">Private Key</label>
+        <input type="password" name="private_key" class="input-field" placeholder="Untuk menandatangani transaksi..." required>
+
+        <button type="submit" class="button button-full">
+            <i class="fa-solid fa-paper-plane"></i> Terbitkan Kampanye
+        </button>
+    </form>
+</div>
+
+{% endblock %}

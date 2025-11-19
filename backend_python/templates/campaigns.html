@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Daftar Campaign</h2>
+
+{% for c in campaigns %}
+<div class="card">
+    <h3>{{ c.title }}</h3>
+    <p><b>Creator:</b> {{ c.creator }}</p>
+    <p><b>Deadline:</b> {{ c.deadline }}</p>
+    <p><b>Total Donations:</b> {{ c.totalDonations }} wei</p>
+    <p><b>Status:</b> {{ c.status }}</p>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto;">
+    <div class="section-header" style="text-align: center;">
+        <h2><i class="fa-solid fa-user-plus"></i> Daftar Baru</h2>
+        <p>Bergabung sebagai Donatur atau Kreator.</p>
+    </div>
+
+    <form method="POST">
+        <label>Username</label>
+        <input type="text" name="username" class="input-field" required>
+
+        <label>Email</label>
+        <input type="email" name="email" class="input-field" required>
+
+        <label>Password</label>
+        <input type="password" name="password" class="input-field" required>
+
+        <label>Daftar Sebagai</label>
+        <select name="role" class="input-field" style="height: 50px;">
+            <option value="donor">Donatur (Ingin Berdonasi)</option>
+            <option value="creator">Kreator (Ingin Galang Dana)</option>
+        </select>
+
+        <label>Wallet Address (Opsional)</label>
+        <input type="text" name="wallet_address" class="input-field" placeholder="0x...">
+
+        <button type="submit" class="button button-full">Buat Akun</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 15px; font-size: 0.9rem;">
+        Sudah punya akun? <a href="/login" style="color: var(--primary);">Login</a>
+    </p>
+</div>
+{% endblock %}

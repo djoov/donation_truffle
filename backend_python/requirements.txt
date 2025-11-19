@@ -1,0 +1,4 @@
+Flask
+flask-cors
+web3==6.5.0
+python-dotenv

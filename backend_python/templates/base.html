@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation Platform</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <a href="/" style="text-decoration:none; color:inherit; margin:0;">
+                <i class="fa-solid fa-hand-holding-heart"></i> Donation<span>Platform</span> 🇮🇩
+            </a>
+        </div>
+        
+        <div class="nav-links">
+            <a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a>
+            
+            <!-- Menu Dinamis Berdasarkan Role -->
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'creator' or current_user.role == 'admin' %}
+                    <a href="/ui/create" class="{{ 'active' if '/create' in request.path else '' }}">Buat Kampanye</a>
+                {% endif %}
+                {% if current_user.role == 'admin' %}
+                    <a href="/ui/admin" class="{{ 'active' if '/admin' in request.path else '' }}">Admin Panel</a>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="nav-auth">
+            {% if current_user.is_authenticated %}
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-dark);">
+                    Hi, {{ current_user.username }} 
+                    <span class="badge" style="font-size: 0.7rem; vertical-align: middle; background: #eee;">{{ current_user.role|title }}</span>
+                </span>
+                <a href="/logout" class="button-outline button-sm" style="border: 1px solid #ccc; color: #666;">Logout</a>
+            {% else %}
+                <a href="/login" class="auth-link">Masuk</a>
+                <a href="/register" class="button button-sm">Daftar</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <!-- Flash Messages (Notifikasi) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; 
+                   background: {{ '#D4EDDA' if category == 'success' else '#F8D7DA' if category == 'danger' else '#FFF3CD' }};
+                   color: {{ '#155724' if category == 'success' else '#721C24' if category == 'danger' else '#856404' }};">
+                  {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

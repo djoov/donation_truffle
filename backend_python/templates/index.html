@@ -1,0 +1,299 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="hero-section">
+    <!-- Kolom Kiri: Teks -->
+    <div class="hero-content">
+        <h2 class="welcome-text">
+            <span class="static-text">👋</span>
+            <span class="typing-text"></span><span class="cursor">&nbsp;</span>
+        </h2>
+
+        <h1 style="margin-top: 10px;">Wujudkan Kebaikan <br>Tanpa Batas</h1>
+        <p>Platform donasi terdesentralisasi yang transparan dan aman.</p>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-num">{{ campaigns|length }}</span>
+                <span class="stat-label">Kampanye Aktif</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">∞</span>
+                <span class="stat-label">Transparansi</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kolom Kanan: Maskot 3D -->
+    <div class="hero-3d">
+        <canvas id="mascot-canvas"></canvas>
+    </div>
+</div>
+
+<div class="section-header">
+  <h2>Kampanye Terbaru</h2>
+  <p>Pilih kampanye dan salurkan donasi Anda sekarang.</p>
+</div>
+
+<div class="campaign-grid">
+  {% for campaign in campaigns %}
+  <div class="campaign-card">
+    <div
+      class="card-image"
+      style="
+        background-color: #ffebee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <i
+        class="fa-solid fa-heart-circle-plus"
+        style="font-size: 3rem; color: #ff8a80"
+      ></i>
+    </div>
+
+    <div class="card-body">
+      {% if campaign.is_active %}
+      <span class="badge badge-active">Aktif</span>
+      {% else %}
+      <span class="badge badge-ended">Selesai</span>
+      {% endif %}
+
+      <h3 class="card-title">{{ campaign.title }}</h3>
+
+      <div class="card-meta">
+        <i class="fa-regular fa-clock"></i> Berakhir: {{ campaign.deadline }}
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-info">
+          <span class="raised">Terkumpul</span>
+          <span class="amount">{{ campaign.amount_raised }} ETH</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 50%"></div>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <a href="/ui/donate/{{ campaign.id }}" class="button button-full">
+          Donasi Sekarang
+        </a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-box-open"></i>
+    <p>Belum ada kampanye yang dibuat.</p>
+    <a href="/ui/create" class="button">Buat Kampanye Pertama</a>
+  </div>
+  {% endfor %}
+</div>
+
+
+<script>
+    const typedTextSpan = document.querySelector(".typing-text");
+    const cursorSpan = document.querySelector(".cursor");
+
+    // Daftar kata-kata yang akan diketik (Bisa ditambah sesuka hati)
+    const textArray = [
+        "Selamat Datang",   // Indonesia
+        "Welcome",          // Inggris
+        "Sugeng Rawuh",     // Jawa
+        "Wilujeng Sumping", // Sunda
+        "Ahlan wa Sahlan",  // Arab
+        "Horas!",           // Batak
+        "Rahajeng Rauh"     // Bali
+    ];
+
+    const typingDelay = 50; // Kecepatan mengetik (ms)
+    const erasingDelay = 50; // Kecepatan menghapus (ms)
+    const newTextDelay = 2000; // Jeda sebelum menghapus (ms)
+    let textArrayIndex = 0;
+    let charIndex = 0;
+
+    function type() {
+        if (charIndex < textArray[textArrayIndex].length) {
+            if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
+            typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
+            charIndex++;
+            setTimeout(type, typingDelay);
+        } else {
+            cursorSpan.classList.remove("typing");
+            setTimeout(erase, newTextDelay);
+        }
+    }
+
+    function erase() {
+        if (charIndex > 0) {
+            if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
+            typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
+            charIndex--;
+            setTimeout(erase, erasingDelay);
+        } else {
+            cursorSpan.classList.remove("typing");
+            textArrayIndex++;
+            if (textArrayIndex >= textArray.length) textArrayIndex = 0;
+            setTimeout(type, typingDelay + 1100);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() { // Mulai saat halaman siap
+        if(textArray.length) setTimeout(type, newTextDelay + 250);
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // --- SKRIP TYPING EFFECT (BIARKAN SEPERTI SEMULA) ---
+    // ... (Kode typing effect Anda di sini, jangan dihapus) ...
+
+
+    // --- SKRIP THREE.JS (MASKOT DIPERBAIKI) ---
+
+    function initMascot() {
+        const canvas = document.getElementById('mascot-canvas');
+        const container = document.querySelector('.hero-3d');
+        
+        if (!canvas || !container) return;
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        // Ubah FOV (Field of View) agar pas
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // --- Membuat Maskot ---
+        const mascotGroup = new THREE.Group();
+        scene.add(mascotGroup);
+
+        // 1. Badan Utama (Kotak Donasi)
+        const bodyGeo = new THREE.BoxGeometry(2, 2, 2);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xD32F2F, flatShading: true });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        mascotGroup.add(body);
+
+        // 2. Lubang Koin (Atas)
+        const slotGeo = new THREE.BoxGeometry(1.2, 0.1, 0.4);
+        const slotMat = new THREE.MeshBasicMaterial({ color: 0x8B0000 });
+        const slot = new THREE.Mesh(slotGeo, slotMat);
+        slot.position.set(0, 1.01, 0); // Sedikit di atas permukaan
+        mascotGroup.add(slot);
+
+        // 3. Mata Putih (Sklera)
+        const eyeWhiteGeo = new THREE.SphereGeometry(0.35, 32, 32);
+        const eyeWhiteMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+        
+        const leftEyeWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+        leftEyeWhite.position.set(-0.5, 0.3, 0.85);
+        mascotGroup.add(leftEyeWhite);
+
+        const rightEyeWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+        rightEyeWhite.position.set(0.5, 0.3, 0.85);
+        mascotGroup.add(rightEyeWhite);
+
+        // 4. Pupil Hitam (Yang Bergerak)
+        const pupilGeo = new THREE.SphereGeometry(0.15, 32, 32);
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+        
+        // Pupil Kiri (Anak dari Mata Putih Kiri)
+        const leftPupil = new THREE.Mesh(pupilGeo, pupilMat);
+        leftPupil.position.set(0, 0, 0.28); // Posisi relatif terhadap mata putih
+        leftEyeWhite.add(leftPupil); 
+
+        // Pupil Kanan (Anak dari Mata Putih Kanan)
+        const rightPupil = new THREE.Mesh(pupilGeo, pupilMat);
+        rightPupil.position.set(0, 0, 0.28);
+        rightEyeWhite.add(rightPupil);
+
+        // 5. Mulut (Senyum)
+        const mouthGeo = new THREE.TorusGeometry(0.3, 0.05, 16, 100, Math.PI);
+        const mouthMat = new THREE.MeshBasicMaterial({ color: 0x5d1010 });
+        const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+        mouth.position.set(0, -0.3, 1.01);
+        mouth.rotation.z = Math.PI; // Senyum ke atas
+        mascotGroup.add(mouth);
+
+        // --- Pencahayaan ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // --- Posisi Kamera ---
+        camera.position.z = 6;
+        camera.position.y = 0; // Kamera sejajar
+
+        // --- Interaksi Mouse ---
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        // Gunakan event listener pada window agar responsif di seluruh layar
+        document.addEventListener('mousemove', (event) => {
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+            
+            // Normalisasi posisi mouse (-1 sampai 1)
+            mouseX = (event.clientX - windowHalfX) / windowHalfX;
+            mouseY = (event.clientY - windowHalfY) / windowHalfY;
+        });
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+
+        // --- Loop Animasi ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 1. Gerakan Pupil (Mata Melirik)
+            // Pupil bergerak sedikit berlawanan arah rotasi mata untuk efek melirik
+            // Dibatasi (clamp) agar tidak keluar dari mata putih
+            const pupilX = Math.max(-0.1, Math.min(0.1, mouseX * 0.2));
+            const pupilY = Math.max(-0.1, Math.min(0.1, -mouseY * 0.2));
+            
+            // Gunakan lerp (Linear Interpolation) untuk gerakan halus
+            leftPupil.position.x = THREE.MathUtils.lerp(leftPupil.position.x, pupilX, 0.1);
+            leftPupil.position.y = THREE.MathUtils.lerp(leftPupil.position.y, pupilY, 0.1);
+            
+            rightPupil.position.x = THREE.MathUtils.lerp(rightPupil.position.x, pupilX, 0.1);
+            rightPupil.position.y = THREE.MathUtils.lerp(rightPupil.position.y, pupilY, 0.1);
+
+            // 2. Gerakan Kepala (Menoleh)
+            // Kepala menoleh ke arah kursor
+            const targetRotX = -mouseY * 0.3; // Menoleh atas-bawah
+            const targetRotY = mouseX * 0.3;  // Menoleh kiri-kanan
+            
+            mascotGroup.rotation.x = THREE.MathUtils.lerp(mascotGroup.rotation.x, targetRotX, 0.05);
+            mascotGroup.rotation.y = THREE.MathUtils.lerp(mascotGroup.rotation.y, targetRotY, 0.05);
+
+            // 3. Efek Melayang (Floating/Breathing)
+            // Membuat maskot naik turun perlahan agar terlihat hidup
+            mascotGroup.position.y = Math.sin(Date.now() * 0.002) * 0.1;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    }
+
+    // Jalankan inisialisasi setelah halaman siap
+    if (document.readyState === 'complete') {
+        initMascot();
+    } else {
+        window.addEventListener('load', initMascot);
+    }
+</script>
+
+{% endblock %}
