@@ -3,9 +3,17 @@
 {% block content %}
 
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
+    
+    <!-- 1. Gambar Cover (Jika Ada) -->
+    {% if c.image %}
+    <div style="width: 100%; height: 300px; overflow: hidden; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee;">
+        <img src="{{ url_for('static', filename='uploads/' + c.image) }}" alt="Bukti Kampanye" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    {% endif %}
+
+    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 30px;">
         
-        <!-- Bagian Kiri: Info Utama -->
+        <!-- Bagian Kiri: Info Utama & Deskripsi -->
         <div style="flex: 2; min-width: 300px;">
             <!-- Status Badge -->
             <div style="margin-bottom: 15px;">
@@ -17,45 +25,54 @@
                 <span class="badge" style="background: #f0f0f0; color: #666;">Status Chain: {{ c.status_label }}</span>
             </div>
 
-            <h1 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;">{{ c.title }}</h1>
+            <h1 style="font-size: 2.5rem; color: var(--text-dark); margin-bottom: 10px;">{{ c.title }}</h1>
             
-            <div style="color: var(--text-gray); font-size: 0.95rem; margin-bottom: 20px;">
-                <p><i class="fa-solid fa-user-circle"></i> <strong>Creator:</strong> <span style="font-family: monospace;">{{ c.creator }}</span></p>
-                <p><i class="fa-regular fa-calendar"></i> <strong>Deadline:</strong> {{ c.deadline }}</p>
+            <div style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 20px; display: flex; gap: 20px;">
+                <span><i class="fa-solid fa-user-circle"></i> {{ c.creator[:10] }}...{{ c.creator[-4:] }}</span>
+                <span><i class="fa-regular fa-calendar"></i> Berakhir: {{ c.deadline }}</span>
             </div>
 
-            <!-- Progress Stats -->
-            <div style="background: var(--bg-body); padding: 20px; border-radius: 12px; margin-top: 20px;">
-                <h3 style="margin-bottom: 10px; color: var(--text-dark);">Total Donasi Terkumpul</h3>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-dark);">
-                    {{ c.totalDonations }} <span style="font-size: 1rem; color: var(--primary);">ETH</span>
-                </div>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <!-- Deskripsi Lengkap -->
+            <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 10px; color: var(--primary);">Tentang Kampanye</h3>
+                <p style="line-height: 1.8; color: #444; white-space: pre-wrap;">{{ c.description }}</p>
             </div>
         </div>
 
-        <!-- Bagian Kanan: Aksi -->
-        <div style="flex: 1; min-width: 280px; background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            <h3 style="margin-bottom: 15px;">Dukung Kampanye Ini</h3>
-            
-            {% if c.is_active %}
-                <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
-                    Donasi Anda akan langsung tercatat di Smart Contract secara transparan.
-                </p>
-                <a href="/ui/donate/{{ c.id }}" class="button button-full">
-                    <i class="fa-solid fa-heart"></i> Donasi Sekarang
-                </a>
-            {% else %}
-                <div style="text-align: center; padding: 20px; color: #888;">
-                    <i class="fa-solid fa-lock" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>Kampanye ini telah berakhir atau belum disetujui.</p>
+        <!-- Bagian Kanan: Panel Donasi Sticky -->
+        <div style="flex: 1; min-width: 280px;">
+            <div style="background: #fff; border: 1px solid #eee; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: sticky; top: 100px;">
+                <h3 style="margin-bottom: 5px; color: var(--text-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Dana Terkumpul</h3>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
+                    {{ c.totalDonations }} <span style="font-size: 1rem; color: var(--text-dark);">ETH</span>
                 </div>
-            {% endif %}
+
+                <!-- Progress Bar -->
+                <div class="progress-bar" style="margin-bottom: 20px;">
+                    <div class="progress-fill" style="width: 10%;"></div> <!-- Logika % bisa ditambahkan jika ada target -->
+                </div>
+                
+                {% if c.is_active %}
+                    <a href="/ui/donate/{{ c.id }}" class="button button-full" style="padding: 15px; font-size: 1.1rem;">
+                        <i class="fa-solid fa-heart"></i> Donasi Sekarang
+                    </a>
+                    <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 15px;">
+                        <i class="fa-solid fa-shield-halved"></i> Transaksi aman tercatat di Blockchain.
+                    </p>
+                {% else %}
+                    <div class="button button-full" style="background: #ccc; cursor: not-allowed; text-align: center;">
+                        Kampanye Berakhir
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
     </div>
 </div>
 
-<div style="text-align: center; margin-top: 20px;">
+<div style="text-align: center; margin-top: 30px;">
     <a href="/" style="text-decoration: none; color: var(--text-gray); font-weight: 500;">
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
     </a>

@@ -2,48 +2,39 @@
 
 {% block content %}
 
-<div class="card" style="max-width: 600px; margin: 0 auto;">
+<div class="card" style="max-width: 700px; margin: 0 auto;">
     <div class="section-header" style="text-align: center;">
         <h2><i class="fa-solid fa-bullhorn"></i> Buat Kampanye Baru</h2>
-        <p>Galang dana untuk tujuan mulia Anda secara transparan.</p>
+        <p>Galang dana dengan mudah. Transaksi Blockchain ditangani otomatis.</p>
     </div>
 
-    <!-- Pesan Sukses/Eror -->
-    {% if success %}
-    <div style="background: #E8F5E9; color: #2E7D32; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-        <i class="fa-solid fa-check-circle"></i> Kampanye berhasil dibuat! <br>
-        <small>Hash Transaksi: {{ tx_hash }}</small>
-        <br>
-        <a href="/" style="color: #2E7D32; font-weight: bold; margin-top: 10px; display: inline-block;">Kembali ke Home</a>
-    </div>
-    {% endif %}
+    <form action="/ui/create" method="POST" enctype="multipart/form-data">
+        
+        <!-- Info Kampanye -->
+        <div style="margin-bottom: 20px;">
+            <label for="title">Judul Kampanye</label>
+            <input type="text" name="title" class="input-field" placeholder="Judul yang menarik..." required>
 
-    {% if error %}
-    <div style="background: #FFEBEE; color: #C62828; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <i class="fa-solid fa-triangle-exclamation"></i> Error: {{ error }}
-    </div>
-    {% endif %}
+            <label for="duration">Durasi (Menit)</label>
+            <input type="number" name="duration" class="input-field" placeholder="Contoh: 1440" required>
 
-    <form action="/ui/create" method="POST">
-        <label for="title">Judul Kampanye</label>
-        <input type="text" name="title" class="input-field" placeholder="Contoh: Bantuan Banjir Demak" required>
+            <label for="description">Deskripsi & Cerita</label>
+            <textarea name="description" class="input-field" rows="6" placeholder="Ceritakan detail kampanye Anda..." style="font-family: 'Inter', sans-serif;"></textarea>
+            
+            <label>Upload Cover (Opsional)</label>
+            <input type="file" name="evidence_image" class="input-field" accept="image/*" style="padding: 10px;">
+        </div>
 
-        <label for="duration">Durasi (Menit)</label>
-        <input type="number" name="duration" class="input-field" placeholder="Contoh: 60" required>
-
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;"><i class="fa-solid fa-key"></i> <strong>Otorisasi Transaksi:</strong></p>
-
-        <label for="from">Wallet Address (Creator)</label>
-        <input type="text" name="from" class="input-field" placeholder="0x..." required>
-
-        <label for="private_key">Private Key</label>
-        <input type="password" name="private_key" class="input-field" placeholder="Untuk menandatangani transaksi..." required>
+        <!-- Info Wallet (Read Only) -->
+        <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 20px; color: #2e7d32; font-size: 0.9rem;">
+            <i class="fa-solid fa-wallet"></i> <strong>Akun Terhubung:</strong><br>
+            {{ current_user.wallet_address }} <br>
+            <small>(Gas fee akan dipotong otomatis dari saldo akun ini)</small>
+        </div>
 
         <button type="submit" class="button button-full">
-            <i class="fa-solid fa-paper-plane"></i> Terbitkan Kampanye
+            <i class="fa-solid fa-rocket"></i> Terbitkan Sekarang
         </button>
     </form>
 </div>
-
 {% endblock %}

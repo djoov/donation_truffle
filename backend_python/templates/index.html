@@ -41,8 +41,13 @@
 <div class="campaign-grid">
     {% for campaign in campaigns %}
     <div class="campaign-card">
-        <div class="card-image" style="background-color: #ffebee; display: flex; align-items: center; justify-content: center;">
-            <i class="fa-solid fa-heart-circle-plus" style="font-size: 3rem; color: #ff8a80;"></i>
+        <!-- Gambar Kartu -->
+        <div class="card-image" style="height: 180px; width: 100%; background-color: #ffebee; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            {% if campaign.image %}
+                <img src="{{ url_for('static', filename='uploads/' + campaign.image) }}" alt="Campaign" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                <i class="fa-solid fa-heart-circle-plus" style="font-size: 3rem; color: #ff8a80;"></i>
+            {% endif %}
         </div>
 
         <div class="card-body">
