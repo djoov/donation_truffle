@@ -1,316 +1,248 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-
-<!-- Hero Section -->
-<div class="hero-section">
-    <!-- Kolom Kiri: Teks -->
-    <div class="hero-content">
-        <h2 class="welcome-text">
-            <span class="static-text">👋</span>
-            <span class="typing-text"></span><span class="cursor">&nbsp;</span>
-        </h2>
-
-        <h1 style="margin-top: 10px;">Wujudkan Kebaikan <br>Tanpa Batas</h1>
-        <p>Platform donasi terdesentralisasi yang transparan dan aman.</p>
-        
-        <div class="hero-stats">
-            <div class="stat-item">
-                <span class="stat-num">{{ campaigns|length }}</span>
-                <span class="stat-label">Kampanye Aktif</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-num">∞</span>
-                <span class="stat-label">Transparansi</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Kolom Kanan: Maskot 3D -->
-    <div class="hero-3d" style="min-height: 400px; position: relative;">
-        <canvas id="mascot-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
-    </div>
-</div>
-
-<!-- 2. Daftar Kampanye (Cards) -->
-<div class="section-header">
-    <h2>Kampanye Terbaru</h2>
-    <p>Pilih kampanye dan salurkan donasi Anda sekarang.</p>
-</div>
-
-<div class="campaign-grid">
-    {% for campaign in campaigns %}
-    <div class="campaign-card">
-        <!-- Gambar Kartu -->
-        <div class="card-image" style="height: 180px; width: 100%; background-color: #ffebee; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-            {% if campaign.image %}
-                <img src="{{ url_for('static', filename='uploads/' + campaign.image) }}" alt="Campaign" style="width: 100%; height: 100%; object-fit: cover;">
-            {% else %}
-                <i class="fa-solid fa-heart-circle-plus" style="font-size: 3rem; color: #ff8a80;"></i>
-            {% endif %}
-        </div>
-
-        <div class="card-body">
-            {% if campaign.is_active %}
-                <span class="badge badge-active">Aktif</span>
-            {% else %}
-                <span class="badge badge-ended">Selesai</span>
-            {% endif %}
-
-            <h3 class="card-title">{{ campaign.title }}</h3>
+<!-- HERO SECTION -->
+<section class="hero-section d-flex align-items-center position-relative overflow-hidden" style="min-height: 600px;">
+    <div class="container position-relative z-10">
+        <div class="row align-items-center">
             
-            <div class="card-meta">
-                <i class="fa-regular fa-clock"></i> Berakhir: {{ campaign.deadline }}
-            </div>
+            <!-- KOLOM KIRI: TEKS -->
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3 fw-bold shadow-sm">
+                    <i class="fas fa-cube me-2"></i> Blockchain 2.0 Technology
+                </span>
 
-            <div class="progress-container">
-                <div class="progress-info">
-                    <span class="raised">Terkumpul</span>
-                    <span class="amount">{{ campaign.amount_raised }} ETH</span>
+                <!-- === TYPING EFFECT CONTAINER === -->
+                <div class="mb-2" style="min-height: 40px;">
+                    <span class="h4 fw-bold" style="font-family: 'Courier New', monospace; color: #64748b;">> </span>
+                    <span id="typing-text" class="h3 fw-bold" 
+                          style="font-family: 'Outfit', sans-serif; 
+                                 background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+                                 -webkit-background-clip: text;
+                                 -webkit-text-fill-color: transparent;">
+                    </span>
+                    <span class="cursor-blink h3 fw-bold" style="color: #4f46e5;">|</span>
                 </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 50%;"></div> 
+                <!-- ============================== -->
+
+                <h1 class="display-4 hero-title mb-3 lh-tight">Transparansi Donasi <br>Tanpa Batas</h1>
+                <p class="lead text-secondary mb-4" style="max-width: 90%;">
+                    Bantu mereka yang membutuhkan dengan jaminan keamanan dan transparansi total. 
+                    Setiap Rupiah tercatat kekal di Ethereum Blockchain.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg shadow-lg px-4 py-3 rounded-pill transition-all hover:scale-105">
+                        Mulai Donasi <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                    <a href="https://youtu.be/SSo_EIwHSd4?si=Dca8UrsdJD0jtbYZ" target="_blank" class="btn btn-outline-primary btn-lg px-4 py-3 rounded-pill">
+                        <i class="fas fa-play-circle me-2"></i> Pelajari
+                    </a>
+                </div>
+                
+                <div class="mt-5 d-flex gap-4 text-muted small border-top pt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-blue-100 p-2 rounded-circle text-primary"><i class="fas fa-shield-alt fa-lg"></i></div>
+                        <span>Aman &<br>Terdesentralisasi</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-orange-100 p-2 rounded-circle text-warning"><i class="fas fa-bolt fa-lg"></i></div>
+                        <span>Transaksi<br>Real-time</span>
+                    </div>
                 </div>
             </div>
+            
+            <!-- KOLOM KANAN: MASKOT 3D -->
+            <div class="col-lg-6 text-center position-relative">
+                <div class="position-absolute top-50 start-50 translate-middle bg-primary rounded-circle opacity-10" 
+                     style="width: 400px; height: 400px; filter: blur(60px); z-index: -1;"></div>
 
-            <div class="card-actions">
-                <a href="/ui/donate/{{ campaign.id }}" class="button button-full">
-                    Donasi Sekarang
-                </a>
+                <div class="mascot-container mx-auto" style="width: 100%; height: 500px; max-width: 600px;">
+                    <canvas id="hero-mascot-canvas" style="width: 100%; height: 100%; display: block; outline: none;"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="empty-state">
-        <i class="fa-solid fa-box-open"></i>
-        <p>Belum ada kampanye yang dibuat.</p>
-        <a href="/ui/create" class="button">Buat Kampanye Pertama</a>
-    </div>
-    {% endfor %}
-</div>
+</section>
 
-<!-- SCRIPTS -->
-<!-- UPDATE LIBRARY KE VERSI r160 (PENTING AGAR CAPSULE GEOMETRY BEKERJA) -->
-<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+<!-- FEATURES SECTION -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Mengapa DonasiKuy?</h2>
+            <p class="text-muted">Menggabungkan kemudahan Web2 dengan keamanan Web3</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 p-4 text-center border-0 shadow-sm hover:shadow-lg transition-all">
+                    <div class="mb-3 mx-auto bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-search-dollar fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold">100% Transparan</h5>
+                    <p class="text-muted small">Setiap donasi yang masuk dapat dilacak langsung di jaringan blockchain. Tidak ada dana tersembunyi.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 text-center border-0 shadow-sm hover:shadow-lg transition-all">
+                    <div class="mb-3 mx-auto bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-fingerprint fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold">Data Tak Bisa Diubah</h5>
+                    <p class="text-muted small">Menggunakan sifat <i>Immutable</i> blockchain, data kampanye tidak bisa dimanipulasi oleh siapapun.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 text-center border-0 shadow-sm hover:shadow-lg transition-all">
+                    <div class="mb-3 mx-auto bg-purple-100 text-purple-600 rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: #f3e8ff; color: #9333ea;">
+                        <i class="fas fa-globe-asia fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold">Akses Global</h5>
+                    <p class="text-muted small">Siapapun dari seluruh dunia dapat berdonasi menggunakan Ethereum tanpa batasan negara.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STYLE CSS KHUSUS TYPING -->
+<style>
+    .cursor-blink {
+        animation: blink-cursor 0.75s step-end infinite;
     }
-  }
-</script>
+    @keyframes blink-cursor {
+        from, to { opacity: 1; }
+        50% { opacity: 0; }
+    }
+</style>
+
+<!-- SCRIPT TYPING EFFECT & 3D MASCOT -->
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } } </script>
 
 <script>
-    // --- SKRIP TYPING EFFECT ---
-    const typedTextSpan = document.querySelector(".typing-text");
-    const cursorSpan = document.querySelector(".cursor");
-    const textArray = ["Selamat Datang", "Welcome", "Sugeng Rawuh", "Wilujeng Sumping", "Ahlan wa Sahlan", "Horas!", "Rahajeng Rauh"];
-    const typingDelay = 100;
-    const erasingDelay = 50;
-    const newTextDelay = 2000;
-    let textArrayIndex = 0;
-    let charIndex = 0;
+    // --- SCRIPT 1: TYPING EFFECT ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const textElement = document.getElementById('typing-text');
+        const words = [
+            "Selamat Datang Temanku...", "Welcome My Friends...", 
+            "أهلا و سهلا", "こんにちわ、 民あーさん", 
+            "안녕하세요, 여러분", "¡Hola, amigos!", "Bonjour Mon Ami..."
+        ];
+        let wordIndex = 0, charIndex = 0, isDeleting = false, typeSpeed = 100;
 
-    function type() {
-        if(!typedTextSpan) return;
-        if (charIndex < textArray[textArrayIndex].length) {
-            if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
-            typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
-            charIndex++;
-            setTimeout(type, typingDelay);
-        } else {
-            cursorSpan.classList.remove("typing");
-            setTimeout(erase, newTextDelay);
+        function type() {
+            const currentWord = words[wordIndex];
+            if (isDeleting) {
+                textElement.textContent = currentWord.substring(0, charIndex - 1);
+                charIndex--; typeSpeed = 50;
+            } else {
+                textElement.textContent = currentWord.substring(0, charIndex + 1);
+                charIndex++; typeSpeed = 100;
+            }
+            if (!isDeleting && charIndex === currentWord.length) {
+                isDeleting = true; typeSpeed = 2000;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false; wordIndex = (wordIndex + 1) % words.length; typeSpeed = 500;
+            }
+            setTimeout(type, typeSpeed);
         }
-    }
-
-    function erase() {
-        if(!typedTextSpan) return;
-        if (charIndex > 0) {
-            if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
-            typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
-            charIndex--;
-            setTimeout(erase, erasingDelay);
-        } else {
-            cursorSpan.classList.remove("typing");
-            textArrayIndex++;
-            if (textArrayIndex >= textArray.length) textArrayIndex = 0;
-            setTimeout(type, typingDelay + 1100);
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        if(textArray.length) setTimeout(type, newTextDelay + 250);
+        type();
     });
 </script>
 
-<!-- SKRIP THREE.JS VIA MODULE (MODERN) -->
 <script type="module">
+    // --- SCRIPT 2: 3D MASCOT (RESTORED ORIGINAL SHAPE) ---
     import * as THREE from 'three';
 
-    function initMascot() {
-        const canvas = document.getElementById('mascot-canvas');
-        const container = document.querySelector('.hero-3d');
-        
+    function initHeroMascot() {
+        const canvas = document.getElementById('hero-mascot-canvas');
+        const container = document.querySelector('.mascot-container');
         if (!canvas || !container) return;
 
-        // Scene Setup
         const scene = new THREE.Scene();
-        // Warna background transparan
-        scene.background = null; 
-        
+        scene.background = null;
+
+        // KAMERA: Dikembalikan ke Z=6.0 agar ukuran pas (tidak terlalu jauh)
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-        
+        camera.position.z = 4.5; 
+        camera.position.y = 0; 
+        camera.position.x = 0; 
+
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: canvas, alpha: true, antialias: true, premultipliedAlpha: false
+        });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        // Pengaturan warna baru untuk Three.js r150+
         renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.setClearColor(0x000000, 0); 
 
-        // --- MODELING RUBAH (LEBIH RAMPING & LUCU) ---
         const mascotGroup = new THREE.Group();
         scene.add(mascotGroup);
 
-        // Warna & Material (Matte/Clay Look)
-        const furColor = new THREE.Color(0xFF8800); // Oranye
-        const creamColor = new THREE.Color(0xFFFDD0); // Cream
-        const noseColor = new THREE.Color(0x222222); // Hitam soft
-        
-        const mainFurMat = new THREE.MeshStandardMaterial({ 
-            color: furColor, 
-            roughness: 0.5, 
-            metalness: 0.0
-        });
-        
-        const creamFurMat = new THREE.MeshStandardMaterial({ 
-            color: creamColor, 
-            roughness: 0.6,
-            metalness: 0.0
-        });
+        // MATERIAL WARNA (ORIGINAL)
+        const furColor = new THREE.Color(0xFF8800);
+        const creamColor = new THREE.Color(0xFFFDD0);
+        const noseColor = new THREE.Color(0x222222);
 
-        const noseMat = new THREE.MeshStandardMaterial({ 
-            color: noseColor, 
-            roughness: 0.3
-        });
+        const mainFurMat = new THREE.MeshStandardMaterial({ color: furColor, roughness: 0.5 });
+        const creamFurMat = new THREE.MeshStandardMaterial({ color: creamColor, roughness: 0.6 });
+        const noseMat = new THREE.MeshStandardMaterial({ color: noseColor, roughness: 0.3 });
 
-        // 1. Kepala Utama 
-        const headGeo = new THREE.SphereGeometry(1.0, 32, 32);
-        const head = new THREE.Mesh(headGeo, mainFurMat);
-        head.scale.set(1.1, 0.95, 1.0); 
-        mascotGroup.add(head);
+        // GEOMETRI RUBAH (ORIGINAL SHAPE)
+        const head = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), mainFurMat);
+        head.scale.set(1.1, 0.95, 1.0); mascotGroup.add(head);
 
-        // 2. Moncong (Snout) 
-        const snoutGeo = new THREE.SphereGeometry(0.45, 32, 32);
-        const snout = new THREE.Mesh(snoutGeo, creamFurMat);
-        snout.position.set(0, -0.3, 0.85); 
-        snout.scale.set(1, 0.8, 1.2); 
-        head.add(snout);
+        const snout = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), creamFurMat);
+        snout.position.set(0, -0.3, 0.85); snout.scale.set(1, 0.8, 1.2); head.add(snout);
 
-        // 3. Pipi (Cream Cheeks) 
         const cheekGeo = new THREE.SphereGeometry(0.45, 32, 32);
         const cheekL = new THREE.Mesh(cheekGeo, creamFurMat);
-        cheekL.position.set(-0.6, -0.35, 0.5); 
-        cheekL.scale.set(1, 0.8, 0.8);
-        head.add(cheekL);
-
+        cheekL.position.set(-0.6, -0.35, 0.5); cheekL.scale.set(1, 0.8, 0.8); head.add(cheekL);
         const cheekR = new THREE.Mesh(cheekGeo, creamFurMat);
-        cheekR.position.set(0.6, -0.35, 0.5);
-        cheekR.scale.set(1, 0.8, 0.8);
-        head.add(cheekR);
+        cheekR.position.set(0.6, -0.35, 0.5); cheekR.scale.set(1, 0.8, 0.8); head.add(cheekR);
 
-        // 4. Hidung 
-        const noseGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const nose = new THREE.Mesh(noseGeo, noseMat);
-        nose.position.set(0, 0.1, 0.45); 
-        nose.scale.set(1.5, 1, 1); 
-        snout.add(nose);
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), noseMat);
+        nose.position.set(0, 0.1, 0.45); nose.scale.set(1.5, 1, 1); snout.add(nose);
 
-        // 5. Telinga 
         const earGeo = new THREE.ConeGeometry(0.35, 0.9, 32);
-        
-        const earL = new THREE.Mesh(earGeo, mainFurMat);
-        earL.position.set(-0.6, 0.85, 0);
-        earL.rotation.z = 0.3;
-        earL.rotation.x = -0.1;
-        head.add(earL);
-
         const earInnerGeo = new THREE.ConeGeometry(0.2, 0.6, 32);
+        const earL = new THREE.Mesh(earGeo, mainFurMat);
+        earL.position.set(-0.6, 0.85, 0); earL.rotation.z = 0.3; earL.rotation.x = -0.1; head.add(earL);
         const earLInner = new THREE.Mesh(earInnerGeo, creamFurMat);
-        earLInner.position.set(0, -0.1, 0.18);
-        earL.add(earLInner);
-
+        earLInner.position.set(0, -0.1, 0.18); earL.add(earLInner);
         const earR = new THREE.Mesh(earGeo, mainFurMat);
-        earR.position.set(0.6, 0.85, 0);
-        earR.rotation.z = -0.3;
-        earR.rotation.x = -0.1;
-        head.add(earR);
-        
+        earR.position.set(0.6, 0.85, 0); earR.rotation.z = -0.3; earR.rotation.x = -0.1; head.add(earR);
         const earRInner = new THREE.Mesh(earInnerGeo, creamFurMat);
-        earRInner.position.set(0, -0.1, 0.18);
-        earR.add(earRInner);
+        earRInner.position.set(0, -0.1, 0.18); earR.add(earRInner);
 
-
-        // --- MATA ---
         const eyeWhiteGeo = new THREE.SphereGeometry(0.28, 32, 32);
         const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.1 });
-
-        const eyeL = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-        eyeL.position.set(-0.35, 0.05, 0.82);
-        eyeL.scale.set(1, 1.1, 0.5); 
-        head.add(eyeL);
-
-        const eyeR = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-        eyeR.position.set(0.35, 0.05, 0.82);
-        eyeR.scale.set(1, 1.1, 0.5);
-        head.add(eyeR);
-
         const pupilGeo = new THREE.SphereGeometry(0.12, 16, 16);
         const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-
-        const pupilL = new THREE.Mesh(pupilGeo, pupilMat);
-        pupilL.position.z = 0.25; 
-        eyeL.add(pupilL);
-
-        const pupilR = new THREE.Mesh(pupilGeo, pupilMat);
-        pupilR.position.z = 0.25;
-        eyeR.add(pupilR);
-
-        // Alis (Menggunakan CapsuleGeometry yang sudah didukung versi r160)
-        const browGeo = new THREE.CapsuleGeometry(0.05, 0.3, 4, 8);
-        const browMat = new THREE.MeshStandardMaterial({ color: furColor }); 
-
-        const browL = new THREE.Mesh(browGeo, browMat);
-        browL.rotation.z = Math.PI / 2 + 0.2;
-        browL.position.set(-0.35, 0.4, 0.85);
-        head.add(browL);
-
-        const browR = new THREE.Mesh(browGeo, browMat);
-        browR.rotation.z = Math.PI / 2 - 0.2;
-        browR.position.set(0.35, 0.4, 0.85);
-        head.add(browR);
-
-
-        // --- PENCAHAYAAN ---
-        const ambientLight = new THREE.HemisphereLight(0xffffff, 0xffeedd, 0.6);
-        scene.add(ambientLight);
         
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1.5); // Intensitas dinaikkan
-        mainLight.position.set(5, 10, 7);
-        mainLight.castShadow = true;
-        scene.add(mainLight);
+        const eyeL = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+        eyeL.position.set(-0.35, 0.05, 0.82); eyeL.scale.set(1, 1.1, 0.5); head.add(eyeL);
+        const pupilL = new THREE.Mesh(pupilGeo, pupilMat);
+        pupilL.position.z = 0.25; eyeL.add(pupilL);
+        
+        const eyeR = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+        eyeR.position.set(0.35, 0.05, 0.82); eyeR.scale.set(1, 1.1, 0.5); head.add(eyeR);
+        const pupilR = new THREE.Mesh(pupilGeo, pupilMat);
+        pupilR.position.z = 0.25; eyeR.add(pupilR);
 
-        const rimLight = new THREE.DirectionalLight(0xffaa00, 0.5); 
-        rimLight.position.set(-5, 5, -5);
-        scene.add(rimLight);
+        const browGeo = new THREE.CapsuleGeometry(0.05, 0.3, 4, 8);
+        const browMat = new THREE.MeshStandardMaterial({ color: furColor });
+        const browL = new THREE.Mesh(browGeo, browMat);
+        browL.rotation.z = Math.PI / 2 + 0.2; browL.position.set(-0.35, 0.4, 0.85); head.add(browL);
+        const browR = new THREE.Mesh(browGeo, browMat);
+        browR.rotation.z = Math.PI / 2 - 0.2; browR.position.set(0.35, 0.4, 0.85); head.add(browR);
 
-        camera.position.z = 5;
-        camera.position.y = 0;
+        // LIGHTING (Dikembalikan agar cerah dan jelas)
+        const ambientLight = new THREE.HemisphereLight(0xffffff, 0xffeedd, 0.6); scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.5); mainLight.position.set(5, 10, 7); scene.add(mainLight);
+        const rimLight = new THREE.DirectionalLight(0x4f46e5, 1.0); rimLight.position.set(-5, 5, -5); scene.add(rimLight);
 
-        // --- INTERAKSI ---
-        let mouseX = 0;
-        let mouseY = 0;
-
+        let mouseX = 0; let mouseY = 0;
         document.addEventListener('mousemove', (event) => {
             const windowHalfX = window.innerWidth / 2;
             const windowHalfY = window.innerHeight / 2;
@@ -329,38 +261,32 @@
         function animate() {
             requestAnimationFrame(animate);
             const time = Date.now() * 0.001;
-
-            // 1. Gerakan Pupil
             const pupilLimit = 0.15;
+            
+            // INTERAKSI MATA & KEPALA
             const targetPupilX = Math.max(-pupilLimit, Math.min(pupilLimit, mouseX * 0.3));
             const targetPupilY = Math.max(-pupilLimit, Math.min(pupilLimit, -mouseY * 0.3));
-
             pupilL.position.x = THREE.MathUtils.lerp(pupilL.position.x, targetPupilX, 0.15);
             pupilL.position.y = THREE.MathUtils.lerp(pupilL.position.y, targetPupilY, 0.15);
-            pupilR.position.x = THREE.MathUtils.lerp(pupilR.position.x, targetPupilX, 0.15);
-            pupilR.position.y = THREE.MathUtils.lerp(pupilR.position.y, targetPupilY, 0.15);
+            pupilR.position.x = pupilL.position.x; 
+            pupilR.position.y = pupilL.position.y;
 
-            // 2. Kepala Mengikuti
             const targetHeadRotX = -mouseY * 0.25;
             const targetHeadRotY = mouseX * 0.35;
             mascotGroup.rotation.x = THREE.MathUtils.lerp(mascotGroup.rotation.x, targetHeadRotX, 0.08);
             mascotGroup.rotation.y = THREE.MathUtils.lerp(mascotGroup.rotation.y, targetHeadRotY, 0.08);
 
-            // 3. Floating & Telinga
-            mascotGroup.position.y = Math.sin(time * 1.5) * 0.1 - 0.2; 
+            // GERAKAN DEFAULT (IDLE)
+            mascotGroup.position.y = Math.sin(time * 1.5) * 0.1;
             earL.rotation.z = 0.3 + Math.sin(time * 3) * 0.05;
             earR.rotation.z = -0.3 - Math.cos(time * 2.5) * 0.05;
 
             renderer.render(scene, camera);
         }
-
         animate();
     }
 
-    if (document.readyState === 'complete') {
-        initMascot();
-    } else {
-        window.addEventListener('load', initMascot);
-    }
+    if (document.readyState === 'complete') initHeroMascot();
+    else window.addEventListener('load', initHeroMascot);
 </script>
 {% endblock %}

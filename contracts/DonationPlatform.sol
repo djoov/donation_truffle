@@ -1,191 +1,124 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.0;
 
 contract DonationPlatform {
-    
-    // ============================
-    // ADMIN ROLE MANAGEMENT
-    // ============================
+    struct Campaign {
+        uint256 id;
+        address creator;
+        string title;
+        string description;
+        uint256 targetAmount;
+        uint256 collectedAmount;
+        string imageHash;
+        uint256 deadline;
+        CampaignStatus status; // 0: Pending, 1: Approved, 2: Rejected, 3: Deleted
+        bool fundsWithdrawn;
+    }
 
-    mapping(address => bool) public admins;
+    enum CampaignStatus { PENDING, APPROVED, REJECTED, DELETED }
 
-    event AdminAdded(address indexed admin);
-    event AdminRemoved(address indexed admin);
+    mapping(uint256 => Campaign) public campaigns;
+    uint256 public campaignCount = 0;
+    address public admin;
+
+    // Events untuk Riwayat Transaksi (Audit Trail)
+    event CampaignCreated(uint256 id, string title, address creator, uint256 timestamp);
+    event DonationReceived(uint256 campaignId, address donor, uint256 amount, uint256 timestamp);
+    event CampaignStatusChanged(uint256 id, CampaignStatus status, uint256 timestamp);
+    event CampaignEdited(uint256 id, string newTitle, uint256 timestamp);
 
     modifier onlyAdmin() {
-        require(admins[msg.sender], "Only admin can perform this action");
+        require(msg.sender == admin, "Only admin can perform this action");
         _;
     }
 
     constructor() {
-        admins[msg.sender] = true; // deployer = default admin
-        emit AdminAdded(msg.sender);
+        admin = msg.sender;
     }
 
-    function addAdmin(address _newAdmin) external onlyAdmin {
-        require(!admins[_newAdmin], "Already an admin");
-        admins[_newAdmin] = true;
-        emit AdminAdded(_newAdmin);
-    }
-
-    function removeAdmin(address _admin) external onlyAdmin {
-        require(admins[_admin], "Not an admin");
-        require(_admin != msg.sender, "Admin cannot remove himself");
-        admins[_admin] = false;
-        emit AdminRemoved(_admin);
-    }
-
-    // ============================
-    // CAMPAIGN MANAGEMENT
-    // ============================
-
-    enum CampaignStatus { Pending, Approved, Rejected, Disabled }
-
-    struct Campaign {
-        address creator;
-        string title;
-        uint deadline;
-        uint totalDonations;
-        CampaignStatus status;
-    }
-
-    Campaign[] public campaigns;
-
-    event CampaignCreated(
-        uint indexed campaignId,
-        address indexed creator,
-        string title,
-        uint deadline
-    );
-
-    event DonationReceived(
-        uint indexed campaignId,
-        address indexed donor,
-        uint amount
-    );
-
-    event FundsWithdrawn(
-        uint indexed campaignId,
-        address indexed creator,
-        uint amount
-    );
-
-    event CampaignApproved(uint indexed campaignId);
-    event CampaignRejected(uint indexed campaignId);
-    event CampaignDisabled(uint indexed campaignId);
-
-    // Create New Campaign → always Pending first
-    function createCampaign(string memory _title, uint _durationMinutes) external {
-        require(_durationMinutes > 0, "Duration must be > 0");
-
-        uint deadline = block.timestamp + (_durationMinutes * 1 minutes);
-
-        campaigns.push(
-            Campaign({
-                creator: msg.sender,
-                title: _title,
-                deadline: deadline,
-                totalDonations: 0,
-                status: CampaignStatus.Pending
-            })
+    function createCampaign(
+        string memory _title,
+        string memory _description,
+        uint256 _targetAmount,
+        string memory _imageHash,
+        uint256 _durationMinutes
+    ) public {
+        require(_targetAmount > 0, "Target amount must be greater than 0");
+        
+        campaigns[campaignCount] = Campaign(
+            campaignCount,
+            msg.sender,
+            _title,
+            _description,
+            _targetAmount,
+            0,
+            _imageHash,
+            block.timestamp + (_durationMinutes * 1 minutes),
+            CampaignStatus.PENDING,
+            false
         );
 
-        emit CampaignCreated(campaigns.length - 1, msg.sender, _title, deadline);
+        emit CampaignCreated(campaignCount, _title, msg.sender, block.timestamp);
+        campaignCount++;
     }
 
-    // ============================
-    // CAMPAIGN MODERATION (Admin Only)
-    // ============================
+    function donateToCampaign(uint256 _id) public payable {
+        Campaign storage campaign = campaigns[_id];
+        require(campaign.status == CampaignStatus.APPROVED, "Campaign is not active");
+        require(block.timestamp < campaign.deadline, "Campaign has ended");
+        require(msg.value > 0, "Donation must be greater than 0");
 
-    function approveCampaign(uint _id) external onlyAdmin {
+        campaign.collectedAmount += msg.value;
+        emit DonationReceived(_id, msg.sender, msg.value, block.timestamp);
+    }
+
+    // --- FITUR BARU UNTUK ADMIN ---
+
+    function approveCampaign(uint256 _id) public onlyAdmin {
+        campaigns[_id].status = CampaignStatus.APPROVED;
+        emit CampaignStatusChanged(_id, CampaignStatus.APPROVED, block.timestamp);
+    }
+
+    function rejectCampaign(uint256 _id) public onlyAdmin {
+        campaigns[_id].status = CampaignStatus.REJECTED;
+        emit CampaignStatusChanged(_id, CampaignStatus.REJECTED, block.timestamp);
+    }
+
+    // Fitur "Soft Delete" (Hanya Admin)
+    function deleteCampaign(uint256 _id) public onlyAdmin {
+        campaigns[_id].status = CampaignStatus.DELETED;
+        emit CampaignStatusChanged(_id, CampaignStatus.DELETED, block.timestamp);
+    }
+
+    // Fitur Edit Campaign (Hanya Admin - karena di blockchain data user immutable, admin yg punya kuasa override)
+    function editCampaign(
+        uint256 _id,
+        string memory _newTitle,
+        string memory _newDesc,
+        uint256 _newTarget
+    ) public onlyAdmin {
         Campaign storage c = campaigns[_id];
-        require(c.status == CampaignStatus.Pending, "Not pending");
-        c.status = CampaignStatus.Approved;
-        emit CampaignApproved(_id);
+        c.title = _newTitle;
+        c.description = _newDesc;
+        c.targetAmount = _newTarget;
+        emit CampaignEdited(_id, _newTitle, block.timestamp);
     }
 
-    function rejectCampaign(uint _id) external onlyAdmin {
-        Campaign storage c = campaigns[_id];
-        require(c.status == CampaignStatus.Pending, "Not pending");
-        c.status = CampaignStatus.Rejected;
-        emit CampaignRejected(_id);
+    function withdrawFunds(uint256 _id) public {
+        Campaign storage campaign = campaigns[_id];
+        require(msg.sender == campaign.creator || msg.sender == admin, "Unauthorized");
+        require(campaign.collectedAmount > 0, "No funds to withdraw");
+        require(!campaign.fundsWithdrawn, "Funds already withdrawn");
+
+        campaign.fundsWithdrawn = true;
+        payable(campaign.creator).transfer(campaign.collectedAmount);
     }
 
-    function disableCampaign(uint _id) external onlyAdmin {
-        Campaign storage c = campaigns[_id];
-        require(c.status == CampaignStatus.Approved, "Only approved can be disabled");
-        c.status = CampaignStatus.Disabled;
-        emit CampaignDisabled(_id);
+    function getCampaign(uint256 _id) public view returns (Campaign memory) {
+        return campaigns[_id];
     }
 
-    // ============================
-    // DONATION LOGIC
-    // ============================
-
-    function donateToCampaign(uint _id) external payable {
-        Campaign storage c = campaigns[_id];
-
-        require(c.status == CampaignStatus.Approved, "Campaign not approved");
-        require(block.timestamp < c.deadline, "Campaign ended");
-        require(msg.value > 0, "Donation must be > 0");
-        require(msg.sender != c.creator, "Creator cannot donate to own campaign");
-
-        c.totalDonations += msg.value;
-
-        emit DonationReceived(_id, msg.sender, msg.value);
-    }
-
-    // ============================
-    // WITHDRAW FUNDS
-    // ============================
-
-    function withdrawFunds(uint _id) external {
-        Campaign storage c = campaigns[_id];
-
-        require(msg.sender == c.creator, "Only creator can withdraw");
-        require(block.timestamp >= c.deadline, "Not finished");
-        require(c.status == CampaignStatus.Approved, "Only approved campaigns");
-        require(c.totalDonations > 0, "No funds available");
-
-        uint amount = c.totalDonations;
-        c.totalDonations = 0;
-
-        payable(msg.sender).transfer(amount);
-
-        emit FundsWithdrawn(_id, msg.sender, amount);
-    }
-
-    // ============================
-    // VIEW FUNCTIONS
-    // ============================
-
-    function getCampaignCount() external view returns (uint) {
-        return campaigns.length;
-    }
-
-    // 🔥 Ditambahkan sesuai permintaan untuk kompatibilitas dengan backend Python
-    function getTotalCampaigns() external view returns (uint) {
-        return campaigns.length;
-    }
-
-    function getCampaign(uint _id) 
-        external 
-        view 
-        returns (
-            address creator,
-            string memory title,
-            uint deadline,
-            uint totalDonations,
-            CampaignStatus status
-        ) 
-    {
-        Campaign memory c = campaigns[_id];
-        return (
-            c.creator,
-            c.title,
-            c.deadline,
-            c.totalDonations,
-            c.status
-        );
+    function getCampaignCount() public view returns (uint256) {
+        return campaignCount;
     }
 }

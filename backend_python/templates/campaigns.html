@@ -1,15 +1,86 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-<h2>Daftar Campaign</h2>
+<div class="container py-5">
+    <div class="row mb-5 align-items-end">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Jelajahi Kampanye</h2>
+            <p class="text-muted">Dukung inisiatif yang mengubah dunia.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if session.get('role') == 'kreator' %}
+            <a href="{{ url_for('create_campaign') }}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-2"></i> Buat Kampanye
+            </a>
+            {% endif %}
+        </div>
+    </div>
 
-{% for c in campaigns %}
-<div class="card">
-    <h3>{{ c.title }}</h3>
-    <p><b>Creator:</b> {{ c.creator }}</p>
-    <p><b>Deadline:</b> {{ c.deadline }}</p>
-    <p><b>Total Donations:</b> {{ c.totalDonations }} wei</p>
-    <p><b>Status:</b> {{ c.status }}</p>
+    <div class="row g-4">
+        {% for c in campaigns %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 hover-shadow transition-all">
+                <!-- Badge Status -->
+                {% if c.status_code == 1 %}
+                    <span class="campaign-badge badge-active shadow-sm"><i class="fas fa-check-circle me-1"></i> Aktif</span>
+                {% elif c.status_code == 0 %}
+                    <span class="campaign-badge bg-warning text-dark shadow-sm"><i class="fas fa-clock me-1"></i> Pending</span>
+                {% endif %}
+
+                <!-- Link Gambar ke Detail -->
+                <a href="{{ url_for('campaign_detail', id=c.id) }}" class="text-decoration-none">
+                    <div class="position-relative overflow-hidden rounded-top-4">
+                        <img src="{{ url_for('static', filename='uploads/' + c.image) }}" class="card-img-top" alt="{{ c.title }}" style="height: 220px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x220?text=DonasiKuy'">
+                        <div class="position-absolute bottom-0 start-0 w-100 bg-gradient-to-t from-black to-transparent p-3">
+                            <!-- Optional Overlay Text -->
+                        </div>
+                    </div>
+                </a>
+                
+                <div class="card-body p-4 d-flex flex-column">
+                    <a href="{{ url_for('campaign_detail', id=c.id) }}" class="text-decoration-none text-dark">
+                        <h5 class="card-title fw-bold mb-2" style="font-family: 'Outfit', sans-serif;">{{ c.title }}</h5>
+                    </a>
+                    
+                    <p class="card-text text-muted small mb-3 text-truncate-3">
+                        {{ c.desc[:100] }}...
+                    </p>
+                    <a href="{{ url_for('campaign_detail', id=c.id) }}" class="text-primary small fw-bold text-decoration-none mb-4">Lihat Selengkapnya <i class="fas fa-arrow-right ms-1"></i></a>
+
+                    <div class="mt-auto">
+                        <!-- Progress Info -->
+                        <div class="d-flex justify-content-between text-sm fw-bold mb-1">
+                            <span class="text-primary">{{ c.collected }} ETH</span>
+                            <span class="text-muted small">dari {{ c.target }} ETH</span>
+                        </div>
+                        
+                        {% set percent = (c.collected | float / c.target | float) * 100 %}
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: {{ percent }}%"></div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="d-grid">
+                            {% if c.status_code == 1 %}
+                                <a href="{{ url_for('campaign_detail', id=c.id) }}" class="btn btn-outline-primary rounded-pill fw-bold">
+                                    <i class="fas fa-heart me-2"></i> Donasi Sekarang
+                                </a>
+                            {% else %}
+                                <button class="btn btn-light rounded-pill text-muted" disabled>Menunggu Verifikasi</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="py-5 bg-white rounded-4 shadow-sm">
+                <i class="fas fa-box-open fa-3x text-muted mb-3 opacity-50"></i>
+                <h5 class="fw-bold text-muted">Belum ada kampanye aktif.</h5>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{% endfor %}
 {% endblock %}

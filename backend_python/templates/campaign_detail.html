@@ -1,81 +1,112 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}" class="text-decoration-none">Kampanye</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Detail #{{ campaign.id }}</li>
+        </ol>
+    </nav>
 
-<div class="card">
-    
-    <!-- 1. Gambar Cover (Jika Ada) -->
-    {% if c.image %}
-    <div style="width: 100%; height: 300px; overflow: hidden; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee;">
-        <img src="{{ url_for('static', filename='uploads/' + c.image) }}" alt="Bukti Kampanye" style="width: 100%; height: 100%; object-fit: cover;">
-    </div>
-    {% endif %}
-
-    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 30px;">
-        
-        <!-- Bagian Kiri: Info Utama & Deskripsi -->
-        <div style="flex: 2; min-width: 300px;">
-            <!-- Status Badge -->
-            <div style="margin-bottom: 15px;">
-                {% if c.is_active %}
-                    <span class="badge badge-active">Aktif</span>
-                {% else %}
-                    <span class="badge badge-ended">Selesai / Tidak Aktif</span>
-                {% endif %}
-                <span class="badge" style="background: #f0f0f0; color: #666;">Status Chain: {{ c.status_label }}</span>
-            </div>
-
-            <h1 style="font-size: 2.5rem; color: var(--text-dark); margin-bottom: 10px;">{{ c.title }}</h1>
-            
-            <div style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 20px; display: flex; gap: 20px;">
-                <span><i class="fa-solid fa-user-circle"></i> {{ c.creator[:10] }}...{{ c.creator[-4:] }}</span>
-                <span><i class="fa-regular fa-calendar"></i> Berakhir: {{ c.deadline }}</span>
-            </div>
-
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-
-            <!-- Deskripsi Lengkap -->
-            <div style="margin-top: 20px;">
-                <h3 style="margin-bottom: 10px; color: var(--primary);">Tentang Kampanye</h3>
-                <p style="line-height: 1.8; color: #444; white-space: pre-wrap;">{{ c.description }}</p>
-            </div>
-        </div>
-
-        <!-- Bagian Kanan: Panel Donasi Sticky -->
-        <div style="flex: 1; min-width: 280px;">
-            <div style="background: #fff; border: 1px solid #eee; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: sticky; top: 100px;">
-                <h3 style="margin-bottom: 5px; color: var(--text-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Dana Terkumpul</h3>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px;">
-                    {{ c.totalDonations }} <span style="font-size: 1rem; color: var(--text-dark);">ETH</span>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="progress-bar" style="margin-bottom: 20px;">
-                    <div class="progress-fill" style="width: 10%;"></div> <!-- Logika % bisa ditambahkan jika ada target -->
-                </div>
+    <div class="row g-5">
+        <!-- KOLOM KIRI: KONTEN UTAMA -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <img src="{{ url_for('static', filename='uploads/' + campaign.image) }}" class="w-100" alt="{{ campaign.title }}" style="max-height: 400px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/800x400?text=Campaign+Image'">
                 
-                {% if c.is_active %}
-                    <a href="/ui/donate/{{ c.id }}" class="button button-full" style="padding: 15px; font-size: 1.1rem;">
-                        <i class="fa-solid fa-heart"></i> Donasi Sekarang
-                    </a>
-                    <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 15px;">
-                        <i class="fa-solid fa-shield-halved"></i> Transaksi aman tercatat di Blockchain.
-                    </p>
-                {% else %}
-                    <div class="button button-full" style="background: #ccc; cursor: not-allowed; text-align: center;">
-                        Kampanye Berakhir
+                <div class="card-body p-4 p-md-5">
+                    <!-- Header Info -->
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">
+                            <i class="fas fa-tag me-2"></i> {{ campaign.category }}
+                        </span>
+                        <span class="text-muted small border-start ps-2">
+                            <i class="fas fa-user me-1"></i> <strong>{{ campaign.creator_name }}</strong>
+                        </span>
+                        <span class="text-muted small border-start ps-2">
+                            <i class="fas fa-clock me-1"></i> Berakhir: {{ campaign.deadline }}
+                        </span>
                     </div>
-                {% endif %}
+
+                    <h1 class="fw-bold mb-2" style="font-family: 'Outfit', sans-serif;">{{ campaign.title }}</h1>
+                    <p class="lead text-muted mb-4">{{ campaign.tagline }}</p>
+                    
+                    <hr class="opacity-10 my-4">
+
+                    <!-- Cerita -->
+                    <h5 class="fw-bold mb-3"><i class="fas fa-book-open me-2 text-primary"></i> Cerita Penggalangan Dana</h5>
+                    <div class="text-muted mb-5" style="line-height: 1.8; white-space: pre-line;">
+                        {{ campaign.desc }}
+                    </div>
+
+                    <!-- Rencana Penggunaan Dana -->
+                    <div class="bg-light p-4 rounded-4 border mb-4">
+                        <h5 class="fw-bold mb-3 text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i> Transparansi Penggunaan Dana</h5>
+                        <p class="mb-0 text-muted" style="white-space: pre-line;">{{ campaign.usage_plan }}</p>
+                    </div>
+
+                    <!-- Link Sosmed -->
+                    <div class="alert alert-info border-0 d-flex align-items-center rounded-3" role="alert">
+                        <i class="fas fa-info-circle me-3 fa-lg"></i>
+                        <div>
+                            <span class="fw-bold d-block">Verifikasi Kreator</span>
+                            <small>Cek profil asli kreator di sini: <a href="{{ campaign.social_link }}" target="_blank" class="fw-bold text-decoration-none">Kunjungi Tautan <i class="fas fa-external-link-alt ms-1"></i></a></small>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
+        <!-- KOLOM KANAN: PANEL DONASI (Sama seperti sebelumnya) -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 sticky-top" style="top: 100px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 text-muted text-uppercase small ls-1">Dana Terkumpul</h5>
+                    
+                    <div class="d-flex align-items-baseline gap-2 mb-2">
+                        <h2 class="fw-bold text-primary mb-0">{{ campaign.collected }} ETH</h2>
+                        <span class="text-muted">dari {{ campaign.target }} ETH</span>
+                    </div>
+
+                    <div class="progress mb-4" style="height: 10px;">
+                        <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: {{ campaign.percent }}%"></div>
+                    </div>
+
+                    <!-- Bagian Form Donasi (Sama) -->
+                    {% if campaign.status_code == 1 %}
+                        {% if session.get('user_id') %}
+                            <form action="{{ url_for('donate', id=campaign.id) }}" method="POST">
+                                <label class="form-label fw-bold mb-2">Nominal Donasi</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" step="0.01" min="0.01" class="form-control form-control-lg bg-light border-0" name="amount" placeholder="0.1" required>
+                                    <span class="input-group-text bg-light border-0 fw-bold">ETH</span>
+                                </div>
+                                <div class="d-grid">
+                                    {% if session.get('role') == 'donatur' %}
+                                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm py-3 transition-all hover:scale-105">
+                                            <i class="fas fa-heart me-2"></i> Kirim Donasi
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-secondary btn-lg rounded-pill" disabled>Login sebagai Donatur</button>
+                                    {% endif %}
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="text-center py-3">
+                                <h6 class="fw-bold">Ingin berdonasi?</h6>
+                                <a href="{{ url_for('login') }}" class="btn btn-primary w-100 rounded-pill mb-2">Masuk Akun</a>
+                                <a href="{{ url_for('register') }}" class="btn btn-outline-primary w-100 rounded-pill">Daftar Baru</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning text-center"><i class="fas fa-exclamation-circle"></i> Kampanye tidak aktif.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<div style="text-align: center; margin-top: 30px;">
-    <a href="/" style="text-decoration: none; color: var(--text-gray); font-weight: 500;">
-        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
-    </a>
-</div>
-
 {% endblock %}

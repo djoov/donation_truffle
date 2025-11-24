@@ -1,58 +1,169 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-
-<div class="section-header">
-    <h2>Admin Dashboard</h2>
-    <p>Monitoring status kampanye dan blockchain.</p>
-</div>
-
-<div class="card" style="padding: 0; overflow: hidden;">
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead style="background: #f8f9fa;">
-            <tr>
-                <th style="padding: 15px;">ID</th>
-                <th style="padding: 15px;">Judul</th>
-                <th style="padding: 15px;">Creator</th>
-                <th style="padding: 15px;">Terkumpul</th>
-                <th style="padding: 15px;">Status</th>
-                <th style="padding: 15px;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for c in campaigns %}
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 15px;">#{{ c.id }}</td>
-                <td style="padding: 15px; font-weight: 600;">{{ c.title }}</td>
-                <td style="padding: 15px; font-family: monospace; color: #666;">{{ c.creator[:8] }}...</td>
-                <td style="padding: 15px;">{{ c.totalDonations }} ETH</td>
-                <td style="padding: 15px;">
-                    <span class="badge" style="background: {{ '#fff3cd' if c.status_label == 'Pending' else '#d4edda' if c.status_label == 'Active' else '#f8d7da' }}; 
-                          color: {{ '#856404' if c.status_label == 'Pending' else '#155724' if c.status_label == 'Active' else '#721c24' }};">
-                        {{ c.status_label }}
-                    </span>
-                </td>
-                <td style="padding: 15px;">
-                    <div style="display: flex; gap: 5px;">
-                        {% if c.status_code == 0 %} <!-- Pending Only -->
-                            <form action="/ui/admin/action/approve/{{ c.id }}" method="POST">
-                                <button class="button button-sm" style="background: #2E7D32;" title="Approve"><i class="fa-solid fa-check"></i></button>
-                            </form>
-                            <form action="/ui/admin/action/reject/{{ c.id }}" method="POST">
-                                <button class="button button-sm" style="background: #C62828;" title="Reject"><i class="fa-solid fa-xmark"></i></button>
-                            </form>
-                        {% elif c.status_code == 1 %} <!-- Active -->
-                             <form action="/ui/admin/action/disable/{{ c.id }}" method="POST">
-                                <button class="button button-sm" style="background: #FF9800;" title="Disable"><i class="fa-solid fa-ban"></i></button>
-                            </form>
-                        {% else %}
-                            <span style="color: #aaa;">-</span>
-                        {% endif %}
+<div class="container py-5">
+    <!-- Header Admin -->
+    <div class="bg-dark text-white p-4 rounded-4 mb-4 shadow-lg position-relative overflow-hidden">
+        <div class="position-relative z-10">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">Admin Control Center</h2>
+                    <p class="text-white-50 mb-0">Kelola ekosistem donasi, verifikasi kampanye, dan audit transaksi.</p>
+                </div>
+                <div class="text-end">
+                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-center">
+                        <small class="d-block text-white-50">Current Network</small>
+                        <span class="fw-bold">Ganache Local</span>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Decoration Circle -->
+        <div class="position-absolute top-0 end-0 bg-primary rounded-circle opacity-50" style="width: 200px; height: 200px; transform: translate(50%, -50%); filter: blur(40px);"></div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-pill shadow-sm" id="adminTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns" type="button">
+                <i class="fas fa-bullhorn me-2"></i> Kelola Kampanye
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">
+                <i class="fas fa-users me-2"></i> Kelola Anggota
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
+                <i class="fas fa-receipt me-2"></i> Audit Transaksi
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        
+        <!-- TAB 1: KELOLA KAMPANYE -->
+        <div class="tab-pane fade show active" id="campaigns">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-4">Campaign</th>
+                                    <th>Kreator</th>
+                                    <th>Target</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in campaigns %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">#{{ c.id }} {{ c.title }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-circle text-center me-2" style="width:30px; height:30px; line-height:30px;">
+                                                <small>{{ c.creator_name[0] }}</small>
+                                            </div>
+                                            <div class="lh-1">
+                                                <div class="fw-bold small">{{ c.creator_name }}</div>
+                                                <small class="text-muted" style="font-size: 10px">{{ c.creator_addr[:10] }}...</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold text-primary">{{ c.target }} ETH</td>
+                                    <td>
+                                        {% if c.status_code == 0 %} <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                                        {% elif c.status_code == 1 %} <span class="badge bg-success rounded-pill px-3">Active</span>
+                                        {% elif c.status_code == 3 %} <span class="badge bg-secondary rounded-pill px-3">Deleted</span>
+                                        {% else %} <span class="badge bg-danger rounded-pill px-3">{{ c.status }}</span> {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        {% if c.status_code == 0 %}
+                                            <a href="/admin/approve/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-check me-1"></i> Approve
+                                            </a>
+                                        {% endif %}
+                                        
+                                        {% if c.status_code != 3 %}
+                                            <a href="/admin/delete_campaign/{{ c.id }}" class="btn btn-sm btn-outline-danger rounded-pill ms-1" onclick="return confirm('Hapus kampanye ini?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: KELOLA USER -->
+        <div class="tab-pane fade" id="users">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Wallet</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td class="fw-bold">{{ u['username'] }}</td>
+                                <td class="text-muted">{{ u['email'] }}</td>
+                                <td><code class="bg-light px-2 py-1 rounded text-primary">{{ u['wallet_address'] }}</code></td>
+                                <td>
+                                    <a href="/admin/delete_user/{{ u['id'] }}" class="btn btn-sm btn-light text-danger" onclick="return confirm('Hapus user?')">Hapus</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: LOG TRANSAKSI -->
+        <div class="tab-pane fade" id="history">
+            <div class="list-group list-group-flush rounded-3 shadow-sm">
+                {% for log in transactions %}
+                <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-light p-2 rounded-circle">
+                            {% if log.type == 'Donasi Masuk' %}
+                                <i class="fas fa-donate text-success fa-lg"></i>
+                            {% else %}
+                                <i class="fas fa-plus-circle text-primary fa-lg"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ log.type }} <span class="text-muted fw-normal">oleh {{ log.from }}</span></h6>
+                            <small class="text-muted"><i class="far fa-clock me-1"></i> {{ log.timestamp }}</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        {% if log.amount != '-' %}
+                            <span class="d-block fw-bold text-success">+{{ log.amount }} ETH</span>
+                        {% endif %}
+                        <small class="text-muted">Campaign #{{ log.campaign_id }}</small>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">Belum ada aktivitas blockchain.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

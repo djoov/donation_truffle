@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="bg-dark text-white py-5 position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0.1; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+    <div class="container position-relative z-10 text-center">
+        <h1 class="fw-bold display-5 mb-3" style="font-family: 'Outfit', sans-serif;">Kebijakan Privasi</h1>
+        <p class="lead opacity-75 mb-0">Transparansi adalah fondasi kepercayaan di DonasiKuy.</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <!-- LAST UPDATED -->
+            <div class="text-center mb-5">
+                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                    Terakhir Diperbarui: 24 November 2025
+                </span>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Disclaimer Penting (Simulasi) -->
+                    <div class="alert alert-warning border-0 d-flex align-items-start gap-3 mb-5 rounded-3" role="alert">
+                        <i class="fas fa-exclamation-triangle mt-1 fa-lg"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1">PENTING: Ini adalah Proyek Simulasi</h5>
+                            <p class="small mb-0">
+                                Platform DonasiKuy dikembangkan untuk tujuan <strong>Edukasi & Penelitian Akademik</strong>. 
+                                Semua transaksi menggunakan jaringan <strong>Ganache (Testnet Lokal)</strong> dan mata uang Ether (ETH) palsu. 
+                                Jangan pernah menggunakan Private Key dari dompet Ethereum asli (Mainnet) Anda di sini.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 1. Pengumpulan Data -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold text-primary mb-3" style="font-family: 'Outfit', sans-serif;">1. Data yang Kami Kumpulkan</h4>
+                        <p class="text-muted">Untuk menjalankan layanan donasi terdesentralisasi ini, kami mengumpulkan beberapa informasi:</p>
+                        <ul class="list-group list-group-flush rounded-3">
+                            <li class="list-group-item bg-light border-0 mb-2 rounded"><i class="fas fa-check text-success me-2"></i> <strong>Informasi Akun:</strong> Username, Email, dan Password (terenkripsi).</li>
+                            <li class="list-group-item bg-light border-0 mb-2 rounded"><i class="fas fa-check text-success me-2"></i> <strong>Data Blockchain:</strong> Wallet Address (Public Key) dan Private Key (Untuk fitur Auto-Sign).</li>
+                            <li class="list-group-item bg-light border-0 rounded"><i class="fas fa-check text-success me-2"></i> <strong>Data Kampanye:</strong> Judul, Deskripsi, Target Dana, dan Gambar pendukung.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 2. Penggunaan Private Key -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold text-primary mb-3" style="font-family: 'Outfit', sans-serif;">2. Penggunaan Private Key</h4>
+                        <p class="text-muted">Kami menerapkan sistem <em>Custodial Wallet</em> untuk mempermudah pengalaman pengguna (UX). Artinya:</p>
+                        <div class="bg-blue-50 p-4 rounded-3 border-start border-4 border-primary">
+                            <p class="mb-2"><strong>Bagaimana kami menggunakannya?</strong></p>
+                            <p class="mb-0 text-muted small">Private Key Anda disimpan di database lokal server hanya untuk tujuan menandatangani transaksi (Donasi/Buat Kampanye) secara otomatis tanpa perlu pop-up dompet eksternal.</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. Transparansi Blockchain -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold text-primary mb-3" style="font-family: 'Outfit', sans-serif;">3. Transparansi Blockchain</h4>
+                        <p class="text-muted">Harap diingat bahwa sifat dasar teknologi Blockchain adalah <strong>Transparan & Permanen (Immutable)</strong>.</p>
+                        <ul class="text-muted">
+                            <li class="mb-2">Semua transaksi donasi yang berhasil akan tercatat di buku besar publik (Ledger).</li>
+                            <li class="mb-2">Siapapun dapat melihat jumlah donasi dan alamat pengirim (Wallet Address), namun identitas asli Anda (Nama/Email) tetap tersimpan aman di database kami (Off-chain).</li>
+                            <li>Data yang sudah masuk ke Blockchain tidak dapat dihapus atau diubah oleh siapapun, termasuk Admin.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 4. Keamanan Data -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold text-primary mb-3" style="font-family: 'Outfit', sans-serif;">4. Keamanan Data</h4>
+                        <p class="text-muted">Kami menggunakan standar keamanan industri untuk melindungi data Anda:</p>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-3 p-3 border rounded-3 h-100">
+                                    <i class="fas fa-lock text-primary fa-2x"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-0">Enkripsi SSL</h6>
+                                        <small class="text-muted">Koneksi aman HTTPS.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-3 p-3 border rounded-3 h-100">
+                                    <i class="fas fa-database text-primary fa-2x"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-0">Database Terisolasi</h6>
+                                        <small class="text-muted">Akses terbatas hanya Admin.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Kontak -->
+                    <div class="text-center border-top pt-5 mt-5">
+                        <p class="text-muted mb-3">Punya pertanyaan lebih lanjut tentang privasi data Anda?</p>
+                        <a href="mailto:support@donasikuy.com" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-envelope me-2"></i> Hubungi Tim Privacy Officer
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-blue-50 { background-color: #eff6ff; }
+</style>
+{% endblock %}

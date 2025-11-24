@@ -1,40 +1,110 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary" style="font-family: 'Outfit', sans-serif;">
+                            <i class="fas fa-hand-holding-heart me-2"></i> Buat Kampanye
+                        </h2>
+                        <p class="text-muted">Ceritakan kisah Anda dan yakinkan donatur.</p>
+                    </div>
 
-<div class="card" style="max-width: 700px; margin: 0 auto;">
-    <div class="section-header" style="text-align: center;">
-        <h2><i class="fa-solid fa-bullhorn"></i> Buat Kampanye Baru</h2>
-        <p>Galang dana dengan mudah. Transaksi Blockchain ditangani otomatis.</p>
+                    <form action="{{ url_for('create_campaign') }}" method="POST" enctype="multipart/form-data">
+                        
+                        <!-- INFO WALLET -->
+                        <div class="alert alert-primary d-flex align-items-center rounded-3 mb-4 border-0 bg-primary bg-opacity-10" role="alert">
+                            <div class="bg-white p-2 rounded-circle text-primary me-3 shadow-sm">
+                                <i class="fas fa-wallet fa-lg"></i>
+                            </div>
+                            <div>
+                                <small class="d-block text-uppercase fw-bold text-primary" style="font-size: 0.7rem;">Creator Wallet</small>
+                                <span class="font-monospace text-dark fw-bold">{{ session.get('wallet') }}</span>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 1: INFORMASI DASAR -->
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">1. Informasi Utama</h6>
+                        
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light border-0 rounded-3" id="title" name="title" placeholder="Judul" required>
+                            <label for="title">Judul Kampanye (Max 50 Karakter)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light border-0 rounded-3" id="tagline" name="tagline" placeholder="Tagline" maxlength="100" required>
+                            <label for="tagline">Tagline Singkat (Contoh: Bantu warga desa mendapatkan air bersih)</label>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select bg-light border-0 rounded-3" id="category" name="category" required>
+                                        <option value="Kemanusiaan">❤️ Kemanusiaan</option>
+                                        <option value="Pendidikan">🎓 Pendidikan</option>
+                                        <option value="Kesehatan">🏥 Kesehatan</option>
+                                        <option value="Bencana Alam">🌪️ Bencana Alam</option>
+                                        <option value="Hewan">🐾 Hewan</option>
+                                        <option value="Teknologi">🚀 Teknologi</option>
+                                        <option value="Lainnya">🌐 Lainnya</option>
+                                    </select>
+                                    <label for="category">Kategori</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-control bg-light border-0 rounded-3 h-100 d-flex align-items-center px-3">
+                                    <input type="file" class="form-control border-0 bg-transparent p-0" id="image" name="image" accept="image/*" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" step="0.01" min="0.01" class="form-control bg-light border-0 rounded-3" id="target" name="target" placeholder="Target" required>
+                                    <label for="target">Target Donasi (ETH)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" min="1" max="365" class="form-control bg-light border-0 rounded-3" id="duration" name="duration" placeholder="Durasi" required>
+                                    <label for="duration">Durasi (Hari)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: DETAIL & TRANSPARANSI -->
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2 mt-4">2. Detail & Transparansi</h6>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control bg-light border-0 rounded-3" placeholder="Cerita" id="description" name="description" style="height: 150px" required></textarea>
+                            <label for="description">Cerita Lengkap (Latar Belakang Masalah)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control bg-light border-0 rounded-3" placeholder="RAB" id="usage_plan" name="usage_plan" style="height: 100px" required></textarea>
+                            <label for="usage_plan">Rencana Penggunaan Dana (Misal: 50% Obat, 30% Logistik)</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="url" class="form-control bg-light border-0 rounded-3" id="social_link" name="social_link" placeholder="https://..." required>
+                            <label for="social_link">Link Website/Sosmed (Untuk Verifikasi Donatur)</label>
+                        </div>
+
+                        <!-- SUBMIT -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm py-3 transition-all hover:scale-105">
+                                <i class="fas fa-rocket me-2"></i> Publikasikan Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <form action="/ui/create" method="POST" enctype="multipart/form-data">
-        
-        <!-- Info Kampanye -->
-        <div style="margin-bottom: 20px;">
-            <label for="title">Judul Kampanye</label>
-            <input type="text" name="title" class="input-field" placeholder="Judul yang menarik..." required>
-
-            <label for="duration">Durasi (Menit)</label>
-            <input type="number" name="duration" class="input-field" placeholder="Contoh: 1440" required>
-
-            <label for="description">Deskripsi & Cerita</label>
-            <textarea name="description" class="input-field" rows="6" placeholder="Ceritakan detail kampanye Anda..." style="font-family: 'Inter', sans-serif;"></textarea>
-            
-            <label>Upload Cover (Opsional)</label>
-            <input type="file" name="evidence_image" class="input-field" accept="image/*" style="padding: 10px;">
-        </div>
-
-        <!-- Info Wallet (Read Only) -->
-        <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 20px; color: #2e7d32; font-size: 0.9rem;">
-            <i class="fa-solid fa-wallet"></i> <strong>Akun Terhubung:</strong><br>
-            {{ current_user.wallet_address }} <br>
-            <small>(Gas fee akan dipotong otomatis dari saldo akun ini)</small>
-        </div>
-
-        <button type="submit" class="button button-full">
-            <i class="fa-solid fa-rocket"></i> Terbitkan Sekarang
-        </button>
-    </form>
 </div>
 {% endblock %}
