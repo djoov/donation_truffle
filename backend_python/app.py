@@ -1,43 +1,64 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from web3 import Web3
-from contract_data import contract, web3, get_contract_info 
 import sqlite3
 import os
 import time
+from datetime import datetime, timedelta
+
+# Konfigurasi Ganache & Contract
+# Pastikan contract_data.py ada di folder yang sama
+try:
+    from contract_data import contract, web3
+except ImportError:
+    contract = None
+    web3 = None
+    print("Warning: contract_data.py tidak ditemukan atau error. Blockchain fitur tidak akan jalan.")
 
 app = Flask(__name__)
 app.secret_key = 'rahasia_donasi_blockchain'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-# --- CONTEXT PROCESSOR ---
+# --- 1. CONTEXT PROCESSOR (Inject Status Blockchain ke semua template) ---
 @app.context_processor
 def inject_blockchain_status():
-    status = {'connected': False, 'user_balance': '0.0000', 'gas_price': '0', 'block_number': '0'}
+    status = {
+        'connected': False,
+        'user_balance': '0.0000',
+        'gas_price': '0',
+        'block_number': '0'
+    }
     try:
-        if web3.is_connected():
+        if web3 and web3.is_connected():
             status['connected'] = True
             status['block_number'] = web3.eth.block_number
-            status['gas_price'] = "{:.1f}".format(web3.from_wei(web3.eth.gas_price, 'gwei'))
+            gas_wei = web3.eth.gas_price
+            status['gas_price'] = "{:.1f}".format(web3.from_wei(gas_wei, 'gwei'))
             if 'wallet' in session:
                 try:
-                    bal = web3.from_wei(web3.eth.get_balance(session['wallet']), 'ether')
-                    status['user_balance'] = "{:.4f}".format(float(bal))
-                except: status['user_balance'] = "Err"
-    except: pass
+                    bal_wei = web3.eth.get_balance(session['wallet'])
+                    bal_eth = web3.from_wei(bal_wei, 'ether')
+                    status['user_balance'] = "{:.4f}".format(float(bal_eth))
+                except:
+                    status['user_balance'] = "Err"
+    except Exception as e:
+        print(f"Blockchain Status Error: {e}")
     return dict(bc_stat=status)
 
-# --- DATABASE SETUP  ---
+# --- 2. DATABASE SETUP ---
 def init_db():
-    if not os.path.exists('instance'): os.makedirs('instance')
+    if not os.path.exists('instance'):
+        os.makedirs('instance')
     conn = sqlite3.connect('instance/users.db')
     c = conn.cursor()
     
-    # Tabel Users
+    # Tabel Users (Updated dengan profile_pic, bio, last_username_change)
     c.execute('''CREATE TABLE IF NOT EXISTS users 
-                 (id INTEGER PRIMARY KEY, username TEXT, email TEXT, 
-                  password TEXT, role TEXT, wallet_address TEXT, private_key TEXT)''')
+                 (id INTEGER PRIMARY KEY, 
+                  username TEXT, email TEXT, password TEXT, role TEXT, 
+                  wallet_address TEXT, private_key TEXT,
+                  profile_pic TEXT, bio TEXT, last_username_change TEXT)''')
     
-    # Tabel Campaign Details (Data Pelengkap Off-Chain)
+    # Tabel Campaign Details (Off-chain Data)
     c.execute('''CREATE TABLE IF NOT EXISTS campaign_details 
                  (id INTEGER PRIMARY KEY, 
                   blockchain_id INTEGER, 
@@ -45,20 +66,30 @@ def init_db():
                   usage_plan TEXT, 
                   social_link TEXT,
                   tagline TEXT)''')
+
+    # Tabel Campaign Updates (Kabar Terbaru)
+    c.execute('''CREATE TABLE IF NOT EXISTS campaign_updates 
+                 (id INTEGER PRIMARY KEY, blockchain_id INTEGER, 
+                  title TEXT, content TEXT, image TEXT, created_at TEXT)''')
     
     # Admin Default
     c.execute("SELECT * FROM users WHERE role='admin'")
     if not c.fetchone():
-        try: admin_wallet = web3.eth.accounts[0]
-        except: admin_wallet = "0x00"
-        c.execute("INSERT INTO users (username, email, password, role, wallet_address, private_key) VALUES (?, ?, ?, ?, ?, ?)",
-                  ('SuperAdmin', 'admin@donasi.com', 'admin123', 'admin', admin_wallet, 'ADMIN_KEY'))
+        try:
+            # Coba ambil akun pertama Ganache, fallback ke dummy jika error
+            admin_wallet = web3.eth.accounts[0] if web3 and web3.is_connected() else "0x0000000000000000000000000000000000000000"
+        except:
+            admin_wallet = "0x0000000000000000000000000000000000000000"
+            
+        c.execute("INSERT INTO users (username, email, password, role, wallet_address, private_key, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                  ('SuperAdmin', 'admin@donasi.com', 'admin123', 'admin', admin_wallet, 'ADMIN_KEY', 'default_user.png'))
     conn.commit()
     conn.close()
 
+# Inisialisasi DB saat app start
 init_db()
 
-# --- HELPER ---
+# --- 3. HELPER FUNCTIONS ---
 def get_db_connection():
     conn = sqlite3.connect('instance/users.db')
     conn.row_factory = sqlite3.Row
@@ -68,23 +99,63 @@ def get_username_by_wallet(wallet_addr):
     conn = get_db_connection()
     user = conn.execute('SELECT username FROM users WHERE wallet_address = ?', (wallet_addr,)).fetchone()
     conn.close()
-    return user['username'] if user else "Unknown"
+    if user:
+        return f"{user['username']}"
+    return "Unknown User"
 
-# --- ROUTES ---
+def get_all_transactions():
+    logs = []
+    try:
+        if contract:
+            # Event Donasi
+            events = contract.events.DonationReceived().get_logs(fromBlock=0)
+            for e in events:
+                args = e['args']
+                logs.append({
+                    'type': 'Donasi Masuk',
+                    'campaign_id': args['campaignId'],
+                    'from': get_username_by_wallet(args['donor']),
+                    'from_addr': args['donor'],
+                    'amount': web3.from_wei(args['amount'], 'ether'),
+                    'timestamp': time.ctime(args['timestamp'])
+                })
+            
+            # Event Create Campaign
+            events_created = contract.events.CampaignCreated().get_logs(fromBlock=0)
+            for e in events_created:
+                args = e['args']
+                logs.append({
+                    'type': 'Campaign Dibuat',
+                    'campaign_id': args['id'],
+                    'from': get_username_by_wallet(args['creator']),
+                    'from_addr': args['creator'],
+                    'amount': '-',
+                    'timestamp': time.ctime(args['timestamp'])
+                })
+            logs.sort(key=lambda x: x['timestamp'], reverse=True)
+    except Exception as e:
+        print(f"Error fetching logs: {e}")
+    return logs
+
+# --- 4. ROUTES (HALAMAN INFORMASI) ---
+
 @app.route('/')
-def index(): return render_template('index.html')
+def index():
+    return render_template('index.html')
 
 @app.route('/help')
-def help_page(): return render_template('help.html')
-
-@app.route('/how-it-works')
-def how_it_works_page():
-    return render_template('how_it_works.html')
+def help_page():
+    return render_template('help.html')
 
 @app.route('/privacy')
 def privacy_page():
     return render_template('privacy.html')
 
+@app.route('/how-it-works')
+def how_it_works_page():
+    return render_template('how_it_works.html')
+
+# --- 5. ROUTES (AUTH & PROFILE) ---
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -95,143 +166,257 @@ def login():
         user = conn.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password)).fetchone()
         conn.close()
         if user:
-            session['user_id'] = user['id']; session['username'] = user['username']
-            session['role'] = user['role']; session['wallet'] = user['wallet_address']
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            session['role'] = user['role']
+            session['wallet'] = user['wallet_address']
+            # Simpan Foto Profil di session
+            session['profile_pic'] = user['profile_pic'] if user['profile_pic'] else 'default_user.png'
             return redirect(url_for('dashboard'))
-        else: flash('Login gagal!')
+        else:
+            flash('Login gagal! Cek email/password.')
     return render_template('auth/login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ganache_accounts = []
-    if web3.is_connected():
-        try: ganache_accounts = web3.eth.accounts
+    if web3 and web3.is_connected():
+        try:
+            ganache_accounts = web3.eth.accounts
         except: pass
 
     if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        role = request.form['role']
+        wallet = request.form['wallet_address']
+        pk = request.form['private_key']
+
+        if web3 and not Web3.is_address(wallet):
+            flash('Alamat Wallet Ethereum tidak valid!')
+            return render_template('auth/register.html', accounts=ganache_accounts)
+
+        conn = get_db_connection()
         try:
-            conn = get_db_connection()
-            conn.execute('INSERT INTO users (username, email, password, role, wallet_address, private_key) VALUES (?, ?, ?, ?, ?, ?)',
-                         (request.form['username'], request.form['email'], request.form['password'], 
-                          request.form['role'], request.form['wallet_address'], request.form['private_key']))
+            conn.execute('INSERT INTO users (username, email, password, role, wallet_address, private_key, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                         (username, email, password, role, wallet, pk, 'default_user.png'))
             conn.commit()
-            flash('Registrasi berhasil!')
+            flash('Registrasi berhasil! Setup Wallet selesai.')
             return redirect(url_for('login'))
-        except Exception as e: flash(f'Gagal Register: {e}')
-        finally: conn.close()
+        except sqlite3.IntegrityError:
+            flash('Email atau Username sudah terdaftar.')
+        except Exception as e:
+            flash(f'Gagal Register: {e}')
+        finally:
+            conn.close()
     return render_template('auth/register.html', accounts=ganache_accounts)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    
+    if request.method == 'POST':
+        new_username = request.form.get('username')
+        bio = request.form.get('bio')
+        file = request.files.get('profile_pic')
+        
+        user = conn.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+        
+        # 1. Update Username (Limit 14 Hari)
+        msg = []
+        if new_username and new_username != user['username']:
+            last_change = user['last_username_change']
+            can_change = True
+            
+            if last_change:
+                last_date = datetime.strptime(last_change, '%Y-%m-%d %H:%M:%S')
+                if datetime.now() < last_date + timedelta(days=14):
+                    can_change = False
+                    days_left = (last_date + timedelta(days=14) - datetime.now()).days
+                    flash(f"Gagal: Username hanya bisa diubah 14 hari sekali. Tunggu {days_left} hari lagi.", "error")
+            
+            if can_change:
+                conn.execute("UPDATE users SET username = ?, last_username_change = ? WHERE id = ?", 
+                             (new_username, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), session['user_id']))
+                session['username'] = new_username
+                msg.append("Username berhasil diubah.")
+
+        # 2. Update Bio
+        conn.execute("UPDATE users SET bio = ? WHERE id = ?", (bio, session['user_id']))
+        
+        # 3. Update Foto Profil
+        if file and file.filename != '':
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+                
+            filename = f"user_{session['user_id']}_{int(time.time())}.jpg" # Rename unik
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            conn.execute("UPDATE users SET profile_pic = ? WHERE id = ?", (filename, session['user_id']))
+            session['profile_pic'] = filename
+            msg.append("Foto profil diperbarui.")
+            
+        conn.commit()
+        if msg: flash("Profil berhasil diperbarui!", "success")
+        return redirect(url_for('profile'))
+
+    # GET Request
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+    
+    days_until_change = 0
+    if user['last_username_change']:
+        last_date = datetime.strptime(user['last_username_change'], '%Y-%m-%d %H:%M:%S')
+        delta = (last_date + timedelta(days=14)) - datetime.now()
+        if delta.days > 0:
+            days_until_change = delta.days
+            
+    balance = "0"
+    try:
+        if web3:
+            bal_wei = web3.eth.get_balance(user['wallet_address'])
+            balance = "{:.4f}".format(web3.from_wei(bal_wei, 'ether'))
+    except: pass
+
+    conn.close()
+    return render_template('profile.html', user=user, balance=balance, days_wait=days_until_change)
+
+# --- 6. ROUTES (CAMPAIGN & DASHBOARD) ---
 
 @app.route('/dashboard')
 def dashboard():
-    if session.get('role') == 'admin': return redirect(url_for('admin_dashboard'))
+    if session.get('role') == 'admin':
+        return redirect(url_for('admin_dashboard'))
+    
     campaigns = []
     if contract:
-        count = contract.functions.getCampaignCount().call()
-        
-        # Ambil data off-chain
-        conn = get_db_connection()
-        details_rows = conn.execute("SELECT * FROM campaign_details").fetchall()
-        conn.close()
-        details_map = {d['blockchain_id']: d for d in details_rows}
-
-        for i in range(count):
-            c = contract.functions.getCampaign(i).call()
-            is_approved = (c[8] == 1)
-            is_owner = False
-            if 'wallet' in session: is_owner = (c[1] == session['wallet'])
+        try:
+            count = contract.functions.getCampaignCount().call()
             
-            if is_approved or is_owner:
-                status_label = 'Unknown'
-                if c[8] == 0: status_label = 'Pending'
-                elif c[8] == 1: status_label = 'Active'
-                elif c[8] == 2: status_label = 'Rejected'
-                elif c[8] == 3: status_label = 'Deleted'
-                
-                # Merge data off-chain
-                detail = details_map.get(c[0])
-                tagline = detail['tagline'] if detail else c[3][:50] + "..."
-                category = detail['category'] if detail else "Umum"
+            conn = get_db_connection()
+            details_rows = conn.execute("SELECT * FROM campaign_details").fetchall()
+            conn.close()
+            details_map = {d['blockchain_id']: d for d in details_rows}
 
-                campaigns.append({
-                    'id': c[0],
-                    'title': c[2],
-                    'desc': c[3],
-                    'target': web3.from_wei(c[4], 'ether'),
-                    'collected': web3.from_wei(c[5], 'ether'),
-                    'image': c[6],
-                    'status_code': c[8],
-                    'status_label': status_label,
-                    'is_owner': is_owner,
-                    'tagline': tagline,
-                    'category': category
-                })
+            for i in range(count):
+                c = contract.functions.getCampaign(i).call()
+                
+                # Filter Logic (Public Guest Friendly)
+                status_code = c[8]
+                creator_address = c[1]
+                
+                is_owner = False
+                if 'wallet' in session:
+                    is_owner = (creator_address == session['wallet'])
+                
+                should_show = False
+                if status_code == 1: should_show = True # Active
+                elif is_owner: should_show = True # Owner sees pending/rejected
+                if status_code == 3: should_show = False # Hide Deleted
+
+                if should_show:
+                    status_label = 'Unknown'
+                    if status_code == 0: status_label = 'Pending'
+                    elif status_code == 1: status_label = 'Active'
+                    elif status_code == 2: status_label = 'Rejected'
+                    elif status_code == 3: status_label = 'Deleted'
+
+                    detail = details_map.get(c[0])
+                    tagline = detail['tagline'] if detail else c[3][:50] + "..."
+                    category = detail['category'] if detail else "Umum"
+
+                    campaigns.append({
+                        'id': c[0],
+                        'title': c[2],
+                        'desc': c[3],
+                        'target': web3.from_wei(c[4], 'ether'),
+                        'collected': web3.from_wei(c[5], 'ether'),
+                        'image': c[6],
+                        'status_code': status_code,
+                        'status_label': status_label,
+                        'is_owner': is_owner,
+                        'tagline': tagline,
+                        'category': category
+                    })
+        except Exception as e:
+            print(f"Dashboard Error: {e}")
+            
     return render_template('campaigns.html', campaigns=campaigns)
 
 @app.route('/create_campaign', methods=['GET', 'POST'])
 def create_campaign():
-    if 'user_id' not in session: return redirect(url_for('login'))
-    if session.get('role') != 'kreator': return redirect(url_for('dashboard'))
+    if 'user_id' not in session:
+        flash("Silakan login terlebih dahulu.")
+        return redirect(url_for('login'))
+    if session.get('role') != 'kreator':
+        flash("Hanya akun KREATOR yang bisa membuat kampanye!")
+        return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        # 1. Ambil Input Dasar
         title = request.form['title']
         desc = request.form['description']
         target = float(request.form['target'])
         try: duration_days = int(request.form['duration'])
         except: duration_days = 30
         
-        # 2. Ambil Input Tambahan (Off-Chain)
-        category = request.form['category']
-        tagline = request.form['tagline']
-        usage_plan = request.form['usage_plan']
-        social_link = request.form['social_link']
+        category = request.form.get('category', 'Umum')
+        tagline = request.form.get('tagline', '')
+        usage_plan = request.form.get('usage_plan', '')
+        social_link = request.form.get('social_link', '')
 
-        # 3. Upload Gambar
         file = request.files['image']
-        if not os.path.exists(app.config['UPLOAD_FOLDER']): os.makedirs(app.config['UPLOAD_FOLDER'])
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'])
         filename = f"{int(time.time())}_{file.filename}"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
-        # 4. Kirim ke Blockchain
         conn = get_db_connection()
         user_data = conn.execute("SELECT wallet_address, private_key FROM users WHERE id = ?", (session['user_id'],)).fetchone()
         
-        if user_data is None:
+        if user_data is None or not user_data['wallet_address'] or not user_data['private_key']:
             conn.close()
-            flash("Data akun error.")
+            flash("Error: Data akun tidak lengkap. Silakan daftar ulang.")
             return redirect(url_for('dashboard'))
 
         try:
             target_wei = web3.to_wei(target, 'ether')
             duration_minutes = duration_days * 1440 
+            
             nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
+            gas_price = web3.eth.gas_price
             
             txn = contract.functions.createCampaign(
                 title, desc, target_wei, filename, duration_minutes 
             ).build_transaction({
-                'chainId': web3.eth.chain_id, 'gas': 2000000, 
-                'gasPrice': web3.eth.gas_price, 'nonce': nonce
+                'chainId': web3.eth.chain_id,
+                'gas': 2000000,
+                'gasPrice': gas_price,
+                'nonce': nonce,
             })
             signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
             tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-            receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-            
-            # 5. Simpan Data Tambahan ke DB (Mapping ID Blockchain -> Detail Off-chain)
-            # Kita harus tahu ID campaign yang baru saja dibuat. 
-            # Cara paling aman: Ambil 'CampaignCount' - 1
+            web3.eth.wait_for_transaction_receipt(tx_hash)
+
+            # Simpan Data Tambahan
             new_count = contract.functions.getCampaignCount().call()
             new_id = new_count - 1
-            
             conn.execute('INSERT INTO campaign_details (blockchain_id, category, usage_plan, social_link, tagline) VALUES (?, ?, ?, ?, ?)',
                          (new_id, category, usage_plan, social_link, tagline))
             conn.commit()
             conn.close()
 
-            flash(f"Campaign '{title}' berhasil dibuat!", "success")
+            flash(f"Campaign '{title}' berhasil dibuat! Menunggu Admin.", "success")
             return redirect(url_for('dashboard'))
         except Exception as e:
             conn.close()
             flash(f"Error Blockchain: {str(e)}", "error")
+            print(f"DEBUG ERROR: {e}")
 
     return render_template('create_campaign.html')
 
@@ -240,64 +425,137 @@ def campaign_detail(id):
     try:
         c = contract.functions.getCampaign(id).call()
         
-        # Ambil data tambahan dari DB
         conn = get_db_connection()
         detail = conn.execute("SELECT * FROM campaign_details WHERE blockchain_id = ?", (id,)).fetchone()
+        updates = conn.execute("SELECT * FROM campaign_updates WHERE blockchain_id = ? ORDER BY id DESC", (id,)).fetchall()
         conn.close()
 
         target = web3.from_wei(c[4], 'ether')
         collected = web3.from_wei(c[5], 'ether')
         percent = 0
-        if target > 0: percent = (float(collected) / float(target)) * 100
-        
+        if target > 0:
+            percent = (float(collected) / float(target)) * 100
+            
         status_map = {0: 'Pending', 1: 'Active', 2: 'Rejected', 3: 'Deleted'}
-        
+        creator_name = get_username_by_wallet(c[1])
+
         campaign = {
             'id': c[0],
-            'creator_name': get_username_by_wallet(c[1]),
+            'creator': c[1],
+            'creator_name': creator_name,
             'title': c[2],
             'desc': c[3],
             'target': target,
             'collected': collected,
             'image': c[6],
             'deadline': time.ctime(c[7]),
+            'status': status_map[c[8]],
             'status_code': c[8],
             'percent': "{:.1f}".format(percent),
-            # Data Tambahan
+            'fundsWithdrawn': c[9],
             'category': detail['category'] if detail else 'Umum',
             'tagline': detail['tagline'] if detail else '',
             'usage_plan': detail['usage_plan'] if detail else 'Tidak ada rincian.',
-            'social_link': detail['social_link'] if detail else '#'
+            'social_link': detail['social_link'] if detail else '#',
+            'updates': updates
         }
         return render_template('campaign_detail.html', campaign=campaign)
     except Exception as e:
-        flash(f"Error: {e}")
+        flash(f"Gagal memuat kampanye: {e}")
         return redirect(url_for('dashboard'))
+
+# --- 7. ACTIONS (DONATE, WITHDRAW, UPDATE) ---
 
 @app.route('/donate/<int:id>', methods=['POST'])
 def donate(id):
     if session.get('role') != 'donatur':
          flash("Hanya akun DONATUR yang bisa berdonasi!")
          return redirect(url_for('campaign_detail', id=id))
+    
     amount = request.form.get('amount')
+    
     try:
+        amount_eth = float(amount)
+        amount_wei = web3.to_wei(amount_eth, 'ether')
+        
         conn = get_db_connection()
         user_data = conn.execute("SELECT wallet_address, private_key FROM users WHERE id = ?", (session['user_id'],)).fetchone()
         conn.close()
         
-        if not user_data['private_key']: return redirect(url_for('campaign_detail', id=id))
+        if not user_data['private_key']:
+            flash("Error: Private Key tidak ditemukan.")
+            return redirect(url_for('campaign_detail', id=id))
 
         nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
         txn = contract.functions.donateToCampaign(id).build_transaction({
-            'chainId': web3.eth.chain_id, 'gas': 2000000, 'gasPrice': web3.eth.gas_price,
-            'nonce': nonce, 'value': web3.to_wei(float(amount), 'ether')
+            'chainId': web3.eth.chain_id,
+            'gas': 2000000,
+            'gasPrice': web3.eth.gas_price,
+            'nonce': nonce,
+            'value': amount_wei 
+        })
+
+        signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
+        tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
+        web3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        flash(f"Terima kasih! Donasi {amount} ETH berhasil dikirim.", "success")
+        
+    except ValueError:
+        flash("Jumlah donasi tidak valid.", "error")
+    except Exception as e:
+        flash(f"Gagal Donasi: {e}", "error")
+        
+    return redirect(url_for('campaign_detail', id=id))
+
+@app.route('/post_update/<int:id>', methods=['POST'])
+def post_update(id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    title = request.form['update_title']
+    content = request.form['update_content']
+    file = request.files['update_image']
+    
+    image_filename = ""
+    if file:
+        if not os.path.exists(app.config['UPLOAD_FOLDER']): os.makedirs(app.config['UPLOAD_FOLDER'])
+        image_filename = f"update_{int(time.time())}_{file.filename}"
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+    
+    conn = get_db_connection()
+    conn.execute('INSERT INTO campaign_updates (blockchain_id, title, content, image, created_at) VALUES (?, ?, ?, ?, ?)',
+                 (id, title, content, image_filename, time.ctime()))
+    conn.commit()
+    conn.close()
+    
+    flash("Kabar terbaru berhasil diposting!", "success")
+    return redirect(url_for('campaign_detail', id=id))
+
+@app.route('/withdraw/<int:id>')
+def withdraw_funds(id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    user_data = conn.execute("SELECT wallet_address, private_key FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+    conn.close()
+
+    try:
+        nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
+        txn = contract.functions.withdrawFunds(id).build_transaction({
+            'chainId': web3.eth.chain_id, 'gas': 2000000, 
+            'gasPrice': web3.eth.gas_price, 'nonce': nonce
         })
         signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
         tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
         web3.eth.wait_for_transaction_receipt(tx_hash)
-        flash(f"Donasi {amount} ETH berhasil!", "success")
-    except Exception as e: flash(f"Gagal: {e}", "error")
+        
+        flash("Dana berhasil ditarik ke dompet Anda!", "success")
+    except Exception as e:
+        flash(f"Gagal Tarik Dana: {e}", "error")
+        
     return redirect(url_for('campaign_detail', id=id))
+
+# --- 8. ADMIN ROUTES ---
 
 @app.route('/admin')
 def admin_dashboard():
@@ -308,39 +566,58 @@ def admin_dashboard():
         for i in range(count):
             c = contract.functions.getCampaign(i).call()
             status_map = {0: 'Pending', 1: 'Approved', 2: 'Rejected', 3: 'Deleted'}
+            creator_name = get_username_by_wallet(c[1])
             campaigns.append({
-                'id': c[0], 'creator_addr': c[1], 'creator_name': get_username_by_wallet(c[1]),
-                'title': c[2], 'target': web3.from_wei(c[4], 'ether'),
-                'status': status_map[c[8]], 'status_code': c[8]
+                'id': c[0],
+                'creator_addr': c[1],
+                'creator_name': creator_name,
+                'title': c[2],
+                'target': web3.from_wei(c[4], 'ether'),
+                'status': status_map[c[8]],
+                'status_code': c[8]
             })
-    conn = get_db_connection(); users = conn.execute('SELECT * FROM users WHERE role != "admin"').fetchall(); conn.close()
-    transactions = get_all_transactions()
+    conn = get_db_connection()
+    users = conn.execute('SELECT * FROM users WHERE role != "admin"').fetchall()
+    conn.close()
+    
+    transactions = get_all_transactions() 
+    
     return render_template('admin_dashboard.html', campaigns=campaigns, users=users, transactions=transactions)
 
 @app.route('/admin/approve/<int:id>')
 def approve_campaign(id):
+    if session['role'] != 'admin': return "Unauthorized"
     try:
         tx = contract.functions.approveCampaign(id).transact({'from': web3.eth.accounts[0]})
         web3.eth.wait_for_transaction_receipt(tx)
-    except: pass
+        flash(f"Campaign #{id} Approved!")
+    except Exception as e:
+        flash(f"Error: {e}")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_campaign/<int:id>')
 def delete_campaign(id):
+    if session['role'] != 'admin': return "Unauthorized"
     try:
         tx = contract.functions.deleteCampaign(id).transact({'from': web3.eth.accounts[0]})
         web3.eth.wait_for_transaction_receipt(tx)
-    except: pass
+        flash(f"Campaign #{id} Deleted.")
+    except Exception as e:
+        flash(f"Gagal menghapus: {e}")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_user/<int:user_id>')
 def delete_user(user_id):
+    if session['role'] != 'admin': return "Unauthorized"
     try:
-        conn = get_db_connection(); conn.execute('DELETE FROM users WHERE id = ?', (user_id,)); conn.commit(); conn.close()
-    except: pass
+        conn = get_db_connection()
+        conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        conn.commit()
+        conn.close()
+        flash(f"User ID {user_id} dihapus.")
+    except Exception as e:
+        flash(f"Gagal hapus user: {e}")
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/logout')
-def logout(): session.clear(); return redirect(url_for('index'))
-
-if __name__ == '__main__': app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

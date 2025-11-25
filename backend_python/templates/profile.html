@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <!-- Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="fw-bold text-primary" style="font-family: 'Outfit', sans-serif;">Profil Saya</h2>
+                    <p class="text-muted">Kelola identitas akun dan dompet digital Anda.</p>
+                </div>
+                <span class="badge bg-{{ 'info' if user.role == 'donatur' else 'warning' }} text-dark px-3 py-2 rounded-pill text-uppercase fw-bold">
+                    {{ user.role }}
+                </span>
+            </div>
+
+            <div class="row g-4">
+                <!-- KARTU KIRI: FOTO & SALDO -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
+                        <div class="position-relative mx-auto mb-3" style="width: 150px; height: 150px;">
+                            <img src="{{ url_for('static', filename='uploads/' + (user.profile_pic if user.profile_pic else 'default_user.png')) }}" 
+                                 class="rounded-circle img-thumbnail w-100 h-100 object-fit-cover shadow-sm" 
+                                 alt="Profile" 
+                                 onerror="this.src='https://via.placeholder.com/150?text=User'">
+                            <label for="upload-photo" class="position-absolute bottom-0 end-0 bg-white text-primary p-2 rounded-circle shadow cursor-pointer" style="cursor: pointer;">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                        </div>
+                        
+                        <h4 class="fw-bold mb-1">{{ user.username }}</h4>
+                        <p class="text-muted small mb-4">{{ user.email }}</p>
+
+                        <div class="bg-light p-3 rounded-3 mb-3 text-start">
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Saldo Dompet</small>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fab fa-ethereum text-primary fa-lg"></i>
+                                <span class="h4 mb-0 fw-bold">{{ balance }} ETH</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light p-3 rounded-3 text-start overflow-hidden">
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Wallet Address</small>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <code class="text-dark text-break small">{{ user.wallet_address }}</code>
+                                <button class="btn btn-sm btn-link text-muted p-0" onclick="navigator.clipboard.writeText('{{ user.wallet_address }}')"><i class="fas fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU KANAN: EDIT FORM -->
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h5 class="fw-bold mb-4 border-bottom pb-2">Edit Informasi</h5>
+                        
+                        <form action="{{ url_for('profile') }}" method="POST" enctype="multipart/form-data">
+                            <!-- Hidden Input untuk trigger upload dari ikon kamera -->
+                            <input type="file" id="upload-photo" name="profile_pic" class="d-none" accept="image/*" onchange="this.form.submit()">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Account ID (Username)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">@</span>
+                                    <input type="text" class="form-control bg-light border-0" name="username" value="{{ user.username }}" {{ 'readonly' if days_wait > 0 }}>
+                                </div>
+                                {% if days_wait > 0 %}
+                                    <small class="text-danger mt-1 d-block">
+                                        <i class="fas fa-lock me-1"></i> Anda baru bisa mengubah ID lagi dalam <strong>{{ days_wait }} hari</strong>.
+                                    </small>
+                                {% else %}
+                                    <small class="text-success mt-1 d-block">
+                                        <i class="fas fa-check-circle me-1"></i> ID tersedia untuk diubah.
+                                    </small>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Bio / Tentang Saya</label>
+                                <textarea class="form-control bg-light border-0 rounded-3" name="bio" rows="4" placeholder="Ceritakan sedikit tentang diri Anda...">{{ user.bio }}</textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Account Number (Database ID)</label>
+                                <input type="text" class="form-control bg-light border-0" value="#{{ user.id }}" readonly>
+                                <small class="text-muted">ID unik sistem, tidak dapat diubah.</small>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="reset" class="btn btn-light rounded-pill px-4">Batal</button>
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Simpan Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

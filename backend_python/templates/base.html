@@ -13,21 +13,29 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- === 1. PRELOADER (CLEAN VERSION) === -->
+    <!-- AUDIO ELEMENTS (Hidden) -->
+    <!-- Menggunakan URL CDN untuk suara UI -->
+    <audio id="sound-hover" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sound-click" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sound-success" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sound-error" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- === 1. PRELOADER === -->
     <div id="global-loader" class="loader-overlay">
         <div class="loader-content text-center">
-            <!-- Logo Besar dengan Efek Glow -->
             <div class="logo-glow-wrapper mb-3">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Loading..." class="clean-loading-logo">
             </div>
-            
-            <!-- Teks Brand -->
             <h4 class="fw-bold text-primary mb-0" style="font-family: 'Outfit', sans-serif; letter-spacing: 1px;">DonasiKuy</h4>
-            
-            <!-- Indikator Dots -->
-            <div class="loading-dots mt-2">
-                <span>.</span><span>.</span><span>.</span>
-            </div>
+            <div class="loading-dots mt-2"><span>.</span><span>.</span><span>.</span></div>
         </div>
     </div>
 
@@ -81,13 +89,21 @@
                                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">{{ session.get('username')[0] | upper }}</div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2">
-                                <li class="px-3 py-2"><small class="text-muted d-block">Masuk sebagai</small><span class="fw-bold text-dark">{{ session.get('username') }}</span></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li class="px-3 py-1"><div class="d-flex justify-content-between align-items-center bg-light p-2 rounded"><span class="small text-muted">Saldo:</span><span class="fw-bold text-primary">{{ bc_stat.user_balance }} ETH</span></div></li>
-                                <li><a class="dropdown-item py-2 mt-2" href="#"><i class="fas fa-wallet me-2 text-primary"></i> {{ session.get('wallet')[:8] }}...</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                            </ul>
+    <!-- Profil Link (BARU) -->
+    <li class="px-3 py-2 text-center">
+        <img src="{{ url_for('static', filename='uploads/' + (session.get('profile_pic') if session.get('profile_pic') else 'default_user.png')) }}" 
+             class="rounded-circle mb-2 shadow-sm" width="50" height="50" style="object-fit: cover;">
+        <div class="fw-bold text-dark">{{ session.get('username') }}</div>
+        <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100">Lihat Profil</a>
+    </li>
+    
+    <li><hr class="dropdown-divider"></li>
+    <!-- Saldo (Tetap Ada) -->
+    <li class="px-3 py-1"><div class="d-flex justify-content-between... (kode lama) ... </div></li>
+    <li><a class="dropdown-item py-2 mt-2" href="#"><i class="fas fa-wallet me-2 text-primary"></i> {{ session.get('wallet')[:8] }}...</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+</ul>
                         </li>
                     {% else %}
                         <li class="nav-item ms-lg-3"><a class="btn btn-outline-primary px-4" href="{{ url_for('login') }}">Masuk</a></li>
@@ -100,13 +116,23 @@
 
     <!-- FLASH MESSAGES -->
     <div class="container mt-4 position-absolute top-10 start-50 translate-middle-x" style="z-index: 1050; max-width: 600px;">
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-info alert-dismissible fade show shadow-lg border-0 rounded-3" role="alert">
-                        <i class="fas fa-info-circle me-2"></i> {{ message }}
+                {% for category, message in messages %}
+                    <!-- Kategori 'error' -> merah, 'success' -> biru/hijau -->
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show shadow-lg border-0 rounded-3" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }} me-2"></i> {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    
+                    <!-- Trigger Sound berdasarkan kategori pesan -->
+                    <script>
+                        window.addEventListener('load', () => {
+                            const type = "{{ category }}";
+                            if(type === 'error') document.getElementById('sound-error').play();
+                            else document.getElementById('sound-success').play();
+                        });
+                    </script>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -131,7 +157,7 @@
                 <div class="col-lg-2 offset-lg-1">
                     <h6 class="fw-bold mb-3 small text-uppercase">Platform</h6>
                     <ul class="list-unstyled text-muted space-y-2 small">
-                        <li><a href="{{ url_for('how_it_works_page') }}" class="text-decoration-none text-muted">Cara Kerja</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Cara Kerja</a></li>
                         <li><a href="#" class="text-decoration-none text-muted">Jelajahi</a></li>
                     </ul>
                 </div>
@@ -161,20 +187,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- === SCRIPT LOADING === -->
+    <!-- === SCRIPT UX (Loading & Sounds) === -->
     <script>
-        // Fungsi menghilangkan loader
+        // --- 1. LOADING SCREEN ---
         function hideLoader() {
             const loader = document.getElementById('global-loader');
             if(loader) {
                 loader.classList.add('fade-out');
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                }, 500); // Sesuaikan durasi fade-out CSS
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
             }
         }
-
-        // Fungsi memunculkan loader (dipanggil saat submit form)
         function showLoader() {
             const loader = document.getElementById('global-loader');
             if(loader) {
@@ -182,17 +204,37 @@
                 loader.classList.remove('fade-out');
             }
         }
-
-        // Event: Halaman selesai dimuat
-        window.addEventListener('load', () => {
-            // Beri jeda sedikit (minimal 800ms) agar animasi logo sempat terlihat
-            setTimeout(hideLoader, 800);
+        window.addEventListener('load', () => { setTimeout(hideLoader, 800); });
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', () => { showLoader(); });
         });
 
-        // Event: Saat form disubmit (Create Campaign / Login / Donate)
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', () => {
-                showLoader();
+        // --- 2. SOUND EFFECTS SYSTEM ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoverSound = document.getElementById('sound-hover');
+            const clickSound = document.getElementById('sound-click');
+            
+            // Set volume rendah agar tidak kaget
+            hoverSound.volume = 0.2; 
+            clickSound.volume = 0.4;
+
+            // Seleksi elemen interaktif
+            const interactiveElements = document.querySelectorAll('a, button, .btn, input[type="submit"], .nav-link');
+
+            interactiveElements.forEach(el => {
+                // Efek Hover
+                el.addEventListener('mouseenter', () => {
+                    // Reset waktu agar bisa diputar cepat berulang kali
+                    hoverSound.currentTime = 0; 
+                    // Promise catch untuk menghindari error jika user belum interaksi dengan halaman
+                    hoverSound.play().catch(() => {}); 
+                });
+
+                // Efek Klik
+                el.addEventListener('click', () => {
+                    clickSound.currentTime = 0;
+                    clickSound.play().catch(() => {});
+                });
             });
         });
     </script>

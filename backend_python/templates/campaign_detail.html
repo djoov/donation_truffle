@@ -11,8 +11,9 @@
     </nav>
 
     <div class="row g-5">
-        <!-- KOLOM KIRI: KONTEN UTAMA -->
+        <!-- KOLOM KIRI: KONTEN UTAMA & TAB UPDATE -->
         <div class="col-lg-8">
+            <!-- CARD GAMBAR & INFO -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                 <img src="{{ url_for('static', filename='uploads/' + campaign.image) }}" class="w-100" alt="{{ campaign.title }}" style="max-height: 400px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/800x400?text=Campaign+Image'">
                 
@@ -25,34 +26,87 @@
                         <span class="text-muted small border-start ps-2">
                             <i class="fas fa-user me-1"></i> <strong>{{ campaign.creator_name }}</strong>
                         </span>
-                        <span class="text-muted small border-start ps-2">
-                            <i class="fas fa-clock me-1"></i> Berakhir: {{ campaign.deadline }}
-                        </span>
                     </div>
 
                     <h1 class="fw-bold mb-2" style="font-family: 'Outfit', sans-serif;">{{ campaign.title }}</h1>
                     <p class="lead text-muted mb-4">{{ campaign.tagline }}</p>
                     
-                    <hr class="opacity-10 my-4">
+                    <!-- NAVIGATION TABS -->
+                    <ul class="nav nav-tabs nav-fill mb-4" id="campaignTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active fw-bold" id="story-tab" data-bs-toggle="tab" data-bs-target="#story" type="button">📖 Cerita & Rencana</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold" id="updates-tab" data-bs-toggle="tab" data-bs-target="#updates" type="button">📢 Kabar Terbaru ({{ campaign.updates|length }})</button>
+                        </li>
+                    </ul>
 
-                    <!-- Cerita -->
-                    <h5 class="fw-bold mb-3"><i class="fas fa-book-open me-2 text-primary"></i> Cerita Penggalangan Dana</h5>
-                    <div class="text-muted mb-5" style="line-height: 1.8; white-space: pre-line;">
-                        {{ campaign.desc }}
-                    </div>
+                    <div class="tab-content" id="campaignTabContent">
+                        <!-- TAB 1: CERITA -->
+                        <div class="tab-pane fade show active" id="story">
+                            <h5 class="fw-bold mb-3">Cerita Penggalangan Dana</h5>
+                            <div class="text-muted mb-5" style="line-height: 1.8; white-space: pre-line;">
+                                {{ campaign.desc }}
+                            </div>
 
-                    <!-- Rencana Penggunaan Dana -->
-                    <div class="bg-light p-4 rounded-4 border mb-4">
-                        <h5 class="fw-bold mb-3 text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i> Transparansi Penggunaan Dana</h5>
-                        <p class="mb-0 text-muted" style="white-space: pre-line;">{{ campaign.usage_plan }}</p>
-                    </div>
+                            <div class="bg-light p-4 rounded-4 border mb-4">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i> Transparansi Penggunaan Dana</h5>
+                                <p class="mb-0 text-muted" style="white-space: pre-line;">{{ campaign.usage_plan }}</p>
+                            </div>
+                            
+                            <div class="alert alert-info border-0 d-flex align-items-center rounded-3">
+                                <i class="fas fa-info-circle me-3 fa-lg"></i>
+                                <div>
+                                    <span class="fw-bold d-block">Verifikasi Kreator</span>
+                                    <small>Profil sosial media: <a href="{{ campaign.social_link }}" target="_blank" class="fw-bold text-decoration-none">Kunjungi Tautan <i class="fas fa-external-link-alt ms-1"></i></a></small>
+                                </div>
+                            </div>
+                        </div>
 
-                    <!-- Link Sosmed -->
-                    <div class="alert alert-info border-0 d-flex align-items-center rounded-3" role="alert">
-                        <i class="fas fa-info-circle me-3 fa-lg"></i>
-                        <div>
-                            <span class="fw-bold d-block">Verifikasi Kreator</span>
-                            <small>Cek profil asli kreator di sini: <a href="{{ campaign.social_link }}" target="_blank" class="fw-bold text-decoration-none">Kunjungi Tautan <i class="fas fa-external-link-alt ms-1"></i></a></small>
+                        <!-- TAB 2: KABAR TERBARU (UPDATES) -->
+                        <div class="tab-pane fade" id="updates">
+                            
+                            <!-- FORM POST UPDATE (Hanya untuk Kreator Pemilik) -->
+                            <!-- LOGIC FIX: Hanya muncul jika wallet di session == wallet creator campaign -->
+                            {% if session.get('wallet') == campaign.creator %}
+                                <div class="card bg-light border-0 mb-4 p-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-edit"></i> Tulis Kabar Terbaru (Wajib Setelah Penarikan)</h6>
+                                    <form action="{{ url_for('post_update', id=campaign.id) }}" method="POST" enctype="multipart/form-data">
+                                        <input type="text" class="form-control mb-2 rounded-3" name="update_title" placeholder="Judul Update (Contoh: Penyerahan Bantuan Tahap 1)" required>
+                                        <textarea class="form-control mb-2 rounded-3" name="update_content" placeholder="Ceritakan progres penyaluran dana..." rows="3" required></textarea>
+                                        <div class="input-group mb-2">
+                                            <input type="file" class="form-control" name="update_image">
+                                            <button class="btn btn-primary" type="submit">Posting Kabar</button>
+                                        </div>
+                                        <small class="text-muted">*Lampirkan foto bukti kwitansi/kegiatan.</small>
+                                    </form>
+                                </div>
+                            {% endif %}
+
+                            <!-- LIST UPDATE (Bisa Dilihat Semua Orang) -->
+                            {% if campaign.updates %}
+                                <div class="timeline-updates">
+                                    {% for update in campaign.updates %}
+                                        <div class="card mb-3 border shadow-sm">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h5 class="fw-bold mb-0">{{ update['title'] }}</h5>
+                                                    <small class="text-muted">{{ update['created_at'] }}</small>
+                                                </div>
+                                                <p class="text-muted">{{ update['content'] }}</p>
+                                                {% if update['image'] %}
+                                                    <img src="{{ url_for('static', filename='uploads/' + update['image']) }}" class="img-fluid rounded mt-2" style="max-height: 300px;">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fas fa-newspaper fa-3x mb-3 opacity-25"></i>
+                                    <p>Belum ada kabar terbaru dari kreator.</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -60,7 +114,7 @@
             </div>
         </div>
 
-        <!-- KOLOM KANAN: PANEL DONASI (Sama seperti sebelumnya) -->
+        <!-- KOLOM KANAN: PANEL DONASI & WITHDRAW -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-lg rounded-4 sticky-top" style="top: 100px;">
                 <div class="card-body p-4">
@@ -75,32 +129,89 @@
                         <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: {{ campaign.percent }}%"></div>
                     </div>
 
-                    <!-- Bagian Form Donasi (Sama) -->
+                    <!-- PANEL KHUSUS KREATOR (WITHDRAW) -->
+                    <!-- LOGIC FIX: Hanya muncul jika wallet di session == wallet creator campaign -->
+                    {% if session.get('wallet') == campaign.creator %}
+                        <div class="alert alert-warning border-0 rounded-3 mb-4">
+                            <h6 class="fw-bold mb-2"><i class="fas fa-user-cog"></i> Panel Kreator</h6>
+                            {% if campaign.fundsWithdrawn %}
+                                <div class="badge bg-success mb-2">Dana Sudah Ditarik</div>
+                                <p class="small mb-0">Harap rutin memposting bukti penyaluran di tab "Kabar Terbaru".</p>
+                            {% else %}
+                                <p class="small mb-3">Anda dapat menarik dana kapan saja (Flexible Funding).</p>
+                                {% if campaign.collected > 0 %}
+                                    <a href="{{ url_for('withdraw_funds', id=campaign.id) }}" class="btn btn-dark w-100 rounded-pill" onclick="return confirm('Apakah Anda yakin ingin menarik semua dana ke wallet Anda? Pastikan segera membuat laporan pertanggungjawaban.')">
+                                        <i class="fas fa-money-bill-wave me-2"></i> Tarik Dana (Withdraw)
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-secondary w-100 rounded-pill" disabled>Belum Ada Dana</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <hr class="my-4 opacity-10">
+
+                    <!-- Form Donasi -->
                     {% if campaign.status_code == 1 %}
+                        
+                        <!-- JIKA SUDAH LOGIN -->
                         {% if session.get('user_id') %}
-                            <form action="{{ url_for('donate', id=campaign.id) }}" method="POST">
-                                <label class="form-label fw-bold mb-2">Nominal Donasi</label>
-                                <div class="input-group mb-3">
-                                    <input type="number" step="0.01" min="0.01" class="form-control form-control-lg bg-light border-0" name="amount" placeholder="0.1" required>
-                                    <span class="input-group-text bg-light border-0 fw-bold">ETH</span>
-                                </div>
-                                <div class="d-grid">
-                                    {% if session.get('role') == 'donatur' %}
+                            
+                            <!-- JIKA DONATUR: Muncul Form -->
+                            {% if session.get('role') == 'donatur' %}
+                                <form action="{{ url_for('donate', id=campaign.id) }}" method="POST">
+                                    <label class="form-label fw-bold mb-2">Nominal Donasi</label>
+                                    <div class="input-group mb-3">
+                                        <input type="number" step="0.01" min="0.01" class="form-control form-control-lg bg-light border-0" name="amount" placeholder="0.1" required>
+                                        <span class="input-group-text bg-light border-0 fw-bold">ETH</span>
+                                    </div>
+                                    <div class="d-grid">
                                         <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm py-3 transition-all hover:scale-105">
                                             <i class="fas fa-heart me-2"></i> Kirim Donasi
                                         </button>
-                                    {% else %}
-                                        <button type="button" class="btn btn-secondary btn-lg rounded-pill" disabled>Login sebagai Donatur</button>
-                                    {% endif %}
+                                    </div>
+                                </form>
+                            
+                            <!-- JIKA KREATOR/ADMIN: Tombol Info (Tidak bisa donasi) -->
+                            {% else %}
+                                <div class="alert alert-info text-center border-0 rounded-3">
+                                    <i class="fas fa-info-circle mb-2"></i><br>
+                                    Anda login sebagai <strong>{{ session.get('role')|capitalize }}</strong>.<br>
+                                    Silakan login sebagai Donatur untuk berdonasi.
                                 </div>
-                            </form>
+                            {% endif %}
+
+                        <!-- JIKA BELUM LOGIN (GUEST) -->
                         {% else %}
                             <div class="text-center py-3">
                                 <h6 class="fw-bold">Ingin berdonasi?</h6>
+                                <p class="small text-muted mb-3">Masuk untuk mulai berdonasi.</p>
                                 <a href="{{ url_for('login') }}" class="btn btn-primary w-100 rounded-pill mb-2">Masuk Akun</a>
                                 <a href="{{ url_for('register') }}" class="btn btn-outline-primary w-100 rounded-pill">Daftar Baru</a>
                             </div>
                         {% endif %}
+
+                        <!-- SHARE BUTTONS (Untuk Semua Orang) -->
+                        <div class="mt-4 pt-4 border-top text-center">
+                            <h6 class="fw-bold small text-uppercase text-muted mb-3">Bantu Bagikan</h6>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" onclick="shareTo('whatsapp')" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center transition-all hover:scale-110" style="width: 40px; height: 40px;">
+                                    <i class="fab fa-whatsapp fa-lg"></i>
+                                </a>
+                                <a href="https://www.instagram.com/" target="_blank" class="btn btn-danger btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center transition-all hover:scale-110" style="width: 40px; height: 40px; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); border: none;">
+                                    <i class="fab fa-instagram fa-lg"></i>
+                                </a>
+                                <a href="#" onclick="shareTo('facebook')" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center transition-all hover:scale-110" style="width: 40px; height: 40px;">
+                                    <i class="fab fa-facebook-f fa-lg"></i>
+                                </a>
+                                <button onclick="copyLink()" class="btn btn-light btn-sm rounded-circle p-2 border d-flex align-items-center justify-content-center transition-all hover:scale-110" style="width: 40px; height: 40px;" title="Salin Link">
+                                    <i class="fas fa-link fa-lg text-muted"></i>
+                                </button>
+                            </div>
+                            <div id="copy-alert" class="alert alert-success py-1 px-2 mt-2 small rounded-pill d-none">Link berhasil disalin!</div>
+                        </div>
+
                     {% else %}
                         <div class="alert alert-warning text-center"><i class="fas fa-exclamation-circle"></i> Kampanye tidak aktif.</div>
                     {% endif %}
@@ -109,4 +220,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    function shareTo(platform) {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent("Bantu kampanye ini di DonasiKuy: {{ campaign.title }}");
+        let shareUrl = '';
+        if (platform === 'whatsapp') shareUrl = `https://wa.me/?text=${title}%0A${url}`;
+        else if (platform === 'facebook') shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        if (shareUrl) window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            const alertBox = document.getElementById('copy-alert');
+            alertBox.classList.remove('d-none');
+            setTimeout(() => { alertBox.classList.add('d-none'); }, 2000);
+        });
+    }
+</script>
 {% endblock %}
