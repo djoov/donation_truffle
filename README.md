@@ -1,221 +1,146 @@
-# 🚀 Decentralized Donation Platform
+# 🪙 DonasiKuy - Decentralized Crowdfunding Platform
 
-**Blockchain + Flask + SQLite + Smart Contract Ethereum**
+### Final Project: Teknologi Blockchain & Distributed Ledger — Semester 5 - Teknik Informatika
 
----
-
-## 📌 Deskripsi Proyek
-
-Decentralized Donation Platform adalah aplikasi donasi berbasis blockchain yang transparan dan aman. Dana donasi dikirim langsung ke kreator kampanye tanpa perantara, dan prosesnya tercatat permanen di blockchain melalui smart contract Ethereum.
-
-Aplikasi ini terdiri dari:
-
-* Backend: Flask + Web3.py
-* On-Chain: Smart Contract Solidity
-* Off-Chain: SQLite
-* Blockchain Network: Ganache
-* Deployment: Truffle Framework
+Platform donasi transparan berbasis Ethereum Blockchain dengan arsitektur Hybrid (Flask + Web3).
 
 ---
 
-## 📂 Struktur Folder Proyek
+## 👥 Tim Pengembang
 
-```
-donation_truffle/
-│
-├── backend_python/
-│   ├── app.py
-│   ├── contract_data.py
-│   ├── db.py
-│   ├── database.db
-│   ├── templates/
-│   └── static/
-│
-├── contracts/
-│   └── DonationPlatform.sol
-│
-├── migrations/
-│   └── 2_deploy_contracts.js
-│
-├── build/
-│   └── contracts/
-│       └── DonationPlatform.json
-│
-├── truffle-config.js
-└── README.md
-```
+| Peran              | Nama                         | Fokus Tugas                                     |
+| ------------------ | ---------------------------- | ----------------------------------------------- |
+| Analis & Pemodel   | Masdani Ilman Putra Karmawan | Use Case, Flow Sistem, Requirement Analysis     |
+| Arsitek & Engineer | Nur Akhmad Van Jouvi         | Smart Contract, Flask Backend, Ganache Setup    |
+| QA & Security      | Fathur Rahman                | Security Testing, Postman API Test, Bug Hunting |
 
 ---
 
-## 🔧 Teknologi Utama
+## 🛠️ Teknologi yang Digunakan (Tech Stack)
 
-### On-Chain
-
-* Solidity
-* Truffle
-* Ganache
-
-### Backend
-
-* Flask
-* Python 3.10+
-* Web3.py
-* SQLite
-
-### Frontend
-
-* Flask + Jinja2
-* Bootstrap 5
+* **Blockchain**: Ethereum (Simulasi Lokal via Ganache)
+* **Smart Contract**: Solidity (.sol), Truffle Framework
+* **Backend**: Python Flask
+* **Frontend**: HTML5, CSS3 (Bootstrap 5), Jinja2 Template
+* **Database**: SQLite (untuk data user & detail kampanye off-chain)
+* **Library**: Web3.py (Jembatan Python ke Blockchain)
 
 ---
 
-## 🧠 Fitur Utama
+## 🚀 Cara Menjalankan Project (Langkah demi Langkah)
 
-### Donatur
+### 1. Persiapan Awal (Prerequisites)
 
-* Melihat daftar kampanye
-* Melihat detail kampanye
-* Donasi ETH ke kampanye
+Pastikan sudah terinstall:
 
-### Kreator
+* Node.js (untuk Truffle)
+* Python 3.x (untuk Backend)
+* Ganache GUI
 
-* Membuat kampanye baru
-* Menarik dana setelah deadline
+### 2. Setup Blockchain (Ganache)
 
-### Admin
+1. Buka Ganache
+2. Klik **New Workspace**
+3. Beri nama workspace (misal: DonasiKuy_Dev)
+4. Pastikan Port Number = **7545**
+5. Klik **Save Workspace**
 
-* Approve kampanye
-* Reject kampanye
-* Disable kampanye
+> Catatan: Biarkan Ganache tetap menyala selama menjalankan aplikasi.
 
-### Smart Contract
+### 3. Setup Smart Contract
 
-* createCampaign
-* approveCampaign
-* rejectCampaign
-* disableCampaign
-* donateToCampaign
-* withdrawFunds
-* getCampaign
-* getCampaignCount
-
-### SQLite
-
-* User management
-* Role (admin/creator/user)
-* Wallet mapping
-
----
-
-## ⚙️ Cara Install dan Menjalankan
-
-### 1. Clone Repo
+Buka terminal di folder utama project (`donation_truffle`):
 
 ```
-git clone https://github.com/djoov/donation_truffle.git
-cd donation_truffle
-```
-
-### 2. Setup Python
-
-```
-conda create -n donation-backend python=3.10
-conda activate donation-backend
-pip install flask web3 python-dotenv
-```
-
-### 3. Setup Database
-
-```
-python -c "from db import init_db; init_db()"
-```
-
-### 4. Jalankan Ganache
-
-RPC: [http://127.0.0.1:7545](http://127.0.0.1:7545)
-
-### 5. Deploy Smart Contract
-
-```
-truffle compile
+npm install -g truffle
 truffle migrate --reset
 ```
 
-### 6. Update contract_data.py
+> Jika sukses, muncul alamat kontrak (contoh: 0x123...). Biarkan terminal tetap terbuka.
 
-Isi:
+### 4. Setup Backend (Python)
 
-* ABI
-* Contract Address
-
-### 7. Jalankan Flask
+Masuk folder backend:
 
 ```
 cd backend_python
+python -m venv venv
+```
+
+Aktifkan virtual environment:
+
+```
+Windows: venv\Scripts\activate
+Mac/Linux: source venv/bin/activate
+```
+
+Install library:
+
+```
+pip install -r requirements.txt
+```
+
+Isi file requirements.txt jika belum ada:
+
+```
+Flask
+web3
+```
+
+### 5. Menjalankan Aplikasi Web
+
+```
 python app.py
 ```
 
-Akses di browser: [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
+Akses di browser: **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ---
 
-## 🧪 Contoh API (Postman)
+## 🔑 Panduan Akun (PENTING UNTUK DEMO)
 
-**GET campaigns:**
+Menggunakan akun Ganache sebagai dompet.
 
-```
-GET http://127.0.0.1:5000/campaigns
-```
+Cara mendapatkan akun:
 
-**POST donasi:**
+* Buka Ganache → lihat Address → klik **Show Key** untuk Private Key
 
-```
-POST /donate
-{
-  "campaign_id": 0,
-  "amount": 0.01,
-  "from": "0x123...",
-  "private_key": "YOUR_KEY"
-}
-```
+### 👮‍♂️ A. Login Admin
 
----
+* Email: **[admin@donasi.com](mailto:admin@donasi.com)**
+* Password: **admin123**
+  Tugas: approve kampanye baru.
 
-## 📄 UML (Use Case)
+### 📢 B. Daftar Kreator
 
-Kode lengkap PlantUML tersedia di dokumentasi utama.
+* Pilih Role: Kreator
+* Copy Address & Private Key dari Ganache (akun ke-2)
+  Tugas: buat kampanye & withdraw dana.
 
----
+### 💙 C. Daftar Donatur
 
-## 🤝 Kontribusi
-
-1. Fork repository
-2. Buat branch baru:
-
-```
-git checkout -b fitur-baru
-```
-
-3. Commit:
-
-```
-git commit -m "fitur baru"
-```
-
-4. Pull request
+* Pilih Role: Donatur
+* Copy Address & Private Key dari Ganache (akun ke-3)
+  Tugas: donasi ke kampanye aktif.
 
 ---
 
-## 📄 License
+## ⚠️ Troubleshooting (Solusi Masalah Umum)
 
-MIT License
+| Masalah                       | Penyebab                                   | Solusi                                                                   |
+| ----------------------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
+| Connection Refused            | Ganache mati / port beda                   | Pastikan Ganache menyala & port = 7545 (atau ubah di `contract_data.py`) |
+| Campaign has ended            | Durasi kampanye habis                      | Buat kampanye baru (misal 30 hari)                                       |
+| Signature Verification Failed | Database tidak sinkron dengan Ganache baru | Hapus `backend_python/instance/users.db`, jalankan ulang Flask           |
 
 ---
 
-## 🙋 Tim Pengembang
+## 📜 Referensi Akademik
 
-* Nur Akhmad Van Jouvi
-* Masdani Ilman
-* Fathur Rahman
+* Khokale et al. (2025) — Transparansi Blockchain
+* Kartiko et al. (2023) — Efisiensi Gas Fee (Hybrid Architecture)
+* Indra S B et al. (2024) — Verifikasi Identitas Kreator
 
+---
 
+© 2025 Kelompok Blockchain DonasiKuy Informatika
