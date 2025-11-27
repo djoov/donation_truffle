@@ -22,7 +22,7 @@
                                 <i class="fas fa-wallet fa-lg"></i>
                             </div>
                             <div>
-                                <small class="d-block text-uppercase fw-bold text-primary" style="font-size: 0.7rem;">Creator Wallet</small>
+                                <small class="d-block text-uppercase fw-bold text-primary" style="font-size: 0.7rem;">Creator Wallet (Auto-Signer)</small>
                                 <span class="font-monospace text-dark fw-bold">{{ session.get('wallet') }}</span>
                             </div>
                         </div>
@@ -31,7 +31,8 @@
                         <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">1. Informasi Utama</h6>
                         
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control bg-light border-0 rounded-3" id="title" name="title" placeholder="Judul" required>
+                            <!-- Value prefill_title diambil dari URL parameter jika ada -->
+                            <input type="text" class="form-control bg-light border-0 rounded-3" id="title" name="title" placeholder="Judul" value="{{ prefill_title if prefill_title else '' }}" required>
                             <label for="title">Judul Kampanye (Max 50 Karakter)</label>
                         </div>
 
@@ -98,13 +99,23 @@
                         <!-- SUBMIT -->
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm py-3 transition-all hover:scale-105">
-                                <i class="fas fa-rocket me-2"></i> Publikasikan Sekarang
+                                <i class="fas fa-rocket me-2"></i> Publikasikan ke Blockchain
                             </button>
                         </div>
+                        
+                        <p class="text-center text-muted small mt-3 mb-0">
+                            <i class="fas fa-lock me-1"></i> Data kampanye akan dicatat di Blockchain Ethereum (Ganache).
+                        </p>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+</style>
 {% endblock %}

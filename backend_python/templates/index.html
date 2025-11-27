@@ -103,7 +103,71 @@
     </div>
 </section>
 
-<!-- STYLE CSS KHUSUS TYPING -->
+<!-- SECTION: BERITA KEMANUSIAAN TERKINI (NEW) -->
+<section class="py-5 bg-light position-relative" style="background-color: #f8fafc;">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-1 rounded-pill fw-bold mb-2">
+                    <i class="fas fa-broadcast-tower me-1"></i> Live Update
+                </span>
+                <h3 class="fw-bold mb-0">Insight Kemanusiaan Hari Ini</h3>
+                <p class="text-muted small">Berita terkini untuk inspirasi aksi kebaikan Anda.</p>
+            </div>
+            <a href="https://www.antaranews.com/humaniora" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-4">Lihat Semua</a>
+        </div>
+
+        <div class="row g-4">
+            {% for n in news %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition-all bg-white rounded-4 overflow-hidden">
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <small class="text-uppercase text-primary fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">
+                                <i class="far fa-newspaper me-1"></i> {{ n.source }}
+                            </small>
+                            <small class="text-muted" style="font-size: 0.65rem;">{{ n.published[:16] }}</small>
+                        </div>
+                        
+                        <h6 class="fw-bold mb-3 line-clamp-3" style="line-height: 1.4;">
+                            <a href="{{ n.link }}" target="_blank" class="text-decoration-none text-dark stretched-link">
+                                {{ n.title }}
+                            </a>
+                        </h6>
+                        
+                        <p class="text-muted small mb-4 line-clamp-3 flex-grow-1" style="font-size: 0.85rem;">
+                            {{ n.summary }}
+                        </p>
+
+                        <!-- Action Button (Hanya jika Kreator Login) -->
+                        <div class="mt-auto position-relative" style="z-index: 2;">
+                            {% if session.get('role') == 'kreator' %}
+                                <a href="{{ url_for('create_campaign', title='Bantuan untuk: ' + n.title) }}" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold py-2 shadow-sm">
+                                    <i class="fas fa-plus-circle me-1"></i> Galang Dana Ini
+                                </a>
+                            {% else %}
+                                <a href="{{ n.link }}" target="_blank" class="btn btn-light btn-sm w-100 rounded-pill text-muted py-2">
+                                    Baca Selengkapnya <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Fallback jika gagal fetch -->
+            <div class="col-12 text-center py-5">
+                <div class="py-4 rounded-4 border bg-white mx-auto" style="max-width: 400px;">
+                    <i class="fas fa-wifi fa-2x text-muted mb-3 opacity-50"></i>
+                    <p class="text-muted small mb-0">Gagal memuat berita terkini.<br>Pastikan koneksi internet Anda aktif.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- STYLES -->
 <style>
     .cursor-blink {
         animation: blink-cursor 0.75s step-end infinite;
@@ -112,9 +176,20 @@
         from, to { opacity: 1; }
         50% { opacity: 0; }
     }
+    /* Style untuk Berita */
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1)!important;
+    }
 </style>
 
-<!-- SCRIPT TYPING EFFECT & 3D MASCOT -->
+<!-- SCRIPTS -->
 <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } } </script>
 
@@ -124,8 +199,9 @@
         const textElement = document.getElementById('typing-text');
         const words = [
             "Selamat Datang Temanku...", "Welcome My Friends...", 
-            "أهلا و سهلا", "こんにちわ、 民あーさん", 
-            "안녕하세요, 여러분", "¡Hola, amigos!", "Bonjour Mon Ami..."
+            "مرحبًا بكم، أصدقائي", "ようこそ、友よ", 
+            "친구들, 환영합니다", "¡Hola, amigos!", "Bonjour Mon Ami...", 
+            "Willkommen, meine Freunde", "Mi casa es su casa", "Hoş Geldiniz", "Добро пожаловать, мои друзья!"
         ];
         let wordIndex = 0, charIndex = 0, isDeleting = false, typeSpeed = 100;
 
@@ -150,7 +226,7 @@
 </script>
 
 <script type="module">
-    // --- SCRIPT 2: 3D MASCOT (RESTORED ORIGINAL SHAPE) ---
+    // --- SCRIPT 2: 3D MASCOT (ZOOMED/BIGGER VERSION) ---
     import * as THREE from 'three';
 
     function initHeroMascot() {
@@ -161,7 +237,7 @@
         const scene = new THREE.Scene();
         scene.background = null;
 
-        // KAMERA: Dikembalikan ke Z=6.0 agar ukuran pas (tidak terlalu jauh)
+        // KAMERA: Z=4.8 agar terlihat besar/dekat
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
         camera.position.z = 4.5; 
         camera.position.y = 0; 
@@ -179,7 +255,6 @@
         const mascotGroup = new THREE.Group();
         scene.add(mascotGroup);
 
-        // MATERIAL WARNA (ORIGINAL)
         const furColor = new THREE.Color(0xFF8800);
         const creamColor = new THREE.Color(0xFFFDD0);
         const noseColor = new THREE.Color(0x222222);
@@ -188,7 +263,7 @@
         const creamFurMat = new THREE.MeshStandardMaterial({ color: creamColor, roughness: 0.6 });
         const noseMat = new THREE.MeshStandardMaterial({ color: noseColor, roughness: 0.3 });
 
-        // GEOMETRI RUBAH (ORIGINAL SHAPE)
+        // GEOMETRI (RUBAH)
         const head = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), mainFurMat);
         head.scale.set(1.1, 0.95, 1.0); mascotGroup.add(head);
 
@@ -237,7 +312,6 @@
         const browR = new THREE.Mesh(browGeo, browMat);
         browR.rotation.z = Math.PI / 2 - 0.2; browR.position.set(0.35, 0.4, 0.85); head.add(browR);
 
-        // LIGHTING (Dikembalikan agar cerah dan jelas)
         const ambientLight = new THREE.HemisphereLight(0xffffff, 0xffeedd, 0.6); scene.add(ambientLight);
         const mainLight = new THREE.DirectionalLight(0xffffff, 1.5); mainLight.position.set(5, 10, 7); scene.add(mainLight);
         const rimLight = new THREE.DirectionalLight(0x4f46e5, 1.0); rimLight.position.set(-5, 5, -5); scene.add(rimLight);
@@ -263,7 +337,6 @@
             const time = Date.now() * 0.001;
             const pupilLimit = 0.15;
             
-            // INTERAKSI MATA & KEPALA
             const targetPupilX = Math.max(-pupilLimit, Math.min(pupilLimit, mouseX * 0.3));
             const targetPupilY = Math.max(-pupilLimit, Math.min(pupilLimit, -mouseY * 0.3));
             pupilL.position.x = THREE.MathUtils.lerp(pupilL.position.x, targetPupilX, 0.15);
@@ -276,7 +349,6 @@
             mascotGroup.rotation.x = THREE.MathUtils.lerp(mascotGroup.rotation.x, targetHeadRotX, 0.08);
             mascotGroup.rotation.y = THREE.MathUtils.lerp(mascotGroup.rotation.y, targetHeadRotY, 0.08);
 
-            // GERAKAN DEFAULT (IDLE)
             mascotGroup.position.y = Math.sin(time * 1.5) * 0.1;
             earL.rotation.z = 0.3 + Math.sin(time * 3) * 0.05;
             earR.rotation.z = -0.3 - Math.cos(time * 2.5) * 0.05;

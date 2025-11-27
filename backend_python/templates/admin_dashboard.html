@@ -7,36 +7,113 @@
         <div class="position-relative z-10">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="fw-bold mb-1">Admin Control Center</h2>
-                    <p class="text-white-50 mb-0">Kelola ekosistem donasi, verifikasi kampanye, dan audit transaksi.</p>
+                    <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Admin Control Center</h2>
+                    <p class="text-white-50 mb-0">Pantau ekosistem donasi secara real-time.</p>
                 </div>
                 <div class="text-end">
-                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-center">
-                        <small class="d-block text-white-50">Current Network</small>
-                        <span class="fw-bold">Ganache Local</span>
+                    <div class="bg-white bg-opacity-10 p-2 rounded-3 text-center border border-white border-opacity-25 backdrop-blur">
+                        <small class="d-block text-white-50" style="font-size: 0.7rem;">BLOCKCHAIN MODE</small>
+                        <span class="fw-bold text-success"><i class="fas fa-circle fa-xs me-1"></i> LIVE</span>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Decoration Circle -->
-        <div class="position-absolute top-0 end-0 bg-primary rounded-circle opacity-50" style="width: 200px; height: 200px; transform: translate(50%, -50%); filter: blur(40px);"></div>
+        <!-- Dekorasi Background -->
+        <div class="position-absolute top-0 end-0 bg-primary rounded-circle opacity-25" style="width: 300px; height: 300px; transform: translate(30%, -30%); filter: blur(60px);"></div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-pill shadow-sm" id="adminTabs" role="tablist">
+    <!-- STATS & CHARTS ROW -->
+    <div class="row g-4 mb-5">
+        <!-- KIRI: SUMMARY CARDS -->
+        <div class="col-lg-8">
+            <div class="row g-3">
+                <!-- Total Campaigns -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3 h-100 rounded-4 transition-all hover-shadow">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                                <i class="fas fa-bullhorn fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ stats.total_campaigns }}</h3>
+                                <small class="text-muted">Total Kampanye</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Users -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3 h-100 rounded-4 transition-all hover-shadow">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-circle text-info">
+                                <i class="fas fa-users fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ total_users }}</h3>
+                                <small class="text-muted">Total Pengguna</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Transactions -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3 h-100 rounded-4 transition-all hover-shadow">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+                                <i class="fas fa-exchange-alt fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ transactions|length }}</h3>
+                                <small class="text-muted">Total Transaksi</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PENDING ACTION ALERT -->
+                {% if stats.pending > 0 %}
+                <div class="col-12">
+                    <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center shadow-sm mt-3" role="alert">
+                        <div class="bg-warning text-dark p-2 rounded-circle me-3">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <strong>Perhatian Admin!</strong>
+                            <div class="small">Ada <span class="fw-bold">{{ stats.pending }} kampanye baru</span> menunggu persetujuan Anda.</div>
+                        </div>
+                        <a href="#campaigns" class="btn btn-warning btn-sm rounded-pill ms-auto fw-bold shadow-sm">Cek Sekarang</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- KANAN: CHART -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
+                <h6 class="fw-bold text-muted mb-4 text-uppercase small ls-1">Distribusi Status</h6>
+                <div class="position-relative d-flex justify-content-center" style="height: 200px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION TABS (TABEL) -->
+    <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-pill shadow-sm border" id="adminTabs" role="tablist">
         <li class="nav-item">
-            <button class="nav-link active rounded-pill" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns" type="button">
-                <i class="fas fa-bullhorn me-2"></i> Kelola Kampanye
+            <button class="nav-link active rounded-pill fw-bold transition-all" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns" type="button">
+                <i class="fas fa-list me-2"></i> Manajemen Kampanye
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link rounded-pill" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">
-                <i class="fas fa-users me-2"></i> Kelola Anggota
+            <button class="nav-link rounded-pill fw-bold transition-all" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">
+                <i class="fas fa-user-friends me-2"></i> Data Pengguna
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link rounded-pill" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
-                <i class="fas fa-receipt me-2"></i> Audit Transaksi
+            <button class="nav-link rounded-pill fw-bold transition-all" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
+                <i class="fas fa-history me-2"></i> Audit Log (Blockchain)
             </button>
         </li>
     </ul>
@@ -45,88 +122,95 @@
         
         <!-- TAB 1: KELOLA KAMPANYE -->
         <div class="tab-pane fade show active" id="campaigns">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light text-muted small text-uppercase">
-                                <tr>
-                                    <th class="ps-4">Campaign</th>
-                                    <th>Kreator</th>
-                                    <th>Target</th>
-                                    <th>Status</th>
-                                    <th class="text-end pe-4">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for c in campaigns %}
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-bold text-dark">#{{ c.id }} {{ c.title }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-light rounded-circle text-center me-2" style="width:30px; height:30px; line-height:30px;">
-                                                <small>{{ c.creator_name[0] }}</small>
-                                            </div>
-                                            <div class="lh-1">
-                                                <div class="fw-bold small">{{ c.creator_name }}</div>
-                                                <small class="text-muted" style="font-size: 10px">{{ c.creator_addr[:10] }}...</small>
-                                            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="ps-4 py-3">Campaign Info</th>
+                                <th>Kreator</th>
+                                <th>Target</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in campaigns %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark text-truncate" style="max-width: 200px;">{{ c.title }}</div>
+                                    <small class="text-muted badge bg-light text-dark border">ID #{{ c.id }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle text-center me-2 fw-bold" style="width:35px; height:35px; line-height:35px;">
+                                            {{ c.creator_name[0] | upper }}
                                         </div>
-                                    </td>
-                                    <td class="fw-bold text-primary">{{ c.target }} ETH</td>
-                                    <td>
-                                        {% if c.status_code == 0 %} <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
-                                        {% elif c.status_code == 1 %} <span class="badge bg-success rounded-pill px-3">Active</span>
-                                        {% elif c.status_code == 3 %} <span class="badge bg-secondary rounded-pill px-3">Deleted</span>
-                                        {% else %} <span class="badge bg-danger rounded-pill px-3">{{ c.status }}</span> {% endif %}
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        {% if c.status_code == 0 %}
-                                            <a href="/admin/approve/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
-                                                <i class="fas fa-check me-1"></i> Approve
-                                            </a>
-                                        {% endif %}
-                                        
-                                        {% if c.status_code != 3 %}
-                                            <a href="/admin/delete_campaign/{{ c.id }}" class="btn btn-sm btn-outline-danger rounded-pill ms-1" onclick="return confirm('Hapus kampanye ini?')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                        <div class="lh-1">
+                                            <div class="fw-bold small">{{ c.creator_name }}</div>
+                                            <small class="text-muted font-monospace" style="font-size: 10px">{{ c.creator_addr[:8] }}...</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="fw-bold text-primary">{{ c.target }} ETH</td>
+                                <td>
+                                    {% if c.status_code == 0 %} <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                                    {% elif c.status_code == 1 %} <span class="badge bg-success rounded-pill px-3">Active</span>
+                                    {% elif c.status_code == 3 %} <span class="badge bg-secondary rounded-pill px-3">Deleted</span>
+                                    {% else %} <span class="badge bg-danger rounded-pill px-3">{{ c.status }}</span> {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    {% if c.status_code == 0 %}
+                                        <a href="/admin/approve/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm me-1 fw-bold">
+                                            <i class="fas fa-check"></i> Approve
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if c.status_code != 3 %}
+                                        <a href="/admin/delete_campaign/{{ c.id }}" class="btn btn-sm btn-light text-danger rounded-circle hover-shadow" onclick="return confirm('Hapus kampanye ini?')" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fas fa-folder-open fa-2x mb-2"></i><br>Tidak ada data kampanye.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
         <!-- TAB 2: KELOLA USER -->
         <div class="tab-pane fade" id="users">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <table class="table align-middle">
-                        <thead>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-0">
+                    <table class="table align-middle mb-0 table-hover">
+                        <thead class="bg-light text-muted small text-uppercase">
                             <tr>
-                                <th>User</th>
+                                <th class="ps-4 py-3">User</th>
                                 <th>Email</th>
+                                <th>Role</th>
                                 <th>Wallet</th>
-                                <th>Aksi</th>
+                                <th class="text-end pe-4">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for u in users %}
                             <tr>
-                                <td class="fw-bold">{{ u['username'] }}</td>
+                                <td class="ps-4 fw-bold">{{ u['username'] }}</td>
                                 <td class="text-muted">{{ u['email'] }}</td>
-                                <td><code class="bg-light px-2 py-1 rounded text-primary">{{ u['wallet_address'] }}</code></td>
-                                <td>
-                                    <a href="/admin/delete_user/{{ u['id'] }}" class="btn btn-sm btn-light text-danger" onclick="return confirm('Hapus user?')">Hapus</a>
+                                <td><span class="badge bg-light text-dark border text-uppercase">{{ u['role'] }}</span></td>
+                                <td><code class="bg-light px-2 py-1 rounded text-primary small font-monospace">{{ u['wallet_address'][:15] }}...</code></td>
+                                <td class="text-end pe-4">
+                                    <a href="/admin/delete_user/{{ u['id'] }}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Hapus user ini permanen?')">
+                                        <i class="fas fa-user-times"></i> Hapus
+                                    </a>
                                 </td>
                             </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center py-5 text-muted">Tidak ada user lain.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -136,19 +220,15 @@
 
         <!-- TAB 3: LOG TRANSAKSI -->
         <div class="tab-pane fade" id="history">
-            <div class="list-group list-group-flush rounded-3 shadow-sm">
+            <div class="list-group list-group-flush rounded-4 shadow-sm bg-white overflow-hidden">
                 {% for log in transactions %}
-                <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                <div class="list-group-item p-3 d-flex justify-content-between align-items-center hover-bg-light">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="bg-light p-2 rounded-circle">
-                            {% if log.type == 'Donasi Masuk' %}
-                                <i class="fas fa-donate text-success fa-lg"></i>
-                            {% else %}
-                                <i class="fas fa-plus-circle text-primary fa-lg"></i>
-                            {% endif %}
+                        <div class="p-2 rounded-circle {{ 'bg-success bg-opacity-10 text-success' if log.type == 'Donasi Masuk' else 'bg-primary bg-opacity-10 text-primary' }}">
+                            <i class="fas {{ 'fa-hand-holding-usd' if log.type == 'Donasi Masuk' else 'fa-plus-circle' }} fa-lg"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0 fw-bold">{{ log.type }} <span class="text-muted fw-normal">oleh {{ log.from }}</span></h6>
+                            <h6 class="mb-0 fw-bold">{{ log.type }} <span class="text-muted fw-normal small">oleh {{ log.from }}</span></h6>
                             <small class="text-muted"><i class="far fa-clock me-1"></i> {{ log.timestamp }}</small>
                         </div>
                     </div>
@@ -156,14 +236,91 @@
                         {% if log.amount != '-' %}
                             <span class="d-block fw-bold text-success">+{{ log.amount }} ETH</span>
                         {% endif %}
-                        <small class="text-muted">Campaign #{{ log.campaign_id }}</small>
+                        <small class="badge bg-light text-dark border">Campaign #{{ log.campaign_id }}</small>
                     </div>
                 </div>
                 {% else %}
-                <div class="text-center py-4 text-muted">Belum ada aktivitas blockchain.</div>
+                <div class="text-center py-5 text-muted"><i class="fas fa-receipt fa-2x mb-3 opacity-25"></i><br>Belum ada aktivitas blockchain yang tercatat.</div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
+<!-- CHART.JS LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Inisialisasi Chart
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    
+    // Data dari Flask (Jinja2)
+    const statusData = {
+        pending: {{ stats.pending }},
+        active: {{ stats.active }},
+        rejected: {{ stats.rejected }},
+        deleted: {{ stats.deleted }}
+    };
+
+    // Cek jika data kosong agar chart tidak error/jelek
+    const totalData = statusData.pending + statusData.active + statusData.rejected + statusData.deleted;
+    
+    const dataConfig = totalData > 0 ? {
+        data: [statusData.pending, statusData.active, statusData.rejected, statusData.deleted],
+        backgroundColor: ['#ffc107', '#198754', '#dc3545', '#6c757d']
+    } : {
+        data: [1], // Placeholder jika kosong
+        backgroundColor: ['#e9ecef']
+    };
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Active', 'Rejected', 'Deleted'],
+            datasets: [{
+                data: dataConfig.data,
+                backgroundColor: dataConfig.backgroundColor,
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { family: "'Outfit', sans-serif", size: 11 },
+                        padding: 20
+                    }
+                }
+            },
+            cutout: '75%', // Membuat bolongan tengah lebih besar (Modern look)
+            layout: {
+                padding: 10
+            }
+        }
+    });
+</script>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.3s ease;
+    }
+    .backdrop-blur {
+        backdrop-filter: blur(5px);
+    }
+    /* Custom Scrollbar untuk Tabel jika overflow */
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+</style>
 {% endblock %}

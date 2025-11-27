@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container py-5">
+    <!-- Header Section -->
     <div class="row mb-5 align-items-end">
         <div class="col-md-8">
             <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Jelajahi Kampanye</h2>
@@ -9,43 +10,69 @@
         </div>
         <div class="col-md-4 text-md-end">
             {% if session.get('role') == 'kreator' %}
-            <a href="{{ url_for('create_campaign') }}" class="btn btn-primary shadow-sm">
+            <a href="{{ url_for('create_campaign') }}" class="btn btn-primary shadow-sm rounded-pill">
                 <i class="fas fa-plus me-2"></i> Buat Kampanye
             </a>
             {% endif %}
         </div>
     </div>
 
+    <!-- Grid Kampanye -->
     <div class="row g-4">
         {% for c in campaigns %}
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm border-0 hover-shadow transition-all">
-                <!-- Badge Status -->
-                {% if c.status_code == 1 %}
-                    <span class="campaign-badge badge-active shadow-sm"><i class="fas fa-check-circle me-1"></i> Aktif</span>
-                {% elif c.status_code == 0 %}
-                    <span class="campaign-badge bg-warning text-dark shadow-sm"><i class="fas fa-clock me-1"></i> Pending</span>
-                {% endif %}
+                
+                <!-- BADGE STATUS (Prioritas Tampilan) -->
+                <div class="position-absolute top-0 end-0 m-3 z-10">
+                    {% if c.fundsWithdrawn %}
+                        <span class="badge bg-success text-white shadow-sm">
+                            <i class="fas fa-check-double me-1"></i> Dana Tersalurkan
+                        </span>
+                    {% elif c.status_code == 1 %}
+                        <span class="badge bg-primary text-white shadow-sm">
+                            <i class="fas fa-check-circle me-1"></i> Aktif
+                        </span>
+                    {% elif c.status_code == 0 %}
+                        <span class="badge bg-warning text-dark shadow-sm">
+                            <i class="fas fa-clock me-1"></i> Pending
+                        </span>
+                    {% elif c.status_code == 2 %}
+                        <span class="badge bg-danger text-white shadow-sm">
+                            <i class="fas fa-times-circle me-1"></i> Ditolak
+                        </span>
+                    {% endif %}
+                </div>
 
-                <!-- Link Gambar ke Detail -->
+                <!-- Link & Gambar -->
                 <a href="{{ url_for('campaign_detail', id=c.id) }}" class="text-decoration-none">
                     <div class="position-relative overflow-hidden rounded-top-4">
                         <img src="{{ url_for('static', filename='uploads/' + c.image) }}" class="card-img-top" alt="{{ c.title }}" style="height: 220px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x220?text=DonasiKuy'">
-                        <div class="position-absolute bottom-0 start-0 w-100 bg-gradient-to-t from-black to-transparent p-3">
-                            <!-- Optional Overlay Text -->
-                        </div>
+                        
+                        <!-- Overlay Owner (Jika Login sebagai Pemilik) -->
+                        {% if c.is_owner %}
+                            <div class="position-absolute bottom-0 start-0 bg-dark text-white px-2 py-1 m-2 rounded text-xs fw-bold opacity-75">
+                                <i class="fas fa-user me-1"></i> Milik Anda
+                            </div>
+                        {% endif %}
                     </div>
                 </a>
                 
+                <!-- Body Card -->
                 <div class="card-body p-4 d-flex flex-column">
+                    <div class="mb-2">
+                        <span class="text-uppercase text-primary fw-bold small" style="font-size: 0.7rem; letter-spacing: 1px;">
+                            <i class="fas fa-tag me-1"></i> {{ c.category }}
+                        </span>
+                    </div>
+                    
                     <a href="{{ url_for('campaign_detail', id=c.id) }}" class="text-decoration-none text-dark">
                         <h5 class="card-title fw-bold mb-2" style="font-family: 'Outfit', sans-serif;">{{ c.title }}</h5>
                     </a>
                     
                     <p class="card-text text-muted small mb-3 text-truncate-3">
-                        {{ c.desc[:100] }}...
+                        {{ c.tagline }}
                     </p>
-                    <a href="{{ url_for('campaign_detail', id=c.id) }}" class="text-primary small fw-bold text-decoration-none mb-4">Lihat Selengkapnya <i class="fas fa-arrow-right ms-1"></i></a>
 
                     <div class="mt-auto">
                         <!-- Progress Info -->
@@ -54,19 +81,26 @@
                             <span class="text-muted small">dari {{ c.target }} ETH</span>
                         </div>
                         
+                        <!-- Kalkulasi Persentase Progress -->
                         {% set percent = (c.collected | float / c.target | float) * 100 %}
-                        <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress mb-3" style="height: 6px;">
                             <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: {{ percent }}%"></div>
                         </div>
 
-                        <!-- Action Button -->
+                        <!-- Action Button Logic -->
                         <div class="d-grid">
-                            {% if c.status_code == 1 %}
-                                <a href="{{ url_for('campaign_detail', id=c.id) }}" class="btn btn-outline-primary rounded-pill fw-bold">
-                                    <i class="fas fa-heart me-2"></i> Donasi Sekarang
+                            {% if c.fundsWithdrawn %}
+                                <a href="{{ url_for('campaign_detail', id=c.id) }}" class="btn btn-outline-success rounded-pill fw-bold btn-sm">
+                                    <i class="fas fa-file-alt me-1"></i> Lihat Laporan
+                                </a>
+                            {% elif c.status_code == 1 %}
+                                <a href="{{ url_for('campaign_detail', id=c.id) }}" class="btn btn-outline-primary rounded-pill fw-bold btn-sm">
+                                    <i class="fas fa-heart me-1"></i> Donasi Sekarang
                                 </a>
                             {% else %}
-                                <button class="btn btn-light rounded-pill text-muted" disabled>Menunggu Verifikasi</button>
+                                <button class="btn btn-light rounded-pill text-muted btn-sm" disabled>
+                                    <i class="fas fa-hourglass-half me-1"></i> Menunggu Verifikasi
+                                </button>
                             {% endif %}
                         </div>
                     </div>
@@ -74,13 +108,32 @@
             </div>
         </div>
         {% else %}
+        <!-- Empty State -->
         <div class="col-12 text-center py-5">
-            <div class="py-5 bg-white rounded-4 shadow-sm">
+            <div class="py-5 bg-white rounded-4 shadow-sm border">
                 <i class="fas fa-box-open fa-3x text-muted mb-3 opacity-50"></i>
                 <h5 class="fw-bold text-muted">Belum ada kampanye aktif.</h5>
+                <p class="text-muted small">Jadilah yang pertama membuat perubahan!</p>
+                {% if session.get('role') == 'kreator' %}
+                    <a href="{{ url_for('create_campaign') }}" class="btn btn-primary rounded-pill mt-2">Mulai Sekarang</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+    /* Helper Class untuk memotong teks tagline yang terlalu panjang */
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+    }
+</style>
 {% endblock %}
