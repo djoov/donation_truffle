@@ -540,5 +540,9 @@ def delete_user(user_id):
     except: flash("Gagal hapus user", "error")
     return redirect(url_for('admin_dashboard'))
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

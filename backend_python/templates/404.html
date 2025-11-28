@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 70vh;">
+    
+    <!-- Ilustrasi Ikon Besar -->
+    <div class="mb-4 text-center position-relative">
+        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm" style="width: 150px; height: 150px;">
+            <i class="fas fa-cube fa-5x text-secondary opacity-25"></i>
+        </div>
+        <div class="position-absolute top-50 start-50 translate-middle">
+            <i class="fas fa-search fa-3x text-warning fa-bounce"></i>
+        </div>
+    </div>
+
+    <!-- Teks Pesan -->
+    <div class="text-center" style="max-width: 500px;">
+        <h1 class="display-1 fw-bold text-dark mb-0" style="font-family: 'Outfit', sans-serif;">404</h1>
+        <h4 class="fw-bold text-muted mb-3">Block Tidak Ditemukan</h4>
+        <p class="text-secondary mb-4">
+            Waduh! Sepertinya halaman yang Anda cari tersesat di rantai blockchain yang salah atau tautannya sudah kedaluwarsa.
+        </p>
+        
+        <!-- Tombol Aksi -->
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-bold">
+                <i class="fas fa-home me-2"></i> Kembali ke Beranda
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold">
+                <i class="fas fa-hand-holding-heart me-2"></i> Donasi Saja
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
