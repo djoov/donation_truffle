@@ -79,7 +79,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB 2: DOA -->
+                        <!-- TAB 2: DOA & DONATUR (UPDATE NONCE DISINI) -->
                         <div class="tab-pane fade" id="prayers">
                             <h5 class="fw-bold mb-3">Doa Orang Baik</h5>
                             <div class="list-group list-group-flush rounded-3">
@@ -95,9 +95,27 @@
                                                 <small class="text-muted" style="font-size: 0.75rem;">{{ donation.timestamp }}</small>
                                             </div>
                                             <div class="text-primary small fw-bold mb-2"><i class="fab fa-ethereum me-1"></i> Donasi {{ donation.amount }} ETH</div>
+                                            
                                             {% if donation.message %}
-                                                <div class="bg-light p-3 rounded-3 fst-italic text-muted small border-start border-4 border-primary">"{{ donation.message }}"</div>
+                                                <div class="bg-light p-3 rounded-3 fst-italic text-muted small border-start border-4 border-primary mb-2">"{{ donation.message }}"</div>
                                             {% endif %}
+
+                                            <!-- FITUR BARU: TAMPILKAN NONCE & HASH -->
+                                            <div class="d-flex align-items-center gap-2 mt-1">
+                                                {% if donation.nonce is not none %}
+                                                <span class="badge bg-secondary font-monospace" style="font-size: 0.65rem;" title="Nomor Urut Transaksi (Nonce)">
+                                                    Nonce #{{ donation.nonce }}
+                                                </span>
+                                                {% endif %}
+                                                
+                                                {% if donation.tx_hash %}
+                                                <a href="#" class="text-decoration-none text-muted font-monospace" style="font-size: 0.65rem;" title="Hash Transaksi: {{ donation.tx_hash }}">
+                                                    <i class="fas fa-link"></i> {{ donation.tx_hash[:10] }}...
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                            <!-- END FITUR BARU -->
+
                                         </div>
                                     </div>
                                 </div>
@@ -109,6 +127,7 @@
 
                         <!-- TAB 3: KABAR TERBARU -->
                         <div class="tab-pane fade" id="updates">
+                            <!-- Form Upload Kabar (Hanya untuk Kreator) -->
                             {% if session.get('wallet') == campaign.creator %}
                                 <div class="card bg-warning bg-opacity-10 border-warning border-opacity-25 mb-4 shadow-sm">
                                     <div class="card-body">

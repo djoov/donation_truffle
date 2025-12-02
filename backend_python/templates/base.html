@@ -10,11 +10,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        /* Tambahan CSS Khusus untuk Tombol Explorer */
+        .btn-web3 {
+            background: #0f172a; /* Slate Dark */
+            color: #4ade80;     /* Neon Green */
+            border: 1px solid #334155;
+            font-family: 'Courier New', monospace;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
+        }
+        .btn-web3:hover {
+            background: #000;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+            border-color: #4ade80;
+            transform: translateY(-1px);
+        }
+        /* Animasi Pulse Halus untuk indikator live */
+        .live-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+    </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
     <!-- AUDIO ELEMENTS (Hidden) -->
-    <!-- Menggunakan URL CDN untuk suara UI -->
     <audio id="sound-hover" preload="auto">
         <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
     </audio>
@@ -40,11 +71,11 @@
     </div>
 
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm bg-white">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
-                <span class="brand-text">DonasiKuy</span>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo" onerror="this.style.display='none'" height="30">
+                <span class="brand-text fw-bold text-primary" style="font-family: 'Outfit', sans-serif;">DonasiKuy</span>
             </a>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -54,60 +85,68 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
                     
-                    <!-- WIDGET STATUS -->
+                    <!-- WIDGET STATUS GANACHE -->
                     <li class="nav-item me-2 d-none d-lg-block">
-                        <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill border bg-light" style="font-size: 0.8rem;">
+                        <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill border bg-light" style="font-size: 0.75rem;">
                             {% if bc_stat.connected %}
                                 <span class="d-flex align-items-center text-success fw-bold">
-                                    <span class="status-dot bg-success rounded-circle me-2" style="width: 8px; height: 8px;"></span>
-                                    Ganache ON
+                                    <span class="status-dot bg-success rounded-circle me-2" style="width: 6px; height: 6px;"></span>
+                                    GANACHE ON
                                 </span>
                                 <span class="text-muted border-start ps-2 ms-1">
                                     <i class="fas fa-gas-pump me-1"></i> {{ bc_stat.gas_price }} Gwei
                                 </span>
                             {% else %}
                                 <span class="d-flex align-items-center text-danger fw-bold">
-                                    <span class="status-dot bg-danger rounded-circle me-2" style="width: 8px; height: 8px; animation: pulse 1s infinite;"></span>
+                                    <span class="status-dot bg-danger rounded-circle me-2" style="width: 6px; height: 6px; animation: pulse 1s infinite;"></span>
                                     OFFLINE
                                 </span>
                             {% endif %}
                         </div>
                     </li>
 
-                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('index') }}">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('dashboard') }}">Kampanye</a></li>
+                    <li class="nav-item"><a class="nav-link px-3 fw-medium" href="{{ url_for('index') }}">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link px-3 fw-medium" href="{{ url_for('dashboard') }}">Kampanye</a></li>
+                    
+                    <!-- TOMBOL LIVE MONITOR (FITUR BARU) -->
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-web3 rounded-pill px-3 py-2 d-flex align-items-center gap-2 shadow-sm" href="/explorer">
+                            <span class="live-dot"></span>
+                            <span class="d-none d-md-inline">Live Monitor</span>
+                            <i class="fas fa-external-link-alt fa-xs ms-1 opacity-50"></i>
+                        </a>
+                    </li>
 
+                    <li class="nav-item border-start mx-2 d-none d-lg-block" style="height: 20px;"></li>
+
+                    <!-- AUTH BUTTONS -->
                     {% if session.get('user_id') %}
                         {% if session.get('role') == 'admin' %}
-                            <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold px-3 text-dark" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-shield-alt me-1"></i> Admin</a></li>
+                            <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold px-3 text-dark rounded-pill shadow-sm" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-shield-alt me-1"></i> Admin</a></li>
                         {% elif session.get('role') == 'kreator' %}
-                            <li class="nav-item"><a class="btn btn-primary btn-sm px-4 shadow-sm" href="{{ url_for('create_campaign') }}"><i class="fas fa-plus me-1"></i> Galang Dana</a></li>
+                            <li class="nav-item"><a class="btn btn-primary btn-sm px-4 rounded-pill shadow-sm fw-bold" href="{{ url_for('create_campaign') }}"><i class="fas fa-plus me-1"></i> Galang Dana</a></li>
                         {% endif %}
 
                         <li class="nav-item dropdown ms-2">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">{{ session.get('username')[0] | upper }}</div>
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-0" href="#" role="button" data-bs-toggle="dropdown">
+                                <img src="{{ url_for('static', filename='uploads/' + (session.get('profile_pic') if session.get('profile_pic') else 'default_user.png')) }}" 
+                                     class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2">
-    <!-- Profil Link (BARU) -->
-    <li class="px-3 py-2 text-center">
-        <img src="{{ url_for('static', filename='uploads/' + (session.get('profile_pic') if session.get('profile_pic') else 'default_user.png')) }}" 
-             class="rounded-circle mb-2 shadow-sm" width="50" height="50" style="object-fit: cover;">
-        <div class="fw-bold text-dark">{{ session.get('username') }}</div>
-        <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100">Lihat Profil</a>
-    </li>
-    
-    <li><hr class="dropdown-divider"></li>
-    <!-- Saldo (Tetap Ada) -->
-    <li class="px-3 py-1"><div class="d-flex justify-content-between... (kode lama) ... </div></li>
-    <li><a class="dropdown-item py-2 mt-2" href="#"><i class="fas fa-wallet me-2 text-primary"></i> {{ session.get('wallet')[:8] }}...</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-</ul>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3 p-2" style="min-width: 200px;">
+                                <li class="px-3 py-2 text-center">
+                                    <div class="fw-bold text-dark fs-6">{{ session.get('username') }}</div>
+                                    <span class="badge bg-light text-muted border rounded-pill mt-1">{{ session.get('role')|upper }}</span>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item rounded-3 py-2" href="{{ url_for('profile') }}"><i class="fas fa-user-circle me-2 text-primary"></i> Profil Saya</a></li>
+                                <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="fas fa-wallet me-2 text-success"></i> {{ session.get('wallet')[:6] }}...{{ session.get('wallet')[-4:] }}</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item rounded-3 py-2 text-danger fw-bold" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                            </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item ms-lg-3"><a class="btn btn-outline-primary px-4" href="{{ url_for('login') }}">Masuk</a></li>
-                        <li class="nav-item"><a class="btn btn-primary px-4 shadow-sm" href="{{ url_for('register') }}">Daftar</a></li>
+                        <li class="nav-item ms-lg-2"><a class="btn btn-outline-primary px-4 rounded-pill fw-bold" href="{{ url_for('login') }}">Masuk</a></li>
+                        <li class="nav-item"><a class="btn btn-primary px-4 rounded-pill shadow-sm fw-bold" href="{{ url_for('register') }}">Daftar</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -119,18 +158,20 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <!-- Kategori 'error' -> merah, 'success' -> biru/hijau -->
-                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show shadow-lg border-0 rounded-3" role="alert">
-                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }} me-2"></i> {{ message }}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show shadow-lg border-0 rounded-4 d-flex align-items-center p-3" role="alert">
+                        <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
+                            <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} fa-lg"></i>
+                        </div>
+                        <div>{{ message }}</div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                     
-                    <!-- Trigger Sound berdasarkan kategori pesan -->
+                    <!-- Trigger Sound -->
                     <script>
                         window.addEventListener('load', () => {
                             const type = "{{ category }}";
-                            if(type === 'error') document.getElementById('sound-error').play();
-                            else document.getElementById('sound-success').play();
+                            if(type === 'error') document.getElementById('sound-error').play().catch(()=>{});
+                            else document.getElementById('sound-success').play().catch(()=>{});
                         });
                     </script>
                 {% endfor %}
@@ -144,43 +185,53 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="py-5 mt-auto">
+    <footer class="bg-white border-top py-5 mt-auto">
         <div class="container">
             <div class="row gy-4">
                 <div class="col-lg-4">
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <img src="{{ url_for('static', filename='img/logo.png') }}" height="30" class="grayscale opacity-75">
-                        <span class="fw-bold text-muted">DonasiKuy</span>
+                        <span class="fw-bold text-dark" style="font-family: 'Outfit', sans-serif;">DonasiKuy</span>
                     </div>
-                    <p class="text-muted small">Platform donasi terdesentralisasi pertama yang menjamin transparansi 100% menggunakan teknologi Ethereum Blockchain.</p>
+                    <p class="text-muted small lh-lg">Platform donasi terdesentralisasi pertama yang menjamin transparansi 100% menggunakan teknologi Ethereum Blockchain dan Smart Contracts.</p>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="#" class="btn btn-light btn-sm rounded-circle border"><i class="fab fa-twitter text-muted"></i></a>
+                        <a href="#" class="btn btn-light btn-sm rounded-circle border"><i class="fab fa-github text-muted"></i></a>
+                        <a href="#" class="btn btn-light btn-sm rounded-circle border"><i class="fab fa-instagram text-muted"></i></a>
+                    </div>
                 </div>
                 <div class="col-lg-2 offset-lg-1">
-                    <h6 class="fw-bold mb-3 small text-uppercase">Platform</h6>
+                    <h6 class="fw-bold mb-3 small text-uppercase text-primary">Platform</h6>
                     <ul class="list-unstyled text-muted space-y-2 small">
-                        <li><a href="{{ url_for('how_it_works_page') }}" class="text-decoration-none text-muted">Cara Kerja</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Jelajahi</a></li>
+                        <li class="mb-2"><a href="{{ url_for('how_it_works_page') }}" class="text-decoration-none text-secondary hover-primary">Cara Kerja</a></li>
+                        <li class="mb-2"><a href="/explorer" class="text-decoration-none text-secondary hover-primary">Blockchain Explorer</a></li>
+                        <li class="mb-2"><a href="{{ url_for('dashboard') }}" class="text-decoration-none text-secondary hover-primary">Daftar Kampanye</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2">
-                    <h6 class="fw-bold mb-3 small text-uppercase">Dukungan</h6>
+                    <h6 class="fw-bold mb-3 small text-uppercase text-primary">Dukungan</h6>
                     <ul class="list-unstyled text-muted space-y-2 small">
-                        <li><a href="{{ url_for('help_page') }}" class="text-decoration-none text-muted">Bantuan & FAQ</a></li>
-                        <li><a href="{{ url_for('privacy_page') }}" class="text-decoration-none text-muted">Kebijakan Privasi</a></li>
+                        <li class="mb-2"><a href="{{ url_for('help_page') }}" class="text-decoration-none text-secondary hover-primary">Bantuan & FAQ</a></li>
+                        <li class="mb-2"><a href="{{ url_for('privacy_page') }}" class="text-decoration-none text-secondary hover-primary">Kebijakan Privasi</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary hover-primary">Syarat Ketentuan</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3">
-                    <h6 class="fw-bold mb-3 small text-uppercase">Network Status</h6>
-                    <div class="d-flex align-items-center gap-2 text-muted small">
-                        <i class="fas fa-circle text-success" style="font-size: 8px;"></i> Block #{{ bc_stat.block_number }}
-                    </div>
-                    <div class="mt-3 d-flex gap-3">
-                        <a href="#" class="btn btn-light btn-sm rounded-circle"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="btn btn-light btn-sm rounded-circle"><i class="fab fa-github"></i></a>
+                    <h6 class="fw-bold mb-3 small text-uppercase text-primary">Network Status</h6>
+                    <div class="p-3 bg-light rounded-4 border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-muted">Block Height</span>
+                            <span class="badge bg-success bg-opacity-10 text-success font-monospace">#{{ bc_stat.block_number }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Status</span>
+                            <span class="d-flex align-items-center small text-success fw-bold"><span class="status-dot bg-success rounded-circle me-2" style="width: 6px; height: 6px;"></span>Synced</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="border-top pt-4 mt-4 text-center text-muted small">
-                &copy; 2024 DonasiKuy Platform. Built with <i class="fas fa-heart text-danger"></i> & Solidity.
+            <div class="border-top pt-4 mt-5 text-center text-muted x-small">
+                &copy; 2025 DonasiKuy Platform. Built with <i class="fas fa-heart text-danger mx-1"></i> using Flask & Solidity.
             </div>
         </div>
     </footer>
@@ -204,7 +255,9 @@
                 loader.classList.remove('fade-out');
             }
         }
-        window.addEventListener('load', () => { setTimeout(hideLoader, 800); });
+        window.addEventListener('load', () => { setTimeout(hideLoader, 600); });
+        
+        // Tampilkan loader saat form submit atau klik link navigasi tertentu
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', () => { showLoader(); });
         });
@@ -214,33 +267,30 @@
             const hoverSound = document.getElementById('sound-hover');
             const clickSound = document.getElementById('sound-click');
             
-            // Set volume rendah agar tidak kaget
-            hoverSound.volume = 0.2; 
-            clickSound.volume = 0.4;
+            if(hoverSound && clickSound) {
+                hoverSound.volume = 0.1; 
+                clickSound.volume = 0.3;
 
-            // Seleksi elemen interaktif
-            const interactiveElements = document.querySelectorAll('a, button, .btn, input[type="submit"], .nav-link');
+                const interactiveElements = document.querySelectorAll('a.btn, button, input[type="submit"], .nav-link');
 
-            interactiveElements.forEach(el => {
-                // Efek Hover
-                el.addEventListener('mouseenter', () => {
-                    // Reset waktu agar bisa diputar cepat berulang kali
-                    hoverSound.currentTime = 0; 
-                    // Promise catch untuk menghindari error jika user belum interaksi dengan halaman
-                    hoverSound.play().catch(() => {}); 
+                interactiveElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        hoverSound.currentTime = 0; 
+                        hoverSound.play().catch(() => {}); 
+                    });
+                    el.addEventListener('click', () => {
+                        clickSound.currentTime = 0;
+                        clickSound.play().catch(() => {});
+                    });
                 });
-
-                // Efek Klik
-                el.addEventListener('click', () => {
-                    clickSound.currentTime = 0;
-                    clickSound.play().catch(() => {});
-                });
-            });
+            }
         });
     </script>
     
     <style>
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .hover-primary:hover { color: var(--bs-primary) !important; transition: color 0.2s; }
+        .x-small { font-size: 0.75rem; }
     </style>
 </body>
 </html>
