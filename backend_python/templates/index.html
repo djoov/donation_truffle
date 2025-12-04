@@ -153,11 +153,12 @@
                             </a>
                         </h6>
                         
+                        <!-- PERBAIKAN DI SINI: MENGGUNAKAN | striptags -->
                         <p class="text-muted small mb-4 line-clamp-3 flex-grow-1" style="font-size: 0.85rem;">
-                            {{ n.summary }}
+                            {{ n.summary | striptags }}
                         </p>
 
-                        <!-- Action Button (Hanya jika Kreator Login) -->
+                        <!-- Action Button -->
                         <div class="mt-auto position-relative" style="z-index: 2;">
                             {% if session.get('role') == 'kreator' %}
                                 <a href="{{ url_for('create_campaign', title='Bantuan untuk: ' + n.title) }}" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold py-2 shadow-sm">
@@ -173,7 +174,6 @@
                 </div>
             </div>
             {% else %}
-            <!-- Fallback jika gagal fetch -->
             <div class="col-12 text-center py-5">
                 <div class="py-4 rounded-4 border bg-white mx-auto" style="max-width: 400px;">
                     <i class="fas fa-wifi fa-2x text-muted mb-3 opacity-50"></i>
@@ -216,10 +216,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         const textElement = document.getElementById('typing-text');
         const words = [
-            "Selamat Datang Temanku...", "Welcome My Friends...", 
-            "مرحبًا بكم، أصدقائي", "ようこそ、友よ", 
-            "친구들, 환영합니다", "¡Hola, amigos!", "Bonjour Mon Ami...", 
-            "Willkommen, meine Freunde", "Mi casa es su casa", "Hoş Geldiniz", "Добро пожаловать, мои друзья!"
+            "Siap berbuat kebaikan hari ini?", "Ready to do some good today?", 
+            "هل أنتم مستعدون لفعل الخير اليوم؟", "今日、良いことをする準備はできていますか？", 
+            "오늘 좋은 일을 할 준비가 되었나요?", "¿Listos para hacer el bien hoy?", "Prêts à faire le bien aujourd'hui ?", 
+            "Bereit, heute Gutes zu tun?", "¿Preparados para compartir bondad hoy?", "Bugün iyilik yapmaya hazır mısınız?", "Готовы творить добро сегодня?"
         ];
         let wordIndex = 0, charIndex = 0, isDeleting = false, typeSpeed = 100;
 

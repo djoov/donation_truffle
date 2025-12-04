@@ -1,434 +1,402 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Header Admin -->
-    <div class="bg-dark text-white p-4 rounded-4 mb-4 shadow-lg position-relative overflow-hidden">
-        <div class="position-relative z-10">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Admin Control Center</h2>
-                    <p class="text-white-50 mb-0">Pantau ekosistem donasi secara real-time.</p>
-                </div>
-                <div class="text-end">
-                    <div class="bg-white bg-opacity-10 p-2 rounded-3 text-center border border-white border-opacity-25 backdrop-blur">
-                        <small class="d-block text-white-50" style="font-size: 0.7rem;">BLOCKCHAIN MODE</small>
-                        <span class="fw-bold text-success"><i class="fas fa-circle fa-xs me-1"></i> LIVE</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Dekorasi Background -->
-        <div class="position-absolute top-0 end-0 bg-primary rounded-circle opacity-25" style="width: 300px; height: 300px; transform: translate(30%, -30%); filter: blur(60px);"></div>
-    </div>
-
-    <!-- STATS & CHARTS ROW -->
-    <div class="row g-4 mb-5">
-        <!-- KIRI: SUMMARY CARDS -->
-        <div class="col-lg-8">
-            <div class="row g-3">
-                <!-- Total Campaigns -->
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm p-3 h-100 rounded-4 transition-all hover-shadow">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
-                                <i class="fas fa-bullhorn fa-lg"></i>
-                            </div>
-                            <div>
-                                <h3 class="fw-bold mb-0">{{ stats.total_campaigns }}</h3>
-                                <small class="text-muted">Total Kampanye</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Total Users -->
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm p-3 h-100 rounded-4 transition-all hover-shadow">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-info bg-opacity-10 p-3 rounded-circle text-info">
-                                <i class="fas fa-users fa-lg"></i>
-                            </div>
-                            <div>
-                                <h3 class="fw-bold mb-0">{{ total_users }}</h3>
-                                <small class="text-muted">Total Pengguna</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Total Transactions -->
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm p-3 h-100 rounded-4 transition-all hover-shadow">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
-                                <i class="fas fa-exchange-alt fa-lg"></i>
-                            </div>
-                            <div>
-                                <h3 class="fw-bold mb-0">{{ transactions|length }}</h3>
-                                <small class="text-muted">Total Transaksi</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PENDING ACTION ALERT -->
-                {% if stats.pending > 0 %}
-                <div class="col-12">
-                    <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center shadow-sm mt-3" role="alert">
-                        <div class="bg-warning text-dark p-2 rounded-circle me-3">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div>
-                            <strong>Perhatian Admin!</strong>
-                            <div class="small">Ada <span class="fw-bold">{{ stats.pending }} kampanye baru</span> menunggu persetujuan Anda.</div>
-                        </div>
-                        <a href="#campaigns" class="btn btn-warning btn-sm rounded-pill ms-auto fw-bold shadow-sm">Cek Sekarang</a>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- KANAN: CHART -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
-                <h6 class="fw-bold text-muted mb-4 text-uppercase small ls-1">Distribusi Status</h6>
-                <div class="position-relative d-flex justify-content-center" style="height: 200px;">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- NAVIGATION TABS (TABEL) -->
-    <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-pill shadow-sm border" id="adminTabs" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active rounded-pill fw-bold transition-all" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns" type="button">
-                <i class="fas fa-list me-2"></i> Manajemen Kampanye
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link rounded-pill fw-bold transition-all" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">
-                <i class="fas fa-user-friends me-2"></i> Data Pengguna
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link rounded-pill fw-bold transition-all" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
-                <i class="fas fa-history me-2"></i> Audit Log (Blockchain)
-            </button>
-        </li>
-    </ul>
-
-    <div class="tab-content mb-5" id="myTabContent">
+<div class="container-fluid">
+    <div class="row flex-nowrap">
         
-        <!-- TAB 1: KELOLA KAMPANYE -->
-        <div class="tab-pane fade show active" id="campaigns">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light text-muted small text-uppercase">
-                            <tr>
-                                <th class="ps-4 py-3">Campaign Info</th>
-                                <th>Kreator</th>
-                                <th>Target</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for c in campaigns %}
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="fw-bold text-dark text-truncate" style="max-width: 200px;">{{ c.title }}</div>
-                                    <small class="text-muted badge bg-light text-dark border">ID #{{ c.id }}</small>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle text-center me-2 fw-bold" style="width:35px; height:35px; line-height:35px;">
-                                            {{ c.creator_name[0] | upper }}
-                                        </div>
-                                        <div class="lh-1">
-                                            <div class="fw-bold small">{{ c.creator_name }}</div>
-                                            <small class="text-muted font-monospace" style="font-size: 10px">{{ c.creator_addr[:8] }}...</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="fw-bold text-primary">{{ c.target }} ETH</td>
-                                <td>
-                                    {% if c.status_code == 0 %} <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
-                                    {% elif c.status_code == 1 %} <span class="badge bg-success rounded-pill px-3">Active</span>
-                                    {% elif c.status_code == 3 %} <span class="badge bg-secondary rounded-pill px-3">Deleted</span>
-                                    {% else %} <span class="badge bg-danger rounded-pill px-3">{{ c.status }}</span> {% endif %}
-                                </td>
-                                <td class="text-end pe-4">
-                                    {% if c.status_code == 0 %}
-                                        <a href="/admin/approve/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm me-1 fw-bold">
-                                            <i class="fas fa-check"></i> Approve
-                                        </a>
-                                    {% endif %}
-                                    
-                                    {% if c.status_code != 3 %}
-                                        <a href="/admin/delete_campaign/{{ c.id }}" class="btn btn-sm btn-light text-danger rounded-circle hover-shadow" onclick="return confirm('Hapus kampanye ini?')" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fas fa-folder-open fa-2x mb-2"></i><br>Tidak ada data kampanye.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <!-- SIDEBAR NAVIGASI (KIRI) -->
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark shadow-lg sidebar-sticky">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
+                <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom w-100">
+                    <span class="fs-5 d-none d-sm-inline fw-bold" style="font-family: 'Outfit', sans-serif;">
+                        <i class="fas fa-shield-alt text-primary me-2"></i> AdminPanel
+                    </span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100 mt-4" id="adminMenu" role="tablist">
+                    <li class="nav-item w-100 mb-2">
+                        <button class="nav-link active w-100 text-start text-white hover-glass" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard-view" type="button">
+                            <i class="fas fa-home me-2"></i> <span class="d-none d-sm-inline">Dashboard</span>
+                        </button>
+                    </li>
+                    <li class="nav-item w-100 mb-2">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns-view" type="button">
+                            <i class="fas fa-bullhorn me-2"></i> <span class="d-none d-sm-inline">Kampanye</span>
+                        </button>
+                    </li>
+                    <li class="nav-item w-100 mb-2">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-view" type="button">
+                            <i class="fas fa-users me-2"></i> <span class="d-none d-sm-inline">Users</span>
+                        </button>
+                    </li>
+                    <li class="nav-item w-100 mb-2">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="blockchain-tab" data-bs-toggle="tab" data-bs-target="#blockchain-view" type="button">
+                            <i class="fas fa-link me-2"></i> <span class="d-none d-sm-inline">Blockchain Log</span>
+                        </button>
+                    </li>
+                    <li class="nav-item w-100 mb-2">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="security-tab" data-bs-toggle="tab" data-bs-target="#security-view" type="button">
+                            <i class="fas fa-lock me-2 text-warning"></i> <span class="d-none d-sm-inline">Security Center</span>
+                        </button>
+                    </li>
+                </ul>
+                <hr class="w-100 border-secondary">
+                <div class="dropdown pb-4 w-100">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=random" width="30" height="30" class="rounded-circle">
+                        <span class="d-none d-sm-inline mx-2">Super Admin</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                        <li><a class="dropdown-item" href="/">Ke Website Utama</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout">Sign out</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: KELOLA USER -->
-        <div class="tab-pane fade" id="users">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-body p-0">
-                    <table class="table align-middle mb-0 table-hover">
-                        <thead class="bg-light text-muted small text-uppercase">
-                            <tr>
-                                <th class="ps-4 py-3">User</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Wallet</th>
-                                <th class="text-end pe-4">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in users %}
-                            <tr>
-                                <td class="ps-4 fw-bold">{{ u['username'] }}</td>
-                                <td class="text-muted">{{ u['email'] }}</td>
-                                <td><span class="badge bg-light text-dark border text-uppercase">{{ u['role'] }}</span></td>
-                                <td><code class="bg-light px-2 py-1 rounded text-primary small font-monospace">{{ u['wallet_address'][:15] }}...</code></td>
-                                <td class="text-end pe-4">
-                                    <a href="/admin/delete_user/{{ u['id'] }}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Hapus user ini permanen?')">
-                                        <i class="fas fa-user-times"></i> Hapus
-                                    </a>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="5" class="text-center py-5 text-muted">Tidak ada user lain.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <!-- KONTEN UTAMA (KANAN) -->
+        <div class="col py-4 px-4 bg-light" style="min-height: 100vh;">
+            
+            <!-- Header Atas -->
+            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-3 shadow-sm">
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">Control Center</h4>
+                    <small class="text-muted" id="current-date"></small>
                 </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: LOG TRANSAKSI -->
-        <div class="tab-pane fade" id="history">
-            <div class="list-group list-group-flush rounded-4 shadow-sm bg-white overflow-hidden">
-                {% for log in transactions %}
-                <div class="list-group-item p-3 d-flex justify-content-between align-items-center hover-bg-light">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="p-2 rounded-circle {{ 'bg-success bg-opacity-10 text-success' if log.type == 'Donasi Masuk' else 'bg-primary bg-opacity-10 text-primary' }}">
-                            <i class="fas {{ 'fa-hand-holding-usd' if log.type == 'Donasi Masuk' else 'fa-plus-circle' }} fa-lg"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 fw-bold">{{ log.type }} <span class="text-muted fw-normal small">oleh {{ log.from }}</span></h6>
-                            <small class="text-muted"><i class="far fa-clock me-1"></i> {{ log.timestamp }}</small>
-                        </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center bg-light px-3 py-1 rounded-pill border">
+                        <span class="badge bg-success rounded-circle p-1 me-2 animate-pulse"> </span>
+                        <small class="fw-bold text-success">{{ network_status }}</small>
                     </div>
-                    <div class="text-end">
-                        {% if log.amount != '-' %}
-                            <span class="d-block fw-bold text-success">+{{ log.amount }} ETH</span>
-                        {% endif %}
-                        <small class="badge bg-light text-dark border">Campaign #{{ log.campaign_id }}</small>
+                    <div class="border-start ps-3">
+                        <small class="fw-bold text-dark"><i class="fas fa-clock me-1 text-primary"></i> <span id="clock">--:--</span></small>
                     </div>
                 </div>
-                {% else %}
-                <div class="text-center py-5 text-muted"><i class="fas fa-receipt fa-2x mb-3 opacity-25"></i><br>Belum ada aktivitas blockchain yang tercatat.</div>
-                {% endfor %}
             </div>
-        </div>
-    </div>
 
-    <!-- BAGIAN BARU: INTEGRASI BLOCKCHAIN LIVE -->
-    <div class="row mt-5 mb-4">
-        <div class="col-12">
-            <div class="d-flex align-items-center mb-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Ethereum-icon-purple.svg/1200px-Ethereum-icon-purple.svg.png" width="40" class="me-3" alt="ETH Logo">
-                <h2 class="fw-bold m-0" style="font-family: 'Outfit', sans-serif;">Blockchain Network Monitor</h2>
+            <!-- ISI TAB KONTEN -->
+            <div class="tab-content" id="v-pills-tabContent">
                 
-                <!-- Status Indikator -->
-                <span class="ms-3 badge rounded-pill {% if 'Connected' in network_status %}bg-success{% else %}bg-danger{% endif %}">
-                    <i class="fas fa-wifi me-1"></i> {{ network_status }}
-                </span>
-            </div>
-            <p class="text-muted">Data di bawah ini diambil secara <strong>Real-Time</strong> dari jaringan Ganache (RPC Server).</p>
-        </div>
-    </div>
+                <!-- 1. DASHBOARD OVERVIEW -->
+                <div class="tab-pane fade show active" id="dashboard-view">
+                    <!-- Stats Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3 h-100 rounded-4 bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="fw-bold mb-0">{{ stats.total_campaigns }}</h3>
+                                        <small class="opacity-75">Total Kampanye</small>
+                                    </div>
+                                    <i class="fas fa-bullhorn fa-2x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3 h-100 rounded-4 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="fw-bold mb-0 text-dark">{{ total_users }}</h3>
+                                        <small class="text-muted">Total Users</small>
+                                    </div>
+                                    <i class="fas fa-users fa-2x text-info opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3 h-100 rounded-4 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="fw-bold mb-0 text-dark">{{ transactions|length }}</h3>
+                                        <small class="text-muted">Total Transaksi</small>
+                                    </div>
+                                    <i class="fas fa-exchange-alt fa-2x text-success opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                        {% if stats.pending > 0 %}
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3 h-100 rounded-4 bg-warning text-dark cursor-pointer" onclick="switchToTab('campaigns-tab')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="fw-bold mb-0">{{ stats.pending }}</h3>
+                                        <small class="fw-bold">Butuh Persetujuan!</small>
+                                    </div>
+                                    <i class="fas fa-bell fa-2x opacity-50 animate-swing"></i>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
 
-    <div class="row g-4 mb-5">
-        <!-- TABEL 1: DAFTAR AKUN GANACHE -->
-        <div class="col-lg-5">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-wallet me-2"></i> Active Accounts (Wallets)</h5>
-                    <span class="badge bg-secondary">{{ ganache_accounts|length }} Accounts</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-striped table-hover mb-0" style="font-size: 0.85rem;">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th>Idx</th>
-                                    <th>Address</th>
-                                    <th class="text-end">Balance (ETH)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for acc in ganache_accounts %}
-                                <tr>
-                                    <td class="fw-bold text-center"><span class="badge bg-light text-dark border">{{ acc.index }}</span></td>
-                                    <td>
-                                        <span class="font-monospace text-primary">{{ acc.address[:10] }}...{{ acc.address[-4:] }}</span>
-                                        {% if acc.index == 0 %}
-                                        <br><span class="badge bg-warning text-dark" style="font-size: 0.6rem;">DEPLOYER</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end fw-bold">{{ acc.balance }} ETH</td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="3" class="text-center text-muted">Tidak ada akun terdeteksi</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="row g-4">
+                        <!-- Widget Security (Mini) -->
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark text-white">
+                                <div class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold mb-0 text-white"><i class="fas fa-shield-alt text-success me-2"></i> Security Monitor (Live)</h6>
+                                    <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="switchToTab('security-tab')">View Full Logs</button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        {% for log in security_logs[:4] %}
+                                        <div class="list-group-item bg-dark border-secondary px-3 py-3 text-white">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="badge {{ 'bg-danger' if log.status == 'high' else 'bg-warning text-dark' if log.status == 'medium' else 'bg-success' }} me-2">{{ log.status|upper }}</span>
+                                                    <span class="fw-bold small">{{ log.action }}</span>
+                                                </div>
+                                                <small class="text-white-50 font-monospace">{{ log.time }}</small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Widget Traffic -->
+                        <div class="col-lg-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-muted mb-4">Traffic Summary</h6>
+                                    <div class="text-center mb-4">
+                                        <h2 class="fw-bold text-primary">{{ visitor_stats.total_visits }}</h2>
+                                        <small class="text-muted">Total Visits Today</small>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 30%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between x-small text-muted">
+                                        <span>Mobile (70%)</span>
+                                        <span>Desktop (30%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- TABEL 2: BLOK TERBARU (LATEST BLOCKS) -->
-        <div class="col-lg-7">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-cubes me-2"></i> Latest Blocks</h5>
-                    <small>Menampilkan 10 Blok Terakhir</small>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Block #</th>
-                                    <th>Hash</th>
-                                    <th>Txns</th>
-                                    <th>Gas Used</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for block in recent_blocks %}
-                                <tr>
-                                    <td class="fw-bold text-center">
-                                        <div class="bg-primary text-white rounded p-1" style="width: 40px;">#{{ block.number }}</div>
-                                    </td>
-                                    <td>
-                                        <small class="font-monospace text-muted" title="{{ block.hash }}">
-                                            {{ block.hash[:12] }}...
-                                        </small>
-                                    </td>
-                                    <td class="text-center">
-                                        {% if block.tx_count > 0 %}
-                                            <span class="badge bg-success">{{ block.tx_count }} Tx</span>
-                                        {% else %}
-                                            <span class="badge bg-light text-secondary border">0</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><small>{{ block.gas_used }}</small></td>
-                                    <td><small class="text-muted">{{ block.timestamp }}</small></td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="5" class="text-center">Belum ada blok yang tercipta.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <!-- 2. CAMPAIGNS VIEW -->
+                <div class="tab-pane fade" id="campaigns-view">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="fw-bold mb-0">Manajemen Kampanye</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr><th class="ps-4">Judul</th><th>Kreator</th><th>Target</th><th>Status</th><th class="text-end pe-4">Aksi</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in campaigns %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold">{{ c.title }} <br><small class="text-muted fw-normal">ID #{{ c.id }}</small></td>
+                                        <td>{{ c.creator_name }}</td>
+                                        <td class="fw-bold text-primary">{{ c.target }} ETH</td>
+                                        <td>
+                                            {% if c.status_code == 0 %}<span class="badge bg-warning text-dark">Pending</span>{% elif c.status_code == 1 %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            {% if c.status_code == 0 %}
+                                                <a href="/admin/approve/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 me-1"><i class="fas fa-check"></i></a>
+                                            {% endif %}
+                                            {% if c.status_code != 3 %}
+                                                <a href="/admin/delete_campaign/{{ c.id }}" class="btn btn-sm btn-light text-danger rounded-circle" onclick="return confirm('Hapus?')"><i class="fas fa-trash"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% else %}<tr><td colspan="5" class="text-center py-4">Data kosong</td></tr>{% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                <!-- 3. USERS VIEW -->
+                <div class="tab-pane fade" id="users-view">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white py-3"><h5 class="fw-bold mb-0">Data Pengguna</h5></div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light"><tr><th class="ps-4">User</th><th>Role</th><th>Wallet</th><th class="text-end pe-4">Aksi</th></tr></thead>
+                                <tbody>
+                                    {% for u in users %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold">{{ u.username }}<br><small class="text-muted fw-normal">{{ u.email }}</small></td>
+                                        <td><span class="badge bg-light text-dark border">{{ u.role }}</span></td>
+                                        <td><code class="text-primary">{{ u.wallet_address[:15] }}...</code></td>
+                                        <td class="text-end pe-4">
+                                            {% if u.role != 'admin' %}
+                                            <a href="/admin/delete_user/{{ u.id }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Hapus user?')"><i class="fas fa-trash-alt"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. BLOCKCHAIN LOG VIEW -->
+                <div class="tab-pane fade" id="blockchain-view">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white py-3"><h5 class="fw-bold mb-0">Audit Log (On-Chain)</h5></div>
+                        <div class="list-group list-group-flush">
+                            {% for log in transactions %}
+                            <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 fw-bold {{ 'text-success' if 'Donasi' in log.type else 'text-primary' }}">{{ log.type }}</h6>
+                                    <small class="text-muted">{{ log.timestamp }} | Oleh: {{ log.from }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold">{{ log.amount }} ETH</span><br>
+                                    <small class="badge bg-secondary bg-opacity-10 text-secondary font-monospace">Nonce #{{ log.nonce }}</small>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">Belum ada transaksi.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. SECURITY CENTER (FULL PAGE) -->
+                <div class="tab-pane fade" id="security-view">
+                    <div class="row g-4">
+                        <!-- Full Logs Table -->
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-4 bg-dark text-white">
+                                <div class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0 text-white"><i class="fas fa-shield-alt text-success me-2"></i> Security Intelligence Log</h5>
+                                    <button class="btn btn-sm btn-outline-light"><i class="fas fa-download me-1"></i> Export CSV</button>
+                                </div>
+                                <div class="table-responsive" style="max-height: 600px;">
+                                    <table class="table table-dark table-hover align-middle mb-0" style="font-size: 0.9rem;">
+                                        <thead class="sticky-top bg-dark">
+                                            <tr>
+                                                <th class="ps-4">Severity</th>
+                                                <th>Action</th>
+                                                <th>Description</th>
+                                                <th>IP Address</th>
+                                                <th class="text-end pe-4">Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for log in security_logs %}
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <span class="badge rounded-pill {{ 'bg-danger' if log.status == 'high' else 'bg-warning text-dark' if log.status == 'medium' else 'bg-success' }}">
+                                                        {{ log.status|upper }}
+                                                    </span>
+                                                </td>
+                                                <td class="fw-bold">{{ log.action }}</td>
+                                                <td class="text-white-50">{{ log.desc }}</td>
+                                                <td class="font-monospace text-info">{{ log.ip }}</td>
+                                                <td class="text-end pe-4 text-white-50">{{ log.time }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Wallets & Threat Map -->
+                        <div class="col-lg-4">
+                            <!-- Active Wallets -->
+                            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-wallet me-2 text-warning"></i> Active Wallets (Ganache)</h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height: 300px;">
+                                        <table class="table table-hover mb-0" style="font-size: 0.8rem;">
+                                            <thead class="table-light sticky-top"><tr><th class="ps-3">Addr</th><th class="text-end pe-3">Bal</th></tr></thead>
+                                            <tbody>
+                                                {% for acc in ganache_accounts %}
+                                                <tr>
+                                                    <td class="ps-3 font-monospace text-primary">{{ acc.address[:8] }}...</td>
+                                                    <td class="text-end pe-3 fw-bold">{{ acc.balance }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Health -->
+                            <div class="card border-0 shadow-sm rounded-4 bg-success bg-opacity-10">
+                                <div class="card-body text-center py-4">
+                                    <div class="mb-3 bg-white p-3 rounded-circle d-inline-block shadow-sm">
+                                        <i class="fas fa-server fa-2x text-success"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success mb-1">System Healthy</h5>
+                                    <p class="small text-muted mb-0">No critical vulnerabilities detected.</p>
+                                    <hr class="border-success opacity-25 my-3">
+                                    <div class="d-flex justify-content-center gap-3 small text-dark fw-bold">
+                                        <span>CPU: 12%</span>
+                                        <span>RAM: 45%</span>
+                                        <span>Disk: 20%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- CHART.JS LIBRARY -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-    // Inisialisasi Chart
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    
-    // Data dari Flask (Jinja2)
-    const statusData = {
-        pending: {{ stats.pending }},
-        active: {{ stats.active }},
-        rejected: {{ stats.rejected }},
-        deleted: {{ stats.deleted }}
-    };
+    // Fungsi Tab Switching Manual
+    function switchToTab(tabId) {
+        const triggerEl = document.getElementById(tabId);
+        const tab = new bootstrap.Tab(triggerEl);
+        tab.show();
+    }
 
-    // Cek jika data kosong agar chart tidak error/jelek
-    const totalData = statusData.pending + statusData.active + statusData.rejected + statusData.deleted;
+    // Clock
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+    }
+    setInterval(updateClock, 1000); updateClock();
     
-    const dataConfig = totalData > 0 ? {
-        data: [statusData.pending, statusData.active, statusData.rejected, statusData.deleted],
-        backgroundColor: ['#ffc107', '#198754', '#dc3545', '#6c757d']
-    } : {
-        data: [1], // Placeholder jika kosong
-        backgroundColor: ['#e9ecef']
-    };
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Pending', 'Active', 'Rejected', 'Deleted'],
-            datasets: [{
-                data: dataConfig.data,
-                backgroundColor: dataConfig.backgroundColor,
-                borderWidth: 0,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        font: { family: "'Outfit', sans-serif", size: 11 },
-                        padding: 20
-                    }
-                }
-            },
-            cutout: '75%', // Membuat bolongan tengah lebih besar (Modern look)
-            layout: {
-                padding: 10
-            }
+    // Auto-click first tab on load to ensure content shows
+    document.addEventListener("DOMContentLoaded", function(){
+        // Check hash to open specific tab if needed
+        if(window.location.hash) {
+            const hash = window.location.hash.replace('#', '');
+            const tabBtn = document.getElementById(hash + '-tab');
+            if(tabBtn) new bootstrap.Tab(tabBtn).show();
         }
     });
 </script>
 
 <style>
-    .hover-shadow:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-        transition: all 0.3s ease;
-    }
-    .backdrop-blur {
-        backdrop-filter: blur(5px);
-    }
-    /* Custom Scrollbar untuk Tabel jika overflow */
-    .table-responsive::-webkit-scrollbar {
-        height: 6px;
-    }
-    .table-responsive::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-    }
+    /* HIDE GLOBAL FOOTER & NAVBAR ON DASHBOARD */
+    footer, .navbar { display: none !important; }
+
+    /* Styling Sidebar */
+    .nav-pills .nav-link { border-radius: 0.5rem; margin-bottom: 0.5rem; transition: all 0.2s; color: rgba(255,255,255,0.7); }
+    .nav-pills .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateX(5px); }
+    .nav-pills .nav-link.active { background: #0d6efd; color: #fff; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); }
+    .hover-glass:hover { backdrop-filter: blur(5px); }
+    .backdrop-blur { backdrop-filter: blur(5px); }
+    .animate-pulse { animation: pulse 2s infinite; }
+    .animate-swing { animation: swing 3s infinite ease-in-out; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    @keyframes swing { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(15deg); } 40% { transform: rotate(-10deg); } 60% { transform: rotate(5deg); } 80% { transform: rotate(-5deg); } }
+    
+    /* Scrollbar */
+    .table-responsive::-webkit-scrollbar { width: 6px; height: 6px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 </style>
 {% endblock %}

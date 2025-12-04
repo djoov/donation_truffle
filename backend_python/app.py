@@ -3,6 +3,7 @@ from web3 import Web3
 import sqlite3
 import os
 import time
+import re
 from datetime import datetime, timedelta
 import feedparser
 from time import mktime
@@ -165,35 +166,50 @@ def get_all_transactions():
         print(f"Error fetching logs: {e}")
     return logs
 
+def cleanhtml(raw_html):
+    """Menghapus tag HTML (seperti <img>, <div>) dari teks"""
+    cleanr = re.compile('<.*?>')
+    cleantext = re.sub(cleanr, '', raw_html)
+    return cleantext
+
 # --- FUNGSI FETCH BERITA (MULTI-SOURCE AGGREGATOR) ---
 def get_humanitarian_news():
     rss_sources = [
-        {"url": "https://www.antaranews.com/rss/humaniora.xml", "name": "Antara News"},
-        {"url": "https://www.cnnindonesia.com/nasional/rss", "name": "CNN Indonesia"},
-        {"url": "https://www.republika.co.id/rss/nasional/umum", "name": "Republika"},
-        {"url": "https://www.viva.co.id/rss/berita/nasional", "name": "Viva News"}
+        {"url": "https://www.antaranews.com/rss/humaniora.xml", "name": "ANTARA NEWS"},
+        {"url": "https://www.cnnindonesia.com/nasional/rss", "name": "CNN INDONESIA"},
+        {"url": "https://www.republika.co.id/rss/nasional/umum", "name": "REPUBLIKA"},
+        {"url": "https://www.viva.co.id/rss/berita/nasional", "name": "VIVA NEWS"}
     ]
-    keywords = ["banjir", "gempa", "longsor", "kebakaran", "bencana", "tsunami", "korban", "bantuan", "donasi", "miskin", "sosial"]
+    keywords = ["banjir", "gempa", "longsor", "kebakaran", "bencana", "tsunami", "korban", "bantuan", "donasi", "miskin", "sosial", "kemanusiaan"]
     aggregated_news = []
     
     for source in rss_sources:
         try:
             feed = feedparser.parse(source["url"])
-            for entry in feed.entries[:5]:
+            for entry in feed.entries[:5]: # Ambil 5 berita per sumber untuk di-filter
                 title = entry.title.lower()
-                summary = entry.summary.lower() if hasattr(entry, 'summary') else ""
-                if any(k in title for k in keywords) or any(k in summary for k in keywords):
+                raw_summary = entry.summary if hasattr(entry, 'summary') else ""
+                
+                if any(k in title for k in keywords) or any(k in raw_summary.lower() for k in keywords):
+                    # 1. Bersihkan HTML Tags DULU
+                    clean_summary = cleanhtml(raw_summary)
+                    
+                    # 2. Potong teks agar tidak kepanjangan
+                    final_summary = clean_summary[:100] + "..." if len(clean_summary) > 100 else clean_summary
+                    
                     pub_time = entry.published_parsed if hasattr(entry, 'published_parsed') else time.gmtime()
                     timestamp = mktime(pub_time) if pub_time else 0
+                    
                     aggregated_news.append({
                         'title': entry.title,
                         'link': entry.link,
                         'published': entry.published if hasattr(entry, 'published') else "Baru saja",
                         'timestamp': timestamp,
-                        'summary': summary[:100] + "...",
+                        'summary': final_summary,
                         'source': source["name"]
                     })
-        except Exception:
+        except Exception as e:
+            print(f"Error parsing RSS: {e}")
             continue
 
     aggregated_news.sort(key=lambda x: x['timestamp'], reverse=True)
@@ -201,8 +217,8 @@ def get_humanitarian_news():
         
     if not final_news:
         final_news = [
-            {'title': 'Banjir Bandang Terjang Pemukiman Warga', 'link': '#', 'published': 'Hari ini', 'summary': 'Warga butuh bantuan...', 'source': 'Simulasi'},
-            {'title': 'Gempa M 5.6 Guncang Wilayah Cianjur', 'link': '#', 'published': 'Kemarin', 'summary': 'Kerusakan infrastruktur...', 'source': 'Simulasi'}
+            {'title': 'Banjir Bandang Terjang Pemukiman Warga', 'link': '#', 'published': 'Hari ini', 'summary': 'Hujan deras menyebabkan tanggul jebol. Warga membutuhkan bantuan logistik...', 'source': 'Simulasi'},
+            {'title': 'Gempa M 5.6 Guncang Wilayah Cianjur', 'link': '#', 'published': 'Kemarin', 'summary': 'Gempa darat dangkal menyebabkan kerusakan infrastruktur...', 'source': 'Simulasi'}
         ]
     return final_news
 
@@ -303,10 +319,10 @@ def profile():
     return render_template('profile.html', user=user, balance=balance, days_wait=0)
 
 # --- 6. ROUTES CAMPAIGN ---
-
 @app.route('/dashboard')
 def dashboard():
     if session.get('role') == 'admin': return redirect(url_for('admin_dashboard'))
+    
     campaigns = []
     if contract:
         try:
@@ -315,9 +331,18 @@ def dashboard():
             details_rows = conn.execute("SELECT * FROM campaign_details").fetchall()
             conn.close()
             details_map = {d['blockchain_id']: d for d in details_rows}
+            
+            current_time = time.time()
+            
             for i in range(count):
                 c = contract.functions.getCampaign(i).call()
-                status_code = c[8]; creator_address = c[1]
+                # c structure: [id, creator, title, desc, target, collected, image, deadline, status, withdrawn]
+                
+                status_code = c[8]
+                creator_address = c[1]
+                deadline_ts = c[7]
+                
+                # Filter Logic
                 is_owner = (creator_address == session.get('wallet'))
                 should_show = False
                 if status_code == 1: should_show = True
@@ -327,6 +352,25 @@ def dashboard():
                 if should_show:
                     status_label = 'Pending' if status_code == 0 else 'Active' if status_code == 1 else 'Rejected'
                     detail = details_map.get(c[0])
+                    
+                    # --- LOGIKA HITUNG WAKTU TERSISA (UPDATED) ---
+                    remaining_text = "Selesai"
+                    is_expired = False
+                    
+                    time_diff = deadline_ts - current_time
+                    if time_diff > 0:
+                        days = int(time_diff // 86400)
+                        hours = int((time_diff % 86400) // 3600)
+                        if days > 0:
+                            remaining_text = f"{days} Hari Lagi"
+                        else:
+                            remaining_text = f"{hours} Jam Lagi"
+                    else:
+                        is_expired = True
+                        remaining_text = "Waktu Habis"
+                    
+                    deadline_date = datetime.fromtimestamp(deadline_ts).strftime('%d %b %Y')
+                    
                     campaigns.append({
                         'id': c[0], 'title': c[2], 'desc': c[3],
                         'target': web3.from_wei(c[4], 'ether'),
@@ -334,19 +378,31 @@ def dashboard():
                         'image': c[6], 'status_code': status_code,
                         'status_label': status_label, 'is_owner': is_owner,
                         'tagline': detail['tagline'] if detail else c[3][:50] + "...",
-                        'category': detail['category'] if detail else "Umum"
+                        'category': detail['category'] if detail else "Umum",
+                        
+                        # Data Waktu Baru
+                        'deadline_date': deadline_date,
+                        'remaining_text': remaining_text,
+                        'is_expired': is_expired
                     })
         except Exception as e: print(f"Dashboard Error: {e}")
     return render_template('campaigns.html', campaigns=campaigns)
 
 @app.route('/create_campaign', methods=['GET', 'POST'])
 def create_campaign():
-    if 'user_id' not in session: flash("Silakan login terlebih dahulu.", "error"); return redirect(url_for('login'))
-    if session.get('role') != 'kreator': flash("Hanya akun KREATOR yang bisa membuat kampanye!", "error"); return redirect(url_for('dashboard'))
+    if 'user_id' not in session: flash("Silakan login.", "error"); return redirect(url_for('login'))
+    if session.get('role') != 'kreator': flash("Hanya Kreator!", "error"); return redirect(url_for('dashboard'))
+    
+    prefill_title = request.args.get('title', '')
     
     if request.method == 'POST':
         title = request.form['title']; desc = request.form['description']
         target = float(request.form['target'])
+        
+        # Ambil Durasi (Default 30 hari jika tidak diisi)
+        try: duration_days = int(request.form['duration'])
+        except: duration_days = 30
+        
         category = request.form.get('category', 'Umum')
         tagline = request.form.get('tagline', '')
         usage_plan = request.form.get('usage_plan', '')
@@ -362,11 +418,13 @@ def create_campaign():
         
         try:
             target_wei = web3.to_wei(target, 'ether')
+            # Konversi hari ke menit (karena smart contract pakai menit) -> 1 hari = 1440 menit
+            duration_minutes = duration_days * 1440
             
-            # 1. Ambil Nonce
             nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
             
-            txn = contract.functions.createCampaign(title, desc, target_wei, filename, 43200).build_transaction({
+            # Panggil fungsi Smart Contract
+            txn = contract.functions.createCampaign(title, desc, target_wei, filename, duration_minutes).build_transaction({
                 'chainId': web3.eth.chain_id, 'gas': 2000000, 'gasPrice': web3.eth.gas_price, 'nonce': nonce
             })
             signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
@@ -377,10 +435,9 @@ def create_campaign():
             conn.execute('INSERT INTO campaign_details (blockchain_id, category, usage_plan, social_link, tagline) VALUES (?, ?, ?, ?, ?)',
                          (new_count - 1, category, usage_plan, social_link, tagline))
             conn.commit(); conn.close()
-            flash(f"Campaign berhasil dibuat! Nonce Transaksi: {nonce}", "success")
-            return redirect(url_for('dashboard'))
+            flash(f"Campaign dibuat! Nonce: {nonce}", "success"); return redirect(url_for('dashboard'))
         except Exception as e: conn.close(); flash(f"Error Blockchain: {str(e)}", "error")
-    return render_template('create_campaign.html')
+    return render_template('create_campaign.html', prefill_title=prefill_title)
 
 @app.route('/campaign/<int:id>')
 def campaign_detail(id):
@@ -492,7 +549,6 @@ def admin_dashboard():
             count = contract.functions.getCampaignCount().call()
             stats['total_campaigns'] = count
             db_details = conn.execute("SELECT * FROM campaign_details").fetchall()
-            details_map = {d['blockchain_id']: d for d in db_details}
             
             for i in range(count):
                 c = contract.functions.getCampaign(i).call()
@@ -513,28 +569,37 @@ def admin_dashboard():
         except: pass
 
     transactions_log = get_all_transactions()
-    ganache_accounts = []; recent_blocks = []; network_status = "Offline"
+    ganache_accounts = []; network_status = "Offline"
     
-    try:
-        if web3 and web3.is_connected():
-            network_status = "Connected to Ganache"
+    if web3 and web3.is_connected():
+        network_status = "Connected"
+        try:
             for i, acc in enumerate(web3.eth.accounts):
                 bal = web3.from_wei(web3.eth.get_balance(acc), 'ether')
                 ganache_accounts.append({'index': i, 'address': acc, 'balance': "{:.4f}".format(bal)})
-            latest = web3.eth.block_number
-            for i in range(latest, max(-1, latest - 10), -1):
-                blk = web3.eth.get_block(i)
-                recent_blocks.append({
-                    'number': blk.number, 'hash': blk.hash.hex(),
-                    'tx_count': len(blk.transactions),
-                    'timestamp': datetime.fromtimestamp(blk.timestamp).strftime('%H:%M:%S')
-                })
-    except: network_status = "Error Network"
+        except: pass
+
+    # --- DATA DUMMY DIPERBANYAK UNTUK FULL LOGS ---
+    security_logs = [
+        {'time': 'Baru saja', 'ip': '192.168.1.105', 'action': 'Admin Login Success', 'status': 'low', 'desc': 'Akses valid dari localhost'},
+        {'time': '2 menit lalu', 'ip': '10.0.0.4', 'action': 'Smart Contract Call', 'status': 'medium', 'desc': 'Fungsi donateToCampaign() dipanggil'},
+        {'time': '5 menit lalu', 'ip': '172.16.0.22', 'action': 'Suspicious Rate Limit', 'status': 'high', 'desc': 'Terdeteksi 5 request/detik (Blocked)'},
+        {'time': '10 menit lalu', 'ip': '192.168.1.50', 'action': 'New User Registration', 'status': 'low', 'desc': 'User donatur baru terdaftar'},
+        {'time': '15 menit lalu', 'ip': 'Unknown', 'action': 'Ganache RPC Access', 'status': 'medium', 'desc': 'Koneksi eksternal ke port 7545'},
+        {'time': '30 menit lalu', 'ip': '192.168.1.12', 'action': 'Failed Login Attempt', 'status': 'medium', 'desc': 'Password salah 3x user: admin'},
+        {'time': '1 jam lalu', 'ip': '10.2.2.1', 'action': 'API Key Generated', 'status': 'low', 'desc': 'API Key baru untuk mobile app'},
+        {'time': '2 jam lalu', 'ip': '45.33.22.11', 'action': 'SQL Injection Attempt', 'status': 'high', 'desc': 'Pola serangan terdeteksi di form login (Blocked)'},
+        {'time': '3 jam lalu', 'ip': '192.168.1.105', 'action': 'Campaign Approved', 'status': 'low', 'desc': 'Admin menyetujui kampanye #12'},
+        {'time': '5 jam lalu', 'ip': 'System', 'action': 'Database Backup', 'status': 'low', 'desc': 'Backup otomatis harian berhasil'}
+    ]
+    
+    visitor_stats = { 'total_visits': 1240, 'unique_visitors': 850, 'avg_session': '4m 32s', 'bounce_rate': '35%' }
 
     conn.close()
     return render_template('admin_dashboard.html', stats=stats, total_users=len(users_rows),
                            campaigns=campaigns_data, users=users_rows, transactions=transactions_log,
-                           ganache_accounts=ganache_accounts, recent_blocks=recent_blocks, network_status=network_status)
+                           ganache_accounts=ganache_accounts, network_status=network_status,
+                           security_logs=security_logs, visitor_stats=visitor_stats)
 
 @app.route('/admin/approve/<int:id>')
 def approve_campaign(id):
@@ -573,28 +638,61 @@ def explorer():
 
 @app.route('/api/explorer-data')
 def explorer_data_api():
-    conn = get_db_connection()
-    
-    # 1. Ambil 15 Transaksi Terakhir
-    query = '''
-        SELECT d.amount, d.timestamp, d.tx_hash, d.nonce, u.wallet_address 
-        FROM donations d
-        JOIN users u ON d.donor_name = u.username
-        ORDER BY d.id DESC LIMIT 15
-    '''
-    tx_rows = conn.execute(query).fetchall()
-    
+    # 1. Fetch Transaksi Langsung dari Blockchain (Smart Contract Events)
     transactions = []
-    for tx in tx_rows:
-        transactions.append({
-            'hash': tx['tx_hash'],
-            'from': tx['wallet_address'],
-            'amount': tx['amount'],
-            'nonce': tx['nonce'],
-            'time': tx['timestamp']
-        })
+    
+    if contract and web3 and web3.is_connected():
+        try:
+            # A. Ambil Semua Event Donasi (Dari Block 0)
+            events_donate = contract.events.DonationReceived().get_logs(fromBlock=0)
+            for e in events_donate:
+                tx_hash = e['transactionHash'].hex()
+                
+                # Ambil detail transaksi untuk mendapatkan Nonce
+                nonce = "N/A"
+                try:
+                    tx_detail = web3.eth.get_transaction(tx_hash)
+                    nonce = tx_detail['nonce']
+                except: pass
 
-    # 2. Ambil SEMUA Blok dari 0 sampai Latest (Limit 100 agar tidak crash jika data banyak)
+                transactions.append({
+                    'hash': tx_hash,
+                    'from': e['args']['donor'], # Wallet Address Donatur
+                    'amount': web3.from_wei(e['args']['amount'], 'ether'),
+                    'nonce': nonce,
+                    'time': datetime.fromtimestamp(e['args']['timestamp']).strftime('%H:%M:%S'),
+                    'timestamp_raw': e['args']['timestamp'], # Untuk sorting
+                    'type': 'Donation' # Penanda tipe
+                })
+
+            # B. Ambil Semua Event Pembuatan Kampanye (Dari Block 0)
+            events_create = contract.events.CampaignCreated().get_logs(fromBlock=0)
+            for e in events_create:
+                tx_hash = e['transactionHash'].hex()
+                
+                nonce = "N/A"
+                try:
+                    tx_detail = web3.eth.get_transaction(tx_hash)
+                    nonce = tx_detail['nonce']
+                except: pass
+
+                transactions.append({
+                    'hash': tx_hash,
+                    'from': e['args']['creator'], # Wallet Address Kreator
+                    'amount': '0.0', # Gas fee only usually
+                    'nonce': nonce,
+                    'time': datetime.fromtimestamp(e['args']['timestamp']).strftime('%H:%M:%S'),
+                    'timestamp_raw': e['args']['timestamp'],
+                    'type': 'New Campaign'
+                })
+            
+            # Urutkan dari yang paling baru (Descending)
+            transactions.sort(key=lambda x: x['timestamp_raw'], reverse=True)
+            
+        except Exception as e:
+            print(f"Explorer Data Error: {e}")
+
+    # 2. Ambil SEMUA Blok (Visualisasi Chain)
     all_blocks = []
     network_stats = {'gasPrice': 0, 'blockTime': 0, 'difficulty': 0}
     
@@ -603,10 +701,10 @@ def explorer_data_api():
             current_block_num = web3.eth.block_number
             network_stats['gasPrice'] = web3.from_wei(web3.eth.gas_price, 'gwei')
             
-            # Loop dari 0 sampai blok terakhir
-            # PERINGATAN: Di production asli, ini harus dipaginasi. 
-            # Untuk demo Ganache (biasanya <100 blok), ini aman.
-            for i in range(0, current_block_num + 1):
+            # Batasi visualisasi blok max 50 terakhir agar browser tidak berat
+            start_block = max(0, current_block_num - 50)
+            
+            for i in range(start_block, current_block_num + 1):
                 blk = web3.eth.get_block(i)
                 all_blocks.append({
                     'number': blk.number,
@@ -618,8 +716,6 @@ def explorer_data_api():
                     'miner': blk.miner
                 })
         except: pass
-    
-    conn.close()
     
     return {'transactions': transactions, 'blocks': all_blocks, 'stats': network_stats}
 
