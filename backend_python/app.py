@@ -638,86 +638,112 @@ def explorer():
 
 @app.route('/api/explorer-data')
 def explorer_data_api():
-    # 1. Fetch Transaksi Langsung dari Blockchain (Smart Contract Events)
     transactions = []
+    all_blocks = []
+    network_stats = {'gasPrice': 0, 'blockTime': 0, 'difficulty': 0}
+    # Data Tambahan: Smart Contract Info
+    contract_info = {'address': 'N/A', 'balance': '0', 'campaign_count': 0}
     
     if contract and web3 and web3.is_connected():
         try:
-            # A. Ambil Semua Event Donasi (Dari Block 0)
+            # 1. Ambil Info Kontrak (VAULT)
+            contract_info['address'] = contract.address
+            # Saldo ETH di dalam kontrak
+            raw_bal = web3.eth.get_balance(contract.address)
+            contract_info['balance'] = "{:.4f}".format(web3.from_wei(raw_bal, 'ether'))
+            contract_info['campaign_count'] = contract.functions.getCampaignCount().call()
+
+            # 2. Transaksi (Event Logs)
             events_donate = contract.events.DonationReceived().get_logs(fromBlock=0)
             for e in events_donate:
                 tx_hash = e['transactionHash'].hex()
-                
-                # Ambil detail transaksi untuk mendapatkan Nonce
                 nonce = "N/A"
                 try:
                     tx_detail = web3.eth.get_transaction(tx_hash)
                     nonce = tx_detail['nonce']
                 except: pass
-
-                transactions.append({
-                    'hash': tx_hash,
-                    'from': e['args']['donor'], # Wallet Address Donatur
-                    'amount': web3.from_wei(e['args']['amount'], 'ether'),
-                    'nonce': nonce,
-                    'time': datetime.fromtimestamp(e['args']['timestamp']).strftime('%H:%M:%S'),
-                    'timestamp_raw': e['args']['timestamp'], # Untuk sorting
-                    'type': 'Donation' # Penanda tipe
-                })
-
-            # B. Ambil Semua Event Pembuatan Kampanye (Dari Block 0)
+                transactions.append({'hash': tx_hash, 'from': e['args']['donor'], 'amount': web3.from_wei(e['args']['amount'], 'ether'), 'nonce': nonce, 'time': datetime.fromtimestamp(e['args']['timestamp']).strftime('%H:%M:%S'), 'timestamp_raw': e['args']['timestamp'], 'type': 'Donation'})
+            
             events_create = contract.events.CampaignCreated().get_logs(fromBlock=0)
             for e in events_create:
                 tx_hash = e['transactionHash'].hex()
-                
                 nonce = "N/A"
                 try:
                     tx_detail = web3.eth.get_transaction(tx_hash)
                     nonce = tx_detail['nonce']
                 except: pass
-
-                transactions.append({
-                    'hash': tx_hash,
-                    'from': e['args']['creator'], # Wallet Address Kreator
-                    'amount': '0.0', # Gas fee only usually
-                    'nonce': nonce,
-                    'time': datetime.fromtimestamp(e['args']['timestamp']).strftime('%H:%M:%S'),
-                    'timestamp_raw': e['args']['timestamp'],
-                    'type': 'New Campaign'
-                })
+                transactions.append({'hash': tx_hash, 'from': e['args']['creator'], 'amount': '0.0', 'nonce': nonce, 'time': datetime.fromtimestamp(e['args']['timestamp']).strftime('%H:%M:%S'), 'timestamp_raw': e['args']['timestamp'], 'type': 'New Campaign'})
             
-            # Urutkan dari yang paling baru (Descending)
             transactions.sort(key=lambda x: x['timestamp_raw'], reverse=True)
-            
-        except Exception as e:
-            print(f"Explorer Data Error: {e}")
 
-    # 2. Ambil SEMUA Blok (Visualisasi Chain)
-    all_blocks = []
-    network_stats = {'gasPrice': 0, 'blockTime': 0, 'difficulty': 0}
-    
-    if web3 and web3.is_connected():
-        try:
+            # 3. Blocks
             current_block_num = web3.eth.block_number
             network_stats['gasPrice'] = web3.from_wei(web3.eth.gas_price, 'gwei')
-            
-            # Batasi visualisasi blok max 50 terakhir agar browser tidak berat
             start_block = max(0, current_block_num - 50)
-            
             for i in range(start_block, current_block_num + 1):
                 blk = web3.eth.get_block(i)
-                all_blocks.append({
-                    'number': blk.number,
-                    'hash': blk.hash.hex(),
-                    'parentHash': blk.parentHash.hex(),
-                    'tx_count': len(blk.transactions),
-                    'timestamp': datetime.fromtimestamp(blk.timestamp).strftime('%H:%M:%S'),
-                    'gasUsed': blk.gasUsed,
-                    'miner': blk.miner
-                })
-        except: pass
+                all_blocks.append({'number': blk.number, 'hash': blk.hash.hex(), 'tx_count': len(blk.transactions), 'timestamp': datetime.fromtimestamp(blk.timestamp).strftime('%H:%M:%S'), 'gasUsed': blk.gasUsed})
+        except Exception as e:
+            print(f"API Error: {e}")
     
-    return {'transactions': transactions, 'blocks': all_blocks, 'stats': network_stats}
+    return {
+        'transactions': transactions, 
+        'blocks': all_blocks, 
+        'stats': network_stats,
+        'contract': contract_info  # Data baru dikirim ke frontend
+    }
+
+@app.route('/api/latest-activity')
+def get_latest_activity():
+    try:
+        # Header agar tidak di-cache browser (Penting!)
+        response_headers = {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
+
+        if not contract: 
+            return ({'status': 'error', 'msg': 'Contract not connected'}, 200, response_headers)
+        
+        # Ambil block terbaru
+        current_block = web3.eth.block_number
+        # Cari log dari 1000 block terakhir (cukup aman & cepat)
+        start_search = max(0, current_block - 1000)
+        
+        events = contract.events.DonationReceived().get_logs(fromBlock=start_search)
+        
+        if not events:
+            return ({'status': 'empty'}, 200, response_headers)
+            
+        # Ambil event PALING BARU (index terakhir)
+        latest_event = events[-1]
+        args = latest_event['args']
+        
+        # Cek Database untuk ambil Nama User
+        conn = get_db_connection()
+        user = conn.execute("SELECT username, role FROM users WHERE wallet_address = ?", (args['donor'],)).fetchone()
+        conn.close()
+        
+        role = user['role'] if user else 'Guest'
+        username = user['username'] if user else 'Anonymous'
+        
+        data = {
+            'status': 'success',
+            'tx_hash': latest_event['transactionHash'].hex(),
+            'from_wallet': args['donor'],
+            'username': username,
+            'role': role.capitalize(),
+            'amount': "{:.4f}".format(web3.from_wei(args['amount'], 'ether')),
+            'campaign_id': args['campaignId'],
+            'timestamp': args['timestamp']
+        }
+        return (data, 200, response_headers)
+
+    except Exception as e:
+        print(f"API Error: {e}")
+        return ({'status': 'error', 'msg': str(e)}, 200, response_headers)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
