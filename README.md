@@ -128,7 +128,7 @@ http://127.0.0.1:5000
 
 ---
 
-## 🔑 Akun Demo (Untuk Sidang/Presentasi)
+## 🔑 Akun Demo
 
 Gunakan data ini untuk demo tanpa registrasi ulang.
 
