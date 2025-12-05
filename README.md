@@ -2,143 +2,178 @@
 
 ### Final Project: Teknologi Blockchain & Distributed Ledger — Semester 5 - Teknik Informatika
 
-Platform donasi transparan berbasis Ethereum Blockchain dengan arsitektur Hybrid (Flask + Web3).
+DonasiKuy adalah platform donasi transparan berbasis Ethereum Blockchain yang menggabungkan kemudahan Web 2.0 dengan keamanan Web 3.0 (Hybrid Architecture).
+
+Proyek ini bertujuan untuk mengatasi krisis kepercayaan dalam donasi online dengan mencatat setiap transaksi secara kekal (immutable) di blockchain, sambil menyediakan antarmuka modern yang ramah pengguna.
+
+---
+
+## ✨ Fitur Unggulan (New!)
+
+* 🌍 **Public Blockchain Explorer** — Visualisasi rantai blok dan transaksi donasi secara live & transparan.
+* 🛡️ **Admin Security Dashboard (SIEM)** — Pemantauan keamanan, deteksi serangan, analisis trafik, dan pemantauan IP.
+* 📰 **Live Humanitarian News** — Integrasi berita bencana real-time via RSS Feed.
+* 🔔 **Real-Time Activity Toast** — Notifikasi aktivitas donasi otomatis tanpa perlu refresh.
+* ⏳ **Smart Countdown** — Penghitung mundur otomatis untuk tenggat kampanye.
 
 ---
 
 ## 👥 Tim Pengembang
 
-| Peran              | Nama                         | Fokus Tugas                                     |
-| ------------------ | ---------------------------- | ----------------------------------------------- |
-| Analis & Pemodel   | Masdani Ilman Putra Karmawan | Use Case, Flow Sistem, Requirement Analysis     |
-| Arsitek & Engineer | Nur Akhmad Van Jouvi         | Smart Contract, Flask Backend, Ganache Setup    |
-| QA & Security      | Fathur Rahman                | Security Testing, Postman API Test, Bug Hunting |
+| Peran              | Nama                         | Fokus Tugas                                        |
+| ------------------ | ---------------------------- | -------------------------------------------------- |
+| Analis & Pemodel   | Masdani Ilman Putra Karmawan | Use Case, Flow Sistem, Requirement Analysis        |
+| Arsitek & Engineer | Nur Akhmad Van Jouvi         | Smart Contract, Flask Backend, Ganache Setup, SIEM |
+| QA & Security      | Fathur Rahman                | Security Testing, Postman API Test, Bug Hunting    |
 
 ---
 
-## 🛠️ Teknologi yang Digunakan (Tech Stack)
+## 🛠️ Teknologi (Tech Stack)
 
-* **Blockchain**: Ethereum (Simulasi Lokal via Ganache)
+* **Core Blockchain**: Ethereum (Simulasi via Ganache)
 * **Smart Contract**: Solidity (.sol), Truffle Framework
 * **Backend**: Python Flask
-* **Frontend**: HTML5, CSS3 (Bootstrap 5), Jinja2 Template
-* **Database**: SQLite (untuk data user & detail kampanye off-chain)
-* **Library**: Web3.py (Jembatan Python ke Blockchain)
+* **Frontend**: Bootstrap 5, Jinja2, SweetAlert2, Chart.js
+* **Database**: SQLite (untuk data user & meta-data kampanye)
+* **Connector**: Web3.py (Jembatan Python ↔ Blockchain)
 
 ---
 
-## 🚀 Cara Menjalankan Project (Langkah demi Langkah)
+## 🚀 Panduan Instalasi & Menjalankan (Lengkap)
 
-### 1. Persiapan Awal (Prerequisites)
+Ikuti langkah berikut agar proyek berjalan lancar.
+
+### 1. Persiapan Software (Prerequisites)
 
 Pastikan sudah terinstall:
 
-* Node.js (untuk Truffle)
-* Python 3.x (untuk Backend)
+* Node.js
+* Python 3.8+
 * Ganache GUI
+* Git
 
 ### 2. Setup Blockchain (Ganache)
 
 1. Buka Ganache
-2. Klik **New Workspace**
-3. Beri nama workspace (misal: DonasiKuy_Dev)
-4. Pastikan Port Number = **7545**
+2. Klik **New Workspace (Ethereum)**
+3. Isi nama workspace → *DonasiKuy_Dev*
+4. Masuk tab **Server**, pastikan Port = **7545**
 5. Klik **Save Workspace**
+6. Biarkan Ganache tetap menyala
 
-> Catatan: Biarkan Ganache tetap menyala selama menjalankan aplikasi.
+### 3. Deploy Smart Contract
 
-### 3. Setup Smart Contract
-
-Buka terminal di folder utama project (`donation_truffle`):
+Masuk ke folder `donation_truffle`:
 
 ```
 npm install -g truffle
 truffle migrate --reset
 ```
 
-> Jika sukses, muncul alamat kontrak (contoh: 0x123...). Biarkan terminal tetap terbuka.
+Setelah selesai, terminal akan menampilkan **Contract Address** (contoh: `0x123...`).
 
-### 4. Setup Backend (Python)
+Update file:
 
-Masuk folder backend:
+```
+backend_python/contract_data.py
+```
+
+Isi variabel `contract_address` dengan alamat terbaru.
+
+### 4. Setup Backend (Python Flask)
+
+Masuk ke folder backend:
 
 ```
 cd backend_python
+```
+
+Buat virtual environment:
+
+```
+Windows:
 python -m venv venv
-```
+venv\Scripts\activate
 
-Aktifkan virtual environment:
-
-```
-Windows: venv\Scripts\activate
-Mac/Linux: source venv/bin/activate
+Mac/Linux:
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 Install library:
 
 ```
+pip install Flask web3 feedparser
+```
+
+Atau:
+
+```
 pip install -r requirements.txt
 ```
 
-Isi file requirements.txt jika belum ada:
-
-```
-Flask
-web3
-```
-
-### 5. Menjalankan Aplikasi Web
+Jalankan aplikasi:
 
 ```
 python app.py
 ```
 
-Akses di browser: **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+### 5. Akses Platform
+
+Akses melalui browser:
+
+```
+http://127.0.0.1:5000
+```
 
 ---
 
-## 🔑 Panduan Akun (PENTING UNTUK DEMO)
+## 🔑 Akun Demo (Untuk Sidang/Presentasi)
 
-Menggunakan akun Ganache sebagai dompet.
+Gunakan data ini untuk demo tanpa registrasi ulang.
 
-Cara mendapatkan akun:
-
-* Buka Ganache → lihat Address → klik **Show Key** untuk Private Key
-
-### 👮‍♂️ A. Login Admin
+### 1. Super Admin
 
 * Email: **[admin@donasi.com](mailto:admin@donasi.com)**
 * Password: **admin123**
-  Tugas: approve kampanye baru.
+* Fitur: Dashboard SIEM, Approve/Reject Kampanye, Hapus User
 
-### 📢 B. Daftar Kreator
+### 2. Akun Kreator
 
-* Pilih Role: Kreator
-* Copy Address & Private Key dari Ganache (akun ke-2)
-  Tugas: buat kampanye & withdraw dana.
+Cara:
 
-### 💙 C. Daftar Donatur
+1. Register di web
+2. Pilih role **Kreator**
+3. Dari Ganache ambil akun ke-2 (Index 1)
+4. Klik icon kunci → copy Private Key
 
-* Pilih Role: Donatur
-* Copy Address & Private Key dari Ganache (akun ke-3)
-  Tugas: donasi ke kampanye aktif.
+### 3. Akun Donatur
+
+Cara:
+
+1. Register di web
+2. Pilih role **Donatur**
+3. Dari Ganache ambil akun ke-3 (Index 2)
+4. Copy Private Key
 
 ---
 
 ## ⚠️ Troubleshooting (Solusi Masalah Umum)
 
-| Masalah                       | Penyebab                                   | Solusi                                                                   |
-| ----------------------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
-| Connection Refused            | Ganache mati / port beda                   | Pastikan Ganache menyala & port = 7545 (atau ubah di `contract_data.py`) |
-| Campaign has ended            | Durasi kampanye habis                      | Buat kampanye baru (misal 30 hari)                                       |
-| Signature Verification Failed | Database tidak sinkron dengan Ganache baru | Hapus `backend_python/instance/users.db`, jalankan ulang Flask           |
+| Masalah                       | Penyebab                     | Solusi                                                          |
+| ----------------------------- | ---------------------------- | --------------------------------------------------------------- |
+| Connection Refused            | Ganache mati / Port salah    | Buka Ganache → Pastikan Port 7545 → Restart app.py              |
+| Contract Logic Error / Revert | Saldo kurang / akun salah    | Pastikan akun memiliki 100 ETH default dari Ganache             |
+| Signature Verification Failed | Database tidak sinkron       | Hapus `backend_python/instance/users.db` → jalankan ulang Flask |
+| Notifikasi Tidak Muncul       | Cache browser                | Hard Refresh (Ctrl + F5) atau buka mode Incognito               |
+| TVL/Saldo Aneh                | Data lama tersisa di Ganache | Klik **Restart Workspace** → jalankan `truffle migrate --reset` |
 
 ---
 
 ## 📜 Referensi Akademik
 
-* Khokale et al. (2025) — Transparansi Blockchain
-* Kartiko et al. (2023) — Efisiensi Gas Fee (Hybrid Architecture)
+* Zheng et al. (2020) — Blockchain-Based Decentralized Application Architecture
+* Kartiko et al. (2023) — Efisiensi Gas Fee Ethereum
 * Indra S B et al. (2024) — Verifikasi Identitas Kreator
 
 ---
