@@ -1,6 +1,6 @@
 # 🪙 DonasiKuy - Decentralized Crowdfunding Platform
 
-### Final Project: Teknologi Blockchain & Distributed Ledger — Semester 5 - Teknik Informatika
+### Final Project: Teknologi Blockchain & Distributed Ledger
 
 DonasiKuy adalah platform donasi transparan berbasis Ethereum Blockchain yang menggabungkan kemudahan Web 2.0 dengan keamanan Web 3.0 (Hybrid Architecture).
 
