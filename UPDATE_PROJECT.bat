@@ -18,7 +18,7 @@ git stash
 
 :: 3. Tarik update dari GitHub
 echo.
-echo [3/5] Mengambil update terbaru dari GitHub Punya Masdani...
+echo [3/5] Mengambil update terbaru dari GitHub Punya Jouvi...
 git pull origin main
 
 :: 4. Update Library Python (Jaga-jaga kalau ada library baru)
