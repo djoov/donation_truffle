@@ -607,6 +607,34 @@
             if (tabBtn) new bootstrap.Tab(tabBtn).show();
         }
     });
+
+    // --- CRITICAL FIX: MANAGE SEPARATE NAV LISTS ---
+    // Because we have multiple <ul> lists (Main Menu & System) controlling the same content,
+    // Bootstrap sometimes fails to deactivate the previous tab. We force it manually.
+    const allAdminTabs = document.querySelectorAll('.nav-link-admin');
+    const allPanes = document.querySelectorAll('.tab-pane');
+
+    allAdminTabs.forEach(tab => {
+        tab.addEventListener('click', function (e) {
+            // 1. Remove active class from ALL buttons
+            allAdminTabs.forEach(t => t.classList.remove('active'));
+            // 2. Add active to clicked button
+            this.classList.add('active');
+
+            // 3. Force Hide ALL Panes
+            allPanes.forEach(p => p.classList.remove('show', 'active'));
+
+            // 4. Show Target Pane
+            const targetId = this.getAttribute('data-bs-target');
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+                // Must add 'active' then 'show' for fade effect (or just both)
+                setTimeout(() => {
+                    targetPane.classList.add('show', 'active');
+                }, 50); // Small delay to prevent race condition with Bootstrap
+            }
+        });
+    });
 </script>
 
 <style>
