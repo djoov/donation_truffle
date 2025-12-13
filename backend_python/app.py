@@ -23,7 +23,9 @@ app.config['MAIL_PASSWORD'] = 'flkx busl pzmr fnxu'
 # Imports untuk Email
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from itsdangerous import URLSafeTimedSerializer
 
 # Import Contract Data
 try:
@@ -329,6 +331,85 @@ def get_humanitarian_news():
         ]
     return final_news
 
+
+# Validasi dan Helper Lainnya...
+
+# --- 3d. CAMPAIGN NOTIFICATION HELPER ---
+def send_campaign_notification(to_email, username, campaign_title, status):
+    """
+    Kirim email notifikasi status kampanye (Pending / Approved / Rejected)
+    Status: 'pending', 'approved', 'rejected'
+    """
+    try:
+        sender_email = app.config['MAIL_USERNAME']
+        password = app.config['MAIL_PASSWORD']
+        
+        # MOCK MODE jika kredensial belum diset
+        if 'xxxx' in password:
+            print(f"[MOCK CAMPAIGN EMAIL] To: {to_email} | Status: {status} | Title: {campaign_title}")
+            return
+
+        msg = MIMEMultipart()
+        msg['From'] = f"DonasiKuy Admin &lt;{sender_email}&gt;"
+        msg['To'] = to_email
+        
+        # Subject & Color Coding
+        if status == 'pending':
+            subject = "⏳ Kampanye Menunggu Persetujuan: " + campaign_title
+            color = "#f59e0b" # Amber
+            status_text = "Sedang Direview"
+            desc = "Kampanye Anda berhasil dibuat dan sedang dalam antrean moderasi oleh Admin."
+        elif status == 'approved':
+            subject = "✅ Kampanye DITERIMA! Silakan Share: " + campaign_title
+            color = "#10b981" # Emerald
+            status_text = "Disetujui / Aktif"
+            desc = "Selamat! Kampanye Anda telah disetujui dan sekarang dapat menerima donasi dari publik."
+        else: # rejected
+            subject = "❌ Status Kampanye: " + campaign_title
+            color = "#ef4444" # Red
+            status_text = "Ditolak / Dihapus"
+            desc = "Mohon maaf, kampanye Anda tidak memenuhi syarat atau telah dihapus oleh Admin."
+
+        msg['Subject'] = subject
+
+        body = f"""
+        <html>
+        <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f3f4f6; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <div style="background-color: {color}; padding: 30px; text-align: center;">
+                    <h1 style="color: white; margin: 0; font-size: 24px;">Status Kampanye</h1>
+                </div>
+                <div style="padding: 40px 30px;">
+                    <h2 style="color: #1f2937; margin-top: 0;">Halo, {username}! 👋</h2>
+                    <p style="font-size: 16px; color: #4b5563;">Berikut adalah update terbaru mengenai kampanye Anda:</p>
+                    
+                    <div style="background-color: #f9fafb; border-left: 5px solid {color}; padding: 20px; margin: 25px 0; border-radius: 4px;">
+                        <h3 style="margin: 0 0 10px 0; color: #111;">{campaign_title}</h3>
+                        <span style="background-color: {color}; color: white; padding: 4px 12px; border-radius: 99px; font-size: 14px; font-weight: bold;">{status_text}</span>
+                        <p style="margin-top: 15px; margin-bottom: 0; color: #4b5563;">{desc}</p>
+                    </div>
+                    
+                    <p>Terima kasih telah menggunakan DonasiKuy untuk misi kebaikan Anda.</p>
+                    
+                    <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 20px; text-align: center;">
+                        <a href="http://localhost:5000/dashboard" style="display: inline-block; color: {color}; text-decoration: none; font-weight: bold;">Ke Dashboard &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, 'html'))
+        server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        server.starttls()
+        server.login(sender_email, password)
+        server.send_message(msg)
+        server.quit()
+        print(f"[EMAIL SUCCESS] Campaign logic ({status}) sent to {to_email}")
+    except Exception as e:
+        print(f"[EMAIL FAILED] {e}")
+
 # --- 3c. EMAIL NOTIFICATION HELPER ---
 def send_welcome_email(to_email, username):
     try:
@@ -388,6 +469,171 @@ def send_welcome_email(to_email, username):
     except Exception as e:
         print(f"[EMAIL FAILED] Could not send email to {to_email}: {e}")
 
+
+# --- 3e. RESET PASSWORD HELPER ---
+def send_reset_password_email(to_email, token):
+    try:
+        sender_email = app.config['MAIL_USERNAME']
+        password = app.config['MAIL_PASSWORD']
+        reset_link = url_for('reset_password', token=token, _external=True)
+
+        if 'xxxx' in password:
+            print(f"[MOCK EMAIL] Reset Link for {to_email}: {reset_link}")
+            return
+
+        msg = MIMEMultipart()
+        msg['From'] = f"DonasiKuy Security &lt;{sender_email}&gt;"
+        msg['To'] = to_email
+        msg['Subject'] = "🔒 Reset Password DonasiKuy"
+
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                <div style="background-color: #f8fafc; padding: 30px; text-align: center; border-bottom: 2px solid #ef4444;">
+                    <h2 style="color: #ef4444; margin: 0;">Permintaan Reset Password</h2>
+                </div>
+                <div style="padding: 30px; background-color: #ffffff;">
+                    <p>Halo,</p>
+                    <p>Kami menerima permintaan untuk mereset password akun DonasiKuy Anda.</p>
+                    <p>Silakan klik tombol di bawah ini untuk membuat password baru (Link berlaku 15 menit):</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{reset_link}" style="background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Reset Password Saya</a>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #64748b;">Jika Anda tidak merasa meminta reset password, abaikan email ini. Akun Anda tetap aman.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, 'html'))
+
+        server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        server.starttls()
+        server.login(sender_email, password)
+        server.send_message(msg)
+        server.quit()
+        print(f"[EMAIL SUCCESS] Reset link sent to {to_email}")
+    except Exception as e:
+        print(f"[EMAIL FAILED] {e}")
+
+
+# --- 3f. DONOR NOTIFICATION HELPERS ---
+def get_donor_emails(campaign_id):
+    """Mengambil daftar email unik dari semua donatur di kampanye tertentu."""
+    conn = get_db_connection()
+    # Ambil nama donatur (asumsi username)
+    donors = conn.execute("SELECT DISTINCT donor_name FROM donations WHERE blockchain_id = ?", (campaign_id,)).fetchall()
+    emails = []
+    for d in donors:
+        # Cari email berdasarkan username
+        user = conn.execute("SELECT email FROM users WHERE username = ?", (d['donor_name'],)).fetchone()
+        if user:
+            emails.append(user['email'])
+    conn.close()
+    return list(set(emails))
+
+def send_update_email(recipients, campaign_title, update_title, content, image_filename=None):
+    if not recipients: return
+    
+    sender_email = app.config['MAIL_USERNAME']
+    password = app.config['MAIL_PASSWORD']
+    
+    # Image URL (Localhost context)
+    image_html = ""
+    if image_filename:
+        img_url = url_for('static', filename='uploads/' + image_filename, _external=True)
+        image_html = f'<div style="margin: 20px 0;"><img src="{img_url}" style="max-width: 100%; border-radius: 8px;" alt="Update Image"></div>'
+
+    msg = MIMEMultipart()
+    msg['From'] = f"DonasiKuy Updates &lt;{sender_email}&gt;"
+    msg['Subject'] = f"🔔 Update Terbaru: {campaign_title}"
+    msg['Bcc'] = ", ".join(recipients) # Blind Carbon Copy untuk privasi
+
+    body = f"""
+    <html>
+    <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #3b82f6; padding: 20px; text-align: center; color: white;">
+                <h2 style="margin:0;">Kabar Terbaru Kampanye</h2>
+                <p style="margin:5px 0 0 0; opacity: 0.9;">{campaign_title}</p>
+            </div>
+            <div style="padding: 30px; background-color: #fff;">
+                <h3 style="color: #1e3a8a; margin-top: 0;">{update_title}</h3>
+                <div style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+                    {content}
+                </div>
+                {image_html}
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #f3f4f6; text-align: center; font-size: 12px; color: #9ca3af;">
+                    Anda menerima email ini karena telah berdonasi di kampanye ini.<br>
+                    DonasiKuy - Platform Kebaikan Blockchain.
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    msg.attach(MIMEText(body, 'html'))
+    
+    try:
+        if 'xxxx' in password:
+            print(f"[MOCK EMAIL] To Donors ({len(recipients)}): {update_title}")
+            return
+            
+        server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        server.starttls()
+        server.login(sender_email, password)
+        # Send to one recipient in To (admin or dummy) and real list in Bcc
+        # But send_message handles Bcc automatically if in headers but not in 'To' arg? 
+        # Actually standard SMTP needs list of recipients.
+        server.send_message(msg, to_addrs=recipients) 
+        server.quit()
+        print(f"[EMAIL SUCCESS] Update sent to {len(recipients)} donors.")
+    except Exception as e:
+        print(f"[EMAIL FAILED] Donor update: {e}")
+
+def send_withdrawal_email(recipients, campaign_title):
+    if not recipients: return
+    sender_email = app.config['MAIL_USERNAME']
+    password = app.config['MAIL_PASSWORD']
+    
+    msg = MIMEMultipart()
+    msg['From'] = f"DonasiKuy Finance &lt;{sender_email}&gt;"
+    msg['Subject'] = f"💸 Dana Dicairkan: {campaign_title}"
+    msg['Bcc'] = ", ".join(recipients)
+
+    body = f"""
+    <html>
+    <body style="font-family: sans-serif; color: #333;">
+        <div style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #059669;">Dana Telah Dicairkan</h2>
+            <p>Halo Orang Baik,</p>
+            <p>Kabar gembira! Dana donasi untuk kampanye <strong>{campaign_title}</strong> telah dicairkan oleh kreator untuk memulai implementasi program kebaikan.</p>
+            <p>Terima kasih telah menjadi bagian dari perjalanan ini. Tunggu update selanjutnya ya!</p>
+            <br>
+            <a href="http://localhost:5000/dashboard" style="color: #3b82f6;">Lihat Kampanye</a>
+        </div>
+    </body>
+    </html>
+    """
+    msg.attach(MIMEText(body, 'html'))
+
+    try:
+        if 'xxxx' in password:
+            print(f"[MOCK EMAIL] Withdrawal Notif to {len(recipients)} donors")
+            return
+        server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        server.starttls()
+        server.login(sender_email, password)
+        server.send_message(msg, to_addrs=recipients)
+        server.quit()
+    except Exception as e:
+        print(f"[EMAIL FAILED] Withdrawal notif: {e}")
+
 # --- 4. ROUTES UTAMA ---
 
 @app.route('/')
@@ -438,6 +684,49 @@ def login():
             flash('Login gagal! Cek email/password.', 'error')
             log_security('Login Failed', 'medium', f"Failed login attempt for email: {email}")
     return render_template('auth/login.html', hide_chrome=True)
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        conn.close()
+
+        if user:
+            # Generate Token (valid 15 minutes)
+            s = URLSafeTimedSerializer(app.secret_key)
+            token = s.dumps(email, salt='email-reset')
+            send_reset_password_email(email, token)
+        
+        # Always flash success to prevent email enumeration
+        flash('Jika email terdaftar, link reset password telah dikirim.', 'info')
+        return redirect(url_for('login'))
+        
+    return render_template('auth/forgot_password.html', hide_chrome=True)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        s = URLSafeTimedSerializer(app.secret_key)
+        email = s.loads(token, salt='email-reset', max_age=900) # 15 minutes
+    except:
+        flash('Link reset password tidak valid atau sudah kadaluwarsa.', 'error')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        password = request.form['password']
+        
+        # Update Password
+        conn = get_db_connection()
+        conn.execute('UPDATE users SET password = ? WHERE email = ?', (password, email))
+        conn.commit(); conn.close()
+        
+        log_security('Password Reset', 'medium', f"User {email} reset their password.")
+        flash('Password berhasil diubah! Silakan login.', 'success')
+        return redirect(url_for('login'))
+        
+    return render_template('auth/reset_password.html', hide_chrome=True, token=token)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -662,10 +951,17 @@ def create_campaign():
             new_count = contract.functions.getCampaignCount().call()
             conn.execute('INSERT INTO campaign_details (blockchain_id, category, usage_plan, social_link, tagline) VALUES (?, ?, ?, ?, ?)',
                          (new_count - 1, category, usage_plan, social_link, tagline))
+            
+            # --- EMAIL NOTIF: PENDING (KE KREATOR) ---
+            try:
+                creator_email = conn.execute("SELECT email, username FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+                send_campaign_notification(creator_email['email'], creator_email['username'], title, 'pending')
+            except: pass
+
             conn.commit(); conn.close()
             flash(f"Campaign dibuat! Nonce: {nonce}", "success"); return redirect(url_for('dashboard'))
         except Exception as e: conn.close(); flash(f"Error Blockchain: {str(e)}", "error")
-    return render_template('create_campaign.html', prefill_title=prefill_title)
+    return render_template('create_campaign.html', prefill_title=prefill_title, hide_chrome=True)
 
 @app.route('/campaign/<int:id>')
 def campaign_detail(id):
@@ -771,6 +1067,22 @@ def post_update(id):
     conn = get_db_connection()
     conn.execute('INSERT INTO campaign_updates (blockchain_id, title, content, image, created_at) VALUES (?, ?, ?, ?, ?)',
                  (id, title, content, image_filename, time.ctime()))
+    
+    # --- EMAIL UPDATE TO DONORS ---
+    try:
+        # 1. Fetch Campaign Title
+        campaign = contract.functions.getCampaign(id).call()
+        campaign_title = campaign[2]
+        
+        # 2. Get Donors
+        donors = get_donor_emails(id)
+        
+        # 3. Send Emails
+        if donors:
+            send_update_email(donors, campaign_title, title, content, image_filename)
+    except Exception as e:
+        print(f"Error sending update emails: {e}")
+        
     conn.commit(); conn.close()
     flash("Kabar terbaru berhasil diposting!", "success"); return redirect(url_for('campaign_detail', id=id))
 
@@ -791,6 +1103,19 @@ def withdraw_funds(id):
         # web3.eth.wait_for_transaction_receipt(tx_hash) <-- ASYNC
         log_security('Withdrawal Funds', 'medium', f"Withdrawal initiated for Campaign #{id}. Tx: {tx_hash.hex()[:10]}...")
         flash(f"Penarikan sedang diproses blockchain (Tx: {tx_hash.hex()[:10]}...)", "success")
+        
+        # --- EMAIL WITHDRAWAL NOTIF ---
+        try:
+            # 1. Title
+            campaign = contract.functions.getCampaign(id).call()
+            title = campaign[2]
+            # 2. Donors
+            donors = get_donor_emails(id)
+            # 3. Send
+            if donors:
+                send_withdrawal_email(donors, title)
+        except Exception as e: print(f"Error withdrawal email: {e}")
+        
     except Exception as e: 
         log_security('Withdrawal Failed', 'high', f"Failed to withdraw Campaign #{id}: {str(e)}")
         flash(f"Gagal Tarik Dana: {e}", "error")
@@ -902,6 +1227,19 @@ def approve_campaign(id):
         tx = contract.functions.approveCampaign(id).transact({'from': web3.eth.accounts[0], 'nonce': nonce})
         # web3.eth.wait_for_transaction_receipt(tx); 
         log_security('Admin Approve', 'high', f"Admin approved Campaign #{id}")
+
+        # --- EMAIL NOTIF: APPROVED ---
+        try:
+            # Fetch Blockchain Data Sync for Email Info
+            c_data = contract.functions.getCampaign(id).call()
+            # c_data[1] = creator address, c_data[2] = title
+            conn = get_db_connection()
+            user = conn.execute("SELECT email, username FROM users WHERE wallet_address = ?", (c_data[1],)).fetchone()
+            conn.close()
+            if user:
+                send_campaign_notification(user['email'], user['username'], c_data[2], 'approved')
+        except Exception as e: print(f"Email Fail: {e}")
+
         flash(f"Campaign #{id} Approve broadcasted..", "success")
     except Exception as e: flash(f"Gagal approve: {e}", "error")
     return redirect(url_for('admin_dashboard'))
@@ -915,6 +1253,17 @@ def delete_campaign(id):
         tx = contract.functions.deleteCampaign(id).transact({'from': web3.eth.accounts[0], 'nonce': nonce})
         # web3.eth.wait_for_transaction_receipt(tx); 
         log_security('Admin Delete', 'high', f"Admin soft-deleted Campaign #{id}")
+
+        # --- EMAIL NOTIF: REJECTED ---
+        try:
+            c_data = contract.functions.getCampaign(id).call()
+            conn = get_db_connection()
+            user = conn.execute("SELECT email, username FROM users WHERE wallet_address = ?", (c_data[1],)).fetchone()
+            conn.close()
+            if user:
+                send_campaign_notification(user['email'], user['username'], c_data[2], 'rejected')
+        except: pass
+
         flash(f"Campaign #{id} Delete broadcasted.", "success")
     except Exception as e: flash(f"Gagal hapus: {e}", "error")
     return redirect(url_for('admin_dashboard'))

@@ -16,6 +16,70 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
+        <style>
+
+        /* --- NAVBAR POLISH (PREMIUM) --- */
+        body {
+            /* Mesh Gradient Subtle Background */
+            background-color: #f8fafc;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 0) 0, hsla(253, 16%, 7%, 0) 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0) 0, hsla(225, 39%, 30%, 0) 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0) 0, hsla(339, 49%, 30%, 0) 50%);
+            background-attachment: fixed;
+            /* Parallax effect */
+        }
+
+        /* Glass Navbar yang Lebih Jelas */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.75) !important;
+            /* Lebih transparan */
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            position: relative;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            /* Slate 600 */
+            transition: all 0.3s ease;
+            margin: 0 6px;
+            padding: 8px 0;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #4f46e5 !important;
+            transform: translateY(-1px);
+            /* Sedikit naik */
+        }
+
+        /* Animated Underline yang lebih Pop */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: 0;
+            left: 50%;
+            background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+            /* Gradient Line */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            border-radius: 99px;
+            opacity: 0;
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+            /* Lebih lebar */
+            opacity: 1;
+        }
+
         /* Styles Tambahan Khusus UX */
         .btn-web3 {
             background: #0f172a;
@@ -195,7 +259,7 @@
 
     <!-- NAVBAR -->
     {% if not hide_chrome %}
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm bg-white">
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm glass-nav">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo"

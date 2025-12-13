@@ -2,66 +2,127 @@
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Custom Admin Styles -->
+    <style>
+        .sidebar-premium {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            /* Indigo 950 to 900 */
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link-admin {
+            color: #94a3b8;
+            /* Slate 400 */
+            font-weight: 500;
+            padding: 12px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link-admin:hover {
+            color: #f8fafc;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-link-admin.active {
+            background: linear-gradient(90deg, #4f46e5, #4338ca);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .nav-link-admin i {
+            width: 24px;
+            text-align: center;
+            margin-right: 12px;
+        }
+    </style>
+
     <div class="row flex-nowrap">
 
         <!-- SIDEBAR NAVIGASI (KIRI) -->
-        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark shadow-lg sidebar-sticky">
+        <div class="col-auto col-md-3 col-xl-2 px-0 shadow-lg sidebar-premium sidebar-sticky">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
                 <a href="/"
-                    class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom w-100">
-                    <span class="fs-5 d-none d-sm-inline fw-bold" style="font-family: 'Outfit', sans-serif;">
-                        <i class="fas fa-shield-alt text-primary me-2"></i> AdminPanel
+                    class="d-flex align-items-center pb-4 mb-2 me-md-auto text-white text-decoration-none px-2 w-100">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" width="28" height="28" class="me-2"
+                        style="background: white; border-radius: 6px; padding: 2px;">
+                    <span class="fs-5 d-none d-sm-inline fw-bold font-outfit text-spacing-1">
+                        Admin<span class="text-primary-light" style="color: #818cf8;">Kuy</span>
                     </span>
                 </a>
-                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100 mt-4"
-                    id="adminMenu" role="tablist">
-                    <li class="nav-item w-100 mb-2">
-                        <button class="nav-link active w-100 text-start text-white hover-glass" id="dashboard-tab"
-                            data-bs-toggle="tab" data-bs-target="#dashboard-view" type="button">
-                            <i class="fas fa-home me-2"></i> <span class="d-none d-sm-inline">Dashboard</span>
-                        </button>
-                    </li>
-                    <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="campaigns-tab"
-                            data-bs-toggle="tab" data-bs-target="#campaigns-view" type="button">
-                            <i class="fas fa-bullhorn me-2"></i> <span class="d-none d-sm-inline">Kampanye</span>
-                        </button>
-                    </li>
-                    <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="users-tab"
-                            data-bs-toggle="tab" data-bs-target="#users-view" type="button">
-                            <i class="fas fa-users me-2"></i> <span class="d-none d-sm-inline">Users</span>
-                        </button>
-                    </li>
-                    <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="blockchain-tab"
-                            data-bs-toggle="tab" data-bs-target="#blockchain-view" type="button">
-                            <i class="fas fa-link me-2"></i> <span class="d-none d-sm-inline">Blockchain Log</span>
-                        </button>
-                    </li>
-                    <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="security-tab"
-                            data-bs-toggle="tab" data-bs-target="#security-view" type="button">
-                            <i class="fas fa-lock me-2 text-warning"></i> <span class="d-none d-sm-inline">Security
-                                Center</span>
-                        </button>
-                    </li>
-                </ul>
-                <hr class="w-100 border-secondary">
-                <div class="dropdown pb-4 w-100">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                        id="dropdownUser1" data-bs-toggle="dropdown">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=random" width="30" height="30"
-                            class="rounded-circle">
-                        <span class="d-none d-sm-inline mx-2">Super Admin</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                        <li><a class="dropdown-item" href="/">Ke Website Utama</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
+
+                <div class="w-100 px-2 mt-2">
+                    <small class="text-uppercase text-white-50 fw-bold"
+                        style="font-size: 0.65rem; letter-spacing: 1.5px; margin-left: 12px;">Main Menu</small>
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100 mt-2"
+                        id="adminMenu" role="tablist">
+                        <li class="nav-item w-100">
+                            <button class="nav-link nav-link-admin active w-100 text-start" id="dashboard-tab"
+                                data-bs-toggle="tab" data-bs-target="#dashboard-view" type="button">
+                                <i class="fas fa-home"></i> <span class="d-none d-sm-inline">Dashboard</span>
+                            </button>
                         </li>
-                        <li><a class="dropdown-item text-danger" href="/logout">Sign out</a></li>
+                        <li class="nav-item w-100">
+                            <button class="nav-link nav-link-admin w-100 text-start" id="campaigns-tab"
+                                data-bs-toggle="tab" data-bs-target="#campaigns-view" type="button">
+                                <i class="fas fa-bullhorn"></i> <span class="d-none d-sm-inline">Kampanye</span>
+                            </button>
+                        </li>
+                        <li class="nav-item w-100">
+                            <button class="nav-link nav-link-admin w-100 text-start" id="users-tab" data-bs-toggle="tab"
+                                data-bs-target="#users-view" type="button">
+                                <i class="fas fa-users"></i> <span class="d-none d-sm-inline">Users</span>
+                            </button>
+                        </li>
                     </ul>
+
+                    <small class="text-uppercase text-white-50 fw-bold mt-4 d-block"
+                        style="font-size: 0.65rem; letter-spacing: 1.5px; margin-left: 12px;">System</small>
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100 mt-2"
+                        id="adminSystem" role="tablist">
+                        <li class="nav-item w-100">
+                            <button class="nav-link nav-link-admin w-100 text-start" id="blockchain-tab"
+                                data-bs-toggle="tab" data-bs-target="#blockchain-view" type="button">
+                                <i class="fas fa-link"></i> <span class="d-none d-sm-inline">Blockchain Log</span>
+                            </button>
+                        </li>
+                        <li class="nav-item w-100">
+                            <button class="nav-link nav-link-admin w-100 text-start" id="security-tab"
+                                data-bs-toggle="tab" data-bs-target="#security-view" type="button">
+                                <i class="fas fa-lock text-warning"></i> <span class="d-none d-sm-inline">Security
+                                    Center</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-auto w-100 pb-4 px-2">
+                    <hr class="border-secondary opacity-25">
+                    <div class="dropdown">
+                        <a href="#"
+                            class="d-flex align-items-center text-white text-decoration-none dropdown-toggle p-2 rounded hover-glass"
+                            id="dropdownUser1" data-bs-toggle="dropdown" style="transition: 0.2s;">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=4f46e5&color=fff" width="32"
+                                height="32" class="rounded-circle shadow-sm">
+                            <div class="d-none d-sm-block ms-2 flex-grow-1">
+                                <div class="fw-bold" style="font-size: 0.85rem;">SuperAdmin</div>
+                                <div class="text-white-50" style="font-size: 0.7rem;">Verified</div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark text-small shadow border-0 rounded-3">
+                            <li><a class="dropdown-item" href="/"><i class="fas fa-globe me-2"></i> Website Utama</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i
+                                        class="fas fa-sign-out-alt me-2"></i> Sign out</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
