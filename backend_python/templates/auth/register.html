@@ -1,116 +1,239 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* ANIMATED MESH GRADIENT Keren (Shared with Login) */
+    .login-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+        background-size: 200% 200%;
+        animation: meshFlow 15s ease infinite;
+    }
+
+    @keyframes meshFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Particles / Stars */
+    .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        background-image: radial-gradient(white 1px, transparent 1px);
+        background-size: 50px 50px;
+        opacity: 0.1;
+    }
+
+    /* GLASSMORPHISM CARD */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        /* Slightly clearer */
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* MODERN INPUTS */
+    .modern-input-group {
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+
+    .modern-input {
+        width: 100%;
+        padding: 0.8rem 0.8rem 0.8rem 2.8rem;
+        background: rgba(0, 0, 0, 0.4);
+        /* Lebih gelap agar teks putih lebih jelas */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .modern-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+        /* Placeholder lebih terang */
+    }
+
+    .modern-input:focus {
+        background: rgba(0, 0, 0, 0.6);
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+        outline: none;
+    }
+
+    .modern-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,...");
+    }
+
+    /* Simplified for brevity, will rely on standard */
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        /* Icon lebih terang */
+        transition: color 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .modern-input:focus+.input-icon {
+        color: var(--bs-primary);
+    }
+
+    .section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.8);
+        /* Judul section lebih jelas */
+        font-weight: 700;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 0.5rem;
+    }
+
+    /* LEFT SIDE MASKOT AREA */
+    .mascot-area {
+        background: radial-gradient(circle at center, rgba(99, 102, 241, 0.25), transparent 70%);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+
+<div class="login-bg"></div>
+<div class="particles"></div>
+
 <div class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
-    <div class="card auth-card shadow-2xl border-0 rounded-4 w-100 overflow-hidden" style="max-width: 900px; background: white;">
+    <div class="card glass-card border-0 rounded-4 w-100 overflow-hidden shadow-lg" style="max-width: 1100px;">
         <div class="row g-0">
-            
-            <!-- KOLOM KIRI: MASKOT 3D (SIDEBAR) -->
-            <div class="col-lg-5 d-none d-lg-flex align-items-center justify-content-center position-relative" 
-                 style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); min-height: 600px;">
-                
-                <!-- Dekorasi Background -->
-                <div class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0.1; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px; pointer-events: none;"></div>
-                
-                <div class="text-center position-relative z-10 w-100 h-100 d-flex flex-column justify-content-center">
-                    <!-- Container Maskot -->
-                    <div class="mascot-container w-100" style="height: 400px; position: relative; z-index: 20;">
-                        <!-- Canvas Transparan -->
-                        <canvas id="register-mascot-canvas" style="width: 100%; height: 100%; display: block; background-color: transparent !important; outline: none;"></canvas>
-                    </div>
-                    
-                    <div class="px-4 mt-n4 position-relative z-20">
-                        <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">One Time Setup</h5>
-                        <p class="text-white-50 small">Pilih akun Ganache Anda untuk memulai.</p>
-                    </div>
+            <!-- LEFT: 3D MASCOT -->
+            <div
+                class="col-lg-5 d-none d-lg-flex flex-column align-items-center justify-content-center mascot-area position-relative p-5">
+                <div class="text-center z-2 mb-4">
+                    <h2 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif;">Join the Movement
+                    </h2>
+                    <p class="text-white opacity-75">Create an account to start your Web3 donation journey.</p>
+                </div>
+                <div class="mascot-container w-100" style="height: 350px;">
+                    <canvas id="register-mascot-canvas" style="width: 100%; height: 100%;"></canvas>
                 </div>
             </div>
 
-            <!-- KOLOM KANAN: FORM REGISTER -->
-            <div class="col-lg-7">
-                <div class="card-body p-4 p-md-5">
+            <!-- RIGHT: REGISTER FORM -->
+            <div class="col-lg-7 position-relative">
+                <div class="card-body p-4 p-md-5 h-100 d-flex flex-column justify-content-center"
+                    style="background: rgba(15, 23, 42, 0.85);"> <!-- Background Form Lebih Gelap -->
+
                     <div class="mb-4">
-                        <h3 class="fw-bold" style="font-family: 'Outfit', sans-serif; color: var(--primary-color);">Setup Akun Web3</h3>
-                        <p class="text-muted small">Hubungkan akun Ganache lokal Anda.</p>
+                        <h3 class="fw-bold text-white font-outfit">Create Account</h3>
+                        <p class="text-white opacity-75 small">Fill in your details to get started.</p>
+                        <div class="position-absolute top-0 end-0 p-4">
+                            <a href="{{ url_for('index') }}"
+                                class="text-white opacity-50 hover-opacity-100 transition-all" title="Back to Home"><i
+                                    class="fas fa-times fa-lg"></i></a>
+                        </div>
                     </div>
 
                     <form action="{{ url_for('register') }}" method="POST">
-                        
-                        <!-- 1. DATA PENGGUNA -->
-                        <h6 class="text-uppercase text-muted small fw-bold mb-3 border-bottom pb-2">Data Profil</h6>
+
+                        <!-- PROFILE DATA -->
+                        <div class="section-title">1. Profile Information</div>
                         <div class="row g-2">
                             <div class="col-md-6">
-                                <div class="form-floating mb-2">
-                                    <input type="text" class="form-control bg-light border-0" id="username" name="username" placeholder="Username" required>
-                                    <label for="username">Username</label>
+                                <div class="modern-input-group">
+                                    <input type="text" class="modern-input" id="username" name="username"
+                                        placeholder="Username" required>
+                                    <i class="fas fa-user input-icon"></i>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-floating mb-2">
-                                    <select class="form-select bg-light border-0" id="role" name="role" required>
-                                        <option value="donatur" selected>💙 Donatur</option>
-                                        <option value="kreator">📢 Kreator Kampanye</option>
+                                <div class="modern-input-group">
+                                    <select class="modern-input form-select text-white" id="role" name="role" required
+                                        style="padding-left: 2.8rem; background-color: rgba(15, 23, 42, 0.6); border-color: rgba(255,255,255,0.1);">
+                                        <option value="donatur" class="text-dark">💙 Donator</option>
+                                        <option value="kreator" class="text-dark">📢 Campaign Creator</option>
                                     </select>
-                                    <label for="role">Peran</label>
+                                    <i class="fas fa-user-tag input-icon"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-floating mb-2">
-                            <input type="email" class="form-control bg-light border-0" id="email" name="email" placeholder="Email" required>
-                            <label for="email">Alamat Email</label>
+                        <div class="modern-input-group">
+                            <input type="email" class="modern-input" id="email" name="email"
+                                placeholder="Email Address (@gmail.com only)" required>
+                            <i class="fas fa-envelope input-icon"></i>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="password" class="form-control bg-light border-0" id="password" name="password" placeholder="Password" required>
-                            <label for="password">Password Login</label>
-                        </div>
-
-                        <!-- 2. DATA BLOCKCHAIN (DROPDOWN GANACHE) -->
-                        <h6 class="text-uppercase text-muted small fw-bold mb-3 border-bottom pb-2 mt-4">
-                            <i class="fas fa-link me-1"></i> Koneksi Ganache
-                        </h6>
-                        
-                        <div class="alert alert-warning py-2 px-3 small d-flex align-items-center gap-2 mb-3">
-                            <i class="fas fa-info-circle"></i>
-                            <div>
-                                <strong>Penting:</strong> Pilih akun yang tersedia di Ganache. 
-                                <br>Private Key tetap harus diisi manual (Klik ikon 🔑 di Ganache).
-                            </div>
+                        <div class="modern-input-group">
+                            <input type="password" class="modern-input" id="password" name="password"
+                                placeholder="Create Password" required>
+                            <i class="fas fa-lock input-icon"></i>
                         </div>
 
-                        <div class="form-floating mb-2">
-                            <select class="form-select bg-light border-0 font-monospace" id="wallet_address" name="wallet_address" required>
-                                <option value="" disabled selected>-- Pilih Akun Ganache --</option>
+                        <!-- BLOCKCHAIN DATA -->
+                        <div class="section-title mt-4">2. Blockchain Connection</div>
+
+                        <div class="modern-input-group">
+                            <select class="modern-input form-select font-monospace text-white" id="wallet_address"
+                                name="wallet_address" required
+                                style="padding-left: 2.8rem; background-color: rgba(15, 23, 42, 0.6); border-color: rgba(255,255,255,0.1);">
+                                <option value="" disabled selected class="text-dark">-- Select Ganache Wallet --
+                                </option>
                                 {% for acc in accounts %}
-                                    <option value="{{ acc }}">{{ acc }}</option>
+                                <option value="{{ acc }}" class="text-dark">{{ acc }}</option>
                                 {% else %}
-                                    <option value="" disabled>Tidak ada akun terdeteksi (Cek Koneksi)</option>
+                                <option value="" disabled class="text-dark">No accounts detected (Check Connection)
+                                </option>
                                 {% endfor %}
                             </select>
-                            <label for="wallet_address">Pilih Wallet Address</label>
+                            <i class="fas fa-wallet input-icon"></i>
                         </div>
 
-                        <div class="form-floating mb-4">
-                            <input type="password" class="form-control bg-light border-0 font-monospace" id="private_key" name="private_key" placeholder="Private Key" required>
-                            <label for="private_key">Paste Private Key (Dari Ganache)</label>
+                        <div class="modern-input-group">
+                            <input type="password" class="modern-input font-monospace" id="private_key"
+                                name="private_key" placeholder="Paste Private Key" required>
+                            <i class="fas fa-key input-icon"></i>
                         </div>
 
                         <div class="form-check mb-4">
-                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>
-                            <label class="form-check-label small text-muted" for="flexCheckDefault">
-                                Saya mengizinkan aplikasi menyimpan kunci saya untuk tanda tangan otomatis.
+                            <input class="form-check-input bg-dark border-secondary" type="checkbox" value=""
+                                id="flexCheckDefault" required>
+                            <label class="form-check-label small text-secondary" for="flexCheckDefault">
+                                I verify that this is my private key and authorize this session.
                             </label>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
-                                <i class="fas fa-plug me-2"></i> Daftar & Hubungkan
-                            </button>
-                        </div>
+                        <button type="submit"
+                            class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-lg position-relative overflow-hidden group">
+                            Complete Setup <i class="fas fa-check-circle ms-2"></i>
+                        </button>
                     </form>
 
-                    <div class="text-center mt-3">
-                        <small class="text-muted">Sudah punya akun? <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none">Masuk</a></small>
+                    <div class="text-center mt-4">
+                        <p class="text-secondary small mb-0">Already have an account? <a href="{{ url_for('login') }}"
+                                class="text-white fw-bold text-decoration-none">Sign In</a></p>
                     </div>
                 </div>
             </div>
@@ -130,29 +253,29 @@
     function initMascot() {
         const canvas = document.getElementById('register-mascot-canvas');
         const container = document.querySelector('.mascot-container');
-        
+
         if (!canvas || !container) return;
 
         const scene = new THREE.Scene();
-        scene.background = null; 
+        scene.background = null;
 
         // KAMERA: Disamakan dengan Login (Z=5.8) agar Zoom-nya pas
         const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.z = 5.8; 
-        camera.position.y = 0; 
+        camera.position.z = 5.8;
+        camera.position.y = 0;
 
-        const renderer = new THREE.WebGLRenderer({ 
-            canvas: canvas, 
-            alpha: true, 
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            alpha: true,
             antialias: true,
-            premultipliedAlpha: false 
+            premultipliedAlpha: false
         });
-        
+
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.setClearColor(0x000000, 0); 
+        renderer.setClearColor(0x000000, 0);
 
         // --- MODELING (Sama Persis dengan Login) ---
         const mascotGroup = new THREE.Group();
@@ -202,12 +325,12 @@
         const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.1 });
         const pupilGeo = new THREE.SphereGeometry(0.12, 16, 16);
         const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-        
+
         const eyeL = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
         eyeL.position.set(-0.35, 0.05, 0.82); eyeL.scale.set(1, 1.1, 0.5); head.add(eyeL);
         const pupilL = new THREE.Mesh(pupilGeo, pupilMat);
         pupilL.position.z = 0.25; eyeL.add(pupilL);
-        
+
         const eyeR = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
         eyeR.position.set(0.35, 0.05, 0.82); eyeR.scale.set(1, 1.1, 0.5); head.add(eyeR);
         const pupilR = new THREE.Mesh(pupilGeo, pupilMat);
@@ -253,7 +376,7 @@
             const pupilLimit = 0.15;
             const targetPupilX = Math.max(-pupilLimit, Math.min(pupilLimit, mouseX * 0.3));
             const targetPupilY = Math.max(-pupilLimit, Math.min(pupilLimit, -mouseY * 0.3));
-            
+
             pupilL.position.x = THREE.MathUtils.lerp(pupilL.position.x, targetPupilX, 0.15);
             pupilL.position.y = THREE.MathUtils.lerp(pupilL.position.y, targetPupilY, 0.15);
             pupilR.position.x = THREE.MathUtils.lerp(pupilR.position.x, targetPupilX, 0.15);

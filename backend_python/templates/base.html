@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonasiKuy - Platform Donasi Blockchain</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
@@ -17,25 +18,62 @@
     <style>
         /* Styles Tambahan Khusus UX */
         .btn-web3 {
-            background: #0f172a; color: #4ade80; border: 1px solid #334155;
-            font-family: 'Courier New', monospace; letter-spacing: -0.5px; transition: all 0.3s ease;
+            background: #0f172a;
+            color: #4ade80;
+            border: 1px solid #334155;
+            font-family: 'Courier New', monospace;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
         }
+
         .btn-web3:hover {
-            background: #000; color: #fff; box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
-            border-color: #4ade80; transform: translateY(-1px);
+            background: #000;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+            border-color: #4ade80;
+            transform: translateY(-1px);
         }
+
         .live-dot {
-            display: inline-block; width: 6px; height: 6px; background-color: #4ade80;
-            border-radius: 50%; animation: pulse-green 2s infinite;
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            animation: pulse-green 2s infinite;
         }
+
         @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-            70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+            }
         }
-        .copy-click { cursor: pointer; transition: color 0.2s; }
-        .copy-click:hover { color: #0d6efd !important; text-decoration: underline; }
-        #btn-back-to-top { position: fixed; bottom: 20px; right: 20px; display: none; z-index: 999; }
+
+        .copy-click {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .copy-click:hover {
+            color: #0d6efd !important;
+            text-decoration: underline;
+        }
+
+        #btn-back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            z-index: 999;
+        }
 
         /* --- NOTIFIKASI LIVE ACTIVITY (POJOK KANAN BAWAH) --- */
         .activity-toast {
@@ -43,53 +81,105 @@
             bottom: 30px;
             right: 30px;
             width: 320px;
-            background: rgba(15, 23, 42, 0.95); /* Dark Glass */
+            background: rgba(15, 23, 42, 0.95);
+            /* Dark Glass */
             backdrop-filter: blur(10px);
-            border-left: 4px solid #4ade80; /* Neon Green Line */
+            border-left: 4px solid #4ade80;
+            /* Neon Green Line */
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             color: white;
             padding: 15px;
             z-index: 9999;
             font-family: 'Outfit', sans-serif;
-            transform: translateX(150%); /* Tersembunyi Default */
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Efek Bouncy */
+            transform: translateX(150%);
+            /* Tersembunyi Default */
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            /* Efek Bouncy */
             overflow: hidden;
         }
-        
+
         .activity-toast.show {
             transform: translateX(0);
         }
 
         .activity-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
+
         .activity-badge {
-            background: rgba(74, 222, 128, 0.2); color: #4ade80; 
-            font-size: 0.65rem; padding: 2px 8px; border-radius: 12px; font-weight: bold; letter-spacing: 0.5px;
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
-        .activity-body { font-size: 0.85rem; line-height: 1.4; color: #e2e8f0; }
-        .activity-meta { margin-top: 8px; font-size: 0.7rem; color: #94a3b8; display: flex; align-items: center; gap: 5px; }
-        
+
+        .activity-body {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #e2e8f0;
+        }
+
+        .activity-meta {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         /* Progress Bar Timer untuk Toast */
         .toast-progress {
-            position: absolute; bottom: 0; left: 0; height: 3px; background: #4ade80; width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: #4ade80;
+            width: 100%;
         }
+
         .toast-progress.animate {
             animation: progress-shrink 5s linear forwards;
         }
-        @keyframes progress-shrink { from { width: 100%; } to { width: 0%; } }
+
+        @keyframes progress-shrink {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
     </style>
 </head>
+
 <body class="d-flex flex-column min-vh-100">
 
     <!-- AUDIO ELEMENTS (LOCAL FILES) -->
     <!-- Pastikan file ada di folder static/sounds/ -->
-    <audio id="sound-hover" preload="auto"><source src="{{ url_for('static', filename='sounds/hover.mp3') }}" type="audio/mpeg"></audio>
-    <audio id="sound-click" preload="auto"><source src="{{ url_for('static', filename='sounds/click.mp3') }}" type="audio/mpeg"></audio>
-    <audio id="sound-success" preload="auto"><source src="{{ url_for('static', filename='sounds/success.mp3') }}" type="audio/mpeg"></audio>
-    <audio id="sound-error" preload="auto"><source src="{{ url_for('static', filename='sounds/error.mp3') }}" type="audio/mpeg"></audio>
-    <audio id="sound-popup" preload="auto"><source src="{{ url_for('static', filename='sounds/success.mp3') }}" type="audio/mpeg"></audio>
+    <audio id="sound-hover" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/hover.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="sound-click" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/click.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="sound-success" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/success.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="sound-error" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/error.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="sound-popup" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/success.mp3') }}" type="audio/mpeg">
+    </audio>
 
     <!-- PRELOADER -->
     <div id="global-loader" class="loader-overlay">
@@ -97,51 +187,61 @@
             <div class="logo-glow-wrapper mb-3">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Loading..." class="clean-loading-logo">
             </div>
-            <h4 class="fw-bold text-primary mb-0" style="font-family: 'Outfit', sans-serif; letter-spacing: 1px;">DonasiKuy</h4>
+            <h4 class="fw-bold text-primary mb-0" style="font-family: 'Outfit', sans-serif; letter-spacing: 1px;">
+                DonasiKuy</h4>
             <div class="loading-dots mt-2"><span>.</span><span>.</span><span>.</span></div>
         </div>
     </div>
 
     <!-- NAVBAR -->
+    {% if not hide_chrome %}
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm bg-white">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo" onerror="this.style.display='none'" height="30">
-                <span class="brand-text fw-bold text-primary" style="font-family: 'Outfit', sans-serif;">DonasiKuy</span>
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo"
+                    onerror="this.style.display='none'" height="30">
+                <span class="brand-text fw-bold text-primary"
+                    style="font-family: 'Outfit', sans-serif;">DonasiKuy</span>
             </a>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
                     <!-- STATUS WIDGET (GANACHE) -->
                     <li class="nav-item me-2 d-none d-lg-block">
-                        <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill border bg-light" style="font-size: 0.75rem;">
+                        <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill border bg-light"
+                            style="font-size: 0.75rem;">
                             {% if bc_stat.connected %}
-                                <span class="d-flex align-items-center text-success fw-bold">
-                                    <span class="status-dot bg-success rounded-circle me-2" style="width: 6px; height: 6px;"></span>
-                                    GANACHE ON
-                                </span>
-                                <span class="text-muted border-start ps-2 ms-1">
-                                    <i class="fas fa-gas-pump me-1"></i> {{ bc_stat.gas_price }} Gwei
-                                </span>
+                            <span class="d-flex align-items-center text-success fw-bold">
+                                <span class="status-dot bg-success rounded-circle me-2"
+                                    style="width: 6px; height: 6px;"></span>
+                                GANACHE ON
+                            </span>
+                            <span class="text-muted border-start ps-2 ms-1">
+                                <i class="fas fa-gas-pump me-1"></i> {{ bc_stat.gas_price }} Gwei
+                            </span>
                             {% else %}
-                                <span class="d-flex align-items-center text-danger fw-bold">
-                                    <span class="status-dot bg-danger rounded-circle me-2" style="width: 6px; height: 6px; animation: pulse 1s infinite;"></span>
-                                    OFFLINE
-                                </span>
+                            <span class="d-flex align-items-center text-danger fw-bold">
+                                <span class="status-dot bg-danger rounded-circle me-2"
+                                    style="width: 6px; height: 6px; animation: pulse 1s infinite;"></span>
+                                OFFLINE
+                            </span>
                             {% endif %}
                         </div>
                     </li>
 
-                    <li class="nav-item"><a class="nav-link px-3 fw-medium" href="{{ url_for('index') }}">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link px-3 fw-medium" href="{{ url_for('dashboard') }}">Kampanye</a></li>
-                    
+                    <li class="nav-item"><a class="nav-link px-3 fw-medium" href="{{ url_for('index') }}">Beranda</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link px-3 fw-medium"
+                            href="{{ url_for('dashboard') }}">Kampanye</a></li>
+
                     <!-- LIVE MONITOR BTN (EXPLORER) -->
                     <li class="nav-item">
-                        <a class="btn btn-sm btn-web3 rounded-pill px-3 py-2 d-flex align-items-center gap-2 shadow-sm" href="/explorer">
+                        <a class="btn btn-sm btn-web3 rounded-pill px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
+                            href="/explorer">
                             <span class="live-dot"></span>
                             <span class="d-none d-md-inline">Live Monitor</span>
                             <i class="fas fa-external-link-alt fa-xs ms-1 opacity-50"></i>
@@ -152,43 +252,62 @@
 
                     <!-- AUTH DROPDOWN -->
                     {% if session.get('user_id') %}
-                        {% if session.get('role') == 'admin' %}
-                            <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold px-3 text-dark rounded-pill shadow-sm" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-shield-alt me-1"></i> Admin</a></li>
-                        {% elif session.get('role') == 'kreator' %}
-                            <li class="nav-item"><a class="btn btn-primary btn-sm px-4 rounded-pill shadow-sm fw-bold" href="{{ url_for('create_campaign') }}"><i class="fas fa-plus me-1"></i> Galang Dana</a></li>
-                        {% endif %}
+                    {% if session.get('role') == 'admin' %}
+                    <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold px-3 text-dark rounded-pill shadow-sm"
+                            href="{{ url_for('admin_dashboard') }}"><i class="fas fa-shield-alt me-1"></i> Admin</a>
+                    </li>
+                    {% elif session.get('role') == 'kreator' %}
+                    <li class="nav-item"><a class="btn btn-primary btn-sm px-4 rounded-pill shadow-sm fw-bold"
+                            href="{{ url_for('create_campaign') }}"><i class="fas fa-plus me-1"></i> Galang Dana</a>
+                    </li>
+                    {% endif %}
 
-                        <li class="nav-item dropdown ms-2">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-0" href="#" role="button" data-bs-toggle="dropdown">
-                                <img src="{{ url_for('static', filename='uploads/' + (session.get('profile_pic') if session.get('profile_pic') else 'default_user.png')) }}" 
-                                     class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3 p-2" style="min-width: 240px;">
-                                <li class="px-3 py-2 text-center">
-                                    <div class="fw-bold text-dark fs-6">{{ session.get('username') }}</div>
-                                    <span class="badge bg-light text-muted border rounded-pill mt-1">{{ session.get('role')|upper }}</span>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item rounded-3 py-2" href="{{ url_for('profile') }}"><i class="fas fa-user-circle me-2 text-primary"></i> Profil Saya</a></li>
-                                <li class="px-3 py-2 bg-light rounded-3 mt-2 mx-2 border">
-                                    <small class="d-block text-muted x-small">Wallet Address</small>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-dark font-monospace small text-truncate" style="max-width: 140px;">{{ session.get('wallet') }}</span>
-                                        <i class="far fa-copy text-primary copy-click" data-clipboard-text="{{ session.get('wallet') }}" title="Copy"></i>
-                                    </div>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item rounded-3 py-2 text-danger fw-bold" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                            </ul>
-                        </li>
+                    <li class="nav-item dropdown ms-2">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-0" href="#" role="button"
+                            data-bs-toggle="dropdown">
+                            <img src="{{ url_for('static', filename='uploads/' + (session.get('profile_pic') if session.get('profile_pic') else 'default_user.png')) }}"
+                                class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3 p-2"
+                            style="min-width: 240px;">
+                            <li class="px-3 py-2 text-center">
+                                <div class="fw-bold text-dark fs-6">{{ session.get('username') }}</div>
+                                <span class="badge bg-light text-muted border rounded-pill mt-1">{{
+                                    session.get('role')|upper }}</span>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item rounded-3 py-2" href="{{ url_for('profile') }}"><i
+                                        class="fas fa-user-circle me-2 text-primary"></i> Profil Saya</a></li>
+                            <li class="px-3 py-2 bg-light rounded-3 mt-2 mx-2 border">
+                                <small class="d-block text-muted x-small">Wallet Address</small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-dark font-monospace small text-truncate"
+                                        style="max-width: 140px;">{{ session.get('wallet') }}</span>
+                                    <i class="far fa-copy text-primary copy-click"
+                                        data-clipboard-text="{{ session.get('wallet') }}" title="Copy"></i>
+                                </div>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item rounded-3 py-2 text-danger fw-bold"
+                                    href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item ms-lg-2"><a class="btn btn-outline-primary px-4 rounded-pill fw-bold" href="{{ url_for('login') }}">Masuk</a></li>
-                        <li class="nav-item"><a class="btn btn-primary px-4 rounded-pill shadow-sm fw-bold" href="{{ url_for('register') }}">Daftar</a></li>
+                    <li class="nav-item ms-lg-2"><a class="btn btn-outline-primary px-4 rounded-pill fw-bold"
+                            href="{{ url_for('login') }}">Masuk</a></li>
+                    <li class="nav-item"><a class="btn btn-primary px-4 rounded-pill shadow-sm fw-bold"
+                            href="{{ url_for('register') }}">Daftar</a></li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <!-- MAIN CONTENT -->
     <div class="flex-grow-1">
@@ -201,50 +320,63 @@
     </button>
 
     <!-- FOOTER -->
+    {% if not hide_chrome %}
     <footer class="bg-white border-top py-5 mt-auto">
         <div class="container">
             <div class="row gy-4">
-                <div class="col-lg-4">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <img src="{{ url_for('static', filename='img/logo.png') }}" height="30" class="grayscale opacity-75">
+                <div class="col-lg-4 text-center text-lg-start">
+                    <div class="d-flex align-items-center justify-content-center justify-content-lg-start gap-2 mb-3">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}" height="30"
+                            class="grayscale opacity-75">
                         <span class="fw-bold text-dark" style="font-family: 'Outfit', sans-serif;">DonasiKuy</span>
                     </div>
-                    <p class="text-muted small lh-lg">Platform donasi terdesentralisasi pertama yang menjamin transparansi 100% menggunakan teknologi Ethereum Blockchain.</p>
+                    <p class="text-muted small lh-lg">Platform donasi terdesentralisasi pertama yang menjamin
+                        transparansi 100% menggunakan teknologi Ethereum Blockchain.</p>
                 </div>
-                <div class="col-lg-2 offset-lg-1">
+                <div class="col-lg-2 offset-lg-1 d-none d-lg-block">
                     <h6 class="fw-bold mb-3 small text-uppercase text-primary">Platform</h6>
                     <ul class="list-unstyled text-muted space-y-2 small">
-                        <li class="mb-2"><a href="{{ url_for('how_it_works_page') }}" class="text-decoration-none text-secondary hover-primary">Cara Kerja</a></li>
-                        <li class="mb-2"><a href="/explorer" class="text-decoration-none text-secondary hover-primary">Blockchain Explorer</a></li>
-                        <li class="mb-2"><a href="{{ url_for('dashboard') }}" class="text-decoration-none text-secondary hover-primary">Daftar Kampanye</a></li>
+                        <li class="mb-2"><a href="{{ url_for('how_it_works_page') }}"
+                                class="text-decoration-none text-secondary hover-primary">Cara Kerja</a></li>
+                        <li class="mb-2"><a href="/explorer"
+                                class="text-decoration-none text-secondary hover-primary">Blockchain Explorer</a></li>
+                        <li class="mb-2"><a href="{{ url_for('dashboard') }}"
+                                class="text-decoration-none text-secondary hover-primary">Daftar Kampanye</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-2 d-none d-lg-block">
                     <h6 class="fw-bold mb-3 small text-uppercase text-primary">Dukungan</h6>
                     <ul class="list-unstyled text-muted space-y-2 small">
-                        <li class="mb-2"><a href="{{ url_for('help_page') }}" class="text-decoration-none text-secondary hover-primary">Bantuan & FAQ</a></li>
-                        <li class="mb-2"><a href="{{ url_for('privacy_page') }}" class="text-decoration-none text-secondary hover-primary">Kebijakan Privasi</a></li>
+                        <li class="mb-2"><a href="{{ url_for('help_page') }}"
+                                class="text-decoration-none text-secondary hover-primary">Bantuan & FAQ</a></li>
+                        <li class="mb-2"><a href="{{ url_for('privacy_page') }}"
+                                class="text-decoration-none text-secondary hover-primary">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-3">
+                <div class="col-lg-3 d-none d-lg-block">
                     <h6 class="fw-bold mb-3 small text-uppercase text-primary">Network Status</h6>
                     <div class="p-3 bg-light rounded-4 border">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="small text-muted">Block Height</span>
-                            <span class="badge bg-success bg-opacity-10 text-success font-monospace">#{{ bc_stat.block_number }}</span>
+                            <span class="badge bg-success bg-opacity-10 text-success font-monospace">#{{
+                                bc_stat.block_number }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="small text-muted">Status</span>
-                            <span class="d-flex align-items-center small text-success fw-bold"><span class="status-dot bg-success rounded-circle me-2" style="width: 6px; height: 6px;"></span>Synced</span>
+                            <span class="d-flex align-items-center small text-success fw-bold"><span
+                                    class="status-dot bg-success rounded-circle me-2"
+                                    style="width: 6px; height: 6px;"></span>Synced</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="border-top pt-4 mt-5 text-center text-muted x-small">
-                &copy; 2025 DonasiKuy Platform. Built with <i class="fas fa-heart text-danger mx-1"></i> using Flask & Solidity.
+                &copy; 2025 DonasiKuy Platform. Built with <i class="fas fa-heart text-danger mx-1"></i> using Flask &
+                Solidity.
             </div>
         </div>
     </footer>
+    {% endif %}
 
     <!-- ACTIVITY TOAST NOTIFICATION (LIVE - HIDDEN BY DEFAULT) -->
     <!-- Hanya tampil untuk NON ADMIN -->
@@ -256,44 +388,81 @@
             <small class="text-secondary" id="toast-time">Just now</small>
         </div>
         <div class="activity-body">
-            <span class="fw-bold text-white" id="toast-user">User</span> 
-            <span class="badge bg-secondary border border-secondary bg-opacity-25 x-small ms-1" id="toast-role">Role</span>
+            <span class="fw-bold text-white" id="toast-user">User</span>
+            <span class="badge bg-secondary border border-secondary bg-opacity-25 x-small ms-1"
+                id="toast-role">Role</span>
             <br>
-            telah mendonasikan <span class="fw-bold text-success" id="toast-amount">0 ETH</span> 
+            telah mendonasikan <span class="fw-bold text-success" id="toast-amount">0 ETH</span>
             ke Campaign #<span id="toast-camp">0</span>
         </div>
         <div class="activity-meta">
-            <i class="fas fa-link"></i> <span class="font-monospace text-truncate" style="max-width: 200px;" id="toast-hash">0x...</span>
+            <i class="fas fa-link"></i> <span class="font-monospace text-truncate" style="max-width: 200px;"
+                id="toast-hash">0x...</span>
         </div>
     </div>
     {% endif %}
 
-        <!-- SCRIPTS -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <script>
         // --- 1. GLOBAL UTILS ---
-        function hideLoader() { const l=document.getElementById('global-loader'); if(l){l.classList.add('fade-out');setTimeout(()=>{l.style.display='none'},500)} }
-        function showLoader() { const l=document.getElementById('global-loader'); if(l){l.style.display='flex';l.classList.remove('fade-out')} }
-        window.addEventListener('load', ()=>{setTimeout(hideLoader,600)});
-        
+        function hideLoader() { const l = document.getElementById('global-loader'); if (l) { l.classList.add('fade-out'); setTimeout(() => { l.style.display = 'none' }, 500) } }
+        function showLoader() { const l = document.getElementById('global-loader'); if (l) { l.style.display = 'flex'; l.classList.remove('fade-out') } }
+        window.addEventListener('load', () => { setTimeout(hideLoader, 600) });
+
+        // --- FLASH MESSAGES TO SWEETALERT ---
+        {% with messages = get_flashed_messages(with_categories = true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        // Mapping Flask categories to SweetAlert icons
+        var category = "{{ category }}";
+        var title = "Notifikasi";
+        var icon = "info";
+
+        if (category === 'error' || category === 'danger') {
+            icon = 'error';
+            title = 'Gagal!';
+        } else if (category === 'success') {
+            icon = 'success';
+            title = 'Berhasil!';
+        } else if (category === 'warning') {
+            icon = 'warning';
+            title = 'Perhatian';
+        }
+
+        // Trigger SweetAlert
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: `{{ message }}`,
+            confirmButtonColor: '#4f46e5',
+            timer: 5000,
+            timerProgressBar: true
+        });
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
         // Copy Text
-        document.querySelectorAll('.copy-click').forEach(el=>{
-            el.addEventListener('click', function(){
-                const t=this.getAttribute('data-clipboard-text');
-                if(t){navigator.clipboard.writeText(t).then(()=>{
-                    Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2000}).fire({icon:'success',title:'Disalin!'});
-                })}
+        document.querySelectorAll('.copy-click').forEach(el => {
+            el.addEventListener('click', function () {
+                const t = this.getAttribute('data-clipboard-text');
+                if (t) {
+                    navigator.clipboard.writeText(t).then(() => {
+                        Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 }).fire({ icon: 'success', title: 'Disalin!' });
+                    })
+                }
             });
         });
 
         // --- 2. LIVE NOTIFICATION SYSTEM (ACCOUNT-BASED LOGIC) ---
         const liveToast = document.getElementById('live-toast');
-        
+
         if (liveToast) {
             const popupSound = document.getElementById('sound-popup');
-            
+
             // FITUR BARU: Membuat Key Penyimpanan Unik Berdasarkan User ID
             // Jika login: 'last_seen_tx_1', 'last_seen_tx_2', dst.
             // Jika guest: 'last_seen_tx_guest'
@@ -314,7 +483,7 @@
                         // LOGIKA:
                         // Tampilkan jika hash transaksi dari API BERBEDA dengan yang terakhir dilihat OLEH AKUN INI
                         if (incomingHash !== storedHash) {
-                            
+
                             // 1. Simpan Hash baru ke storage KHUSUS USER INI
                             localStorage.setItem(storageKey, incomingHash);
 
@@ -324,19 +493,19 @@
                             document.getElementById('toast-amount').innerText = data.amount + " ETH";
                             document.getElementById('toast-camp').innerText = data.campaign_id;
                             document.getElementById('toast-hash').innerText = incomingHash.substring(0, 16) + "...";
-                            
+
                             // 3. Reset & Tampilkan Animasi Toast
                             liveToast.classList.remove('show');
                             void liveToast.offsetWidth; // Trigger CSS Reflow
                             liveToast.classList.add('show');
-                            
+
                             const progress = document.getElementById('toast-progress');
                             progress.classList.remove('animate');
-                            void progress.offsetWidth; 
+                            void progress.offsetWidth;
                             progress.classList.add('animate');
 
                             // 4. Mainkan Suara
-                            if(popupSound) popupSound.play().catch(()=>{});
+                            if (popupSound) popupSound.play().catch(() => { });
 
                             // 5. Hilangkan Otomatis setelah 6 detik
                             setTimeout(() => {
@@ -344,8 +513,8 @@
                             }, 6000);
                         }
                     }
-                } catch (e) { 
-                    console.error("Polling error:", e); 
+                } catch (e) {
+                    console.error("Polling error:", e);
                 }
             }
 
@@ -356,11 +525,31 @@
             setInterval(checkNewActivity, 5000);
         }
     </script>
-    
+
     <style>
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .hover-primary:hover { color: var(--bs-primary) !important; transition: color 0.2s; }
-        .x-small { font-size: 0.65rem; }
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .hover-primary:hover {
+            color: var(--bs-primary) !important;
+            transition: color 0.2s;
+        }
+
+        .x-small {
+            font-size: 0.65rem;
+        }
     </style>
 </body>
+
 </html>

@@ -3,51 +3,63 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row flex-nowrap">
-        
+
         <!-- SIDEBAR NAVIGASI (KIRI) -->
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark shadow-lg sidebar-sticky">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
-                <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom w-100">
+                <a href="/"
+                    class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom w-100">
                     <span class="fs-5 d-none d-sm-inline fw-bold" style="font-family: 'Outfit', sans-serif;">
                         <i class="fas fa-shield-alt text-primary me-2"></i> AdminPanel
                     </span>
                 </a>
-                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100 mt-4" id="adminMenu" role="tablist">
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100 mt-4"
+                    id="adminMenu" role="tablist">
                     <li class="nav-item w-100 mb-2">
-                        <button class="nav-link active w-100 text-start text-white hover-glass" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard-view" type="button">
+                        <button class="nav-link active w-100 text-start text-white hover-glass" id="dashboard-tab"
+                            data-bs-toggle="tab" data-bs-target="#dashboard-view" type="button">
                             <i class="fas fa-home me-2"></i> <span class="d-none d-sm-inline">Dashboard</span>
                         </button>
                     </li>
                     <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns-view" type="button">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="campaigns-tab"
+                            data-bs-toggle="tab" data-bs-target="#campaigns-view" type="button">
                             <i class="fas fa-bullhorn me-2"></i> <span class="d-none d-sm-inline">Kampanye</span>
                         </button>
                     </li>
                     <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-view" type="button">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="users-tab"
+                            data-bs-toggle="tab" data-bs-target="#users-view" type="button">
                             <i class="fas fa-users me-2"></i> <span class="d-none d-sm-inline">Users</span>
                         </button>
                     </li>
                     <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="blockchain-tab" data-bs-toggle="tab" data-bs-target="#blockchain-view" type="button">
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="blockchain-tab"
+                            data-bs-toggle="tab" data-bs-target="#blockchain-view" type="button">
                             <i class="fas fa-link me-2"></i> <span class="d-none d-sm-inline">Blockchain Log</span>
                         </button>
                     </li>
                     <li class="nav-item w-100 mb-2">
-                        <button class="nav-link w-100 text-start text-white hover-glass" id="security-tab" data-bs-toggle="tab" data-bs-target="#security-view" type="button">
-                            <i class="fas fa-lock me-2 text-warning"></i> <span class="d-none d-sm-inline">Security Center</span>
+                        <button class="nav-link w-100 text-start text-white hover-glass" id="security-tab"
+                            data-bs-toggle="tab" data-bs-target="#security-view" type="button">
+                            <i class="fas fa-lock me-2 text-warning"></i> <span class="d-none d-sm-inline">Security
+                                Center</span>
                         </button>
                     </li>
                 </ul>
                 <hr class="w-100 border-secondary">
                 <div class="dropdown pb-4 w-100">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=random" width="30" height="30" class="rounded-circle">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                        id="dropdownUser1" data-bs-toggle="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=random" width="30" height="30"
+                            class="rounded-circle">
                         <span class="d-none d-sm-inline mx-2">Super Admin</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
                         <li><a class="dropdown-item" href="/">Ke Website Utama</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li><a class="dropdown-item text-danger" href="/logout">Sign out</a></li>
                     </ul>
                 </div>
@@ -56,7 +68,7 @@
 
         <!-- KONTEN UTAMA (KANAN) -->
         <div class="col py-4 px-4 bg-light" style="min-height: 100vh;">
-            
+
             <!-- Header Atas -->
             <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-3 shadow-sm">
                 <div>
@@ -69,14 +81,15 @@
                         <small class="fw-bold text-success">{{ network_status }}</small>
                     </div>
                     <div class="border-start ps-3">
-                        <small class="fw-bold text-dark"><i class="fas fa-clock me-1 text-primary"></i> <span id="clock">--:--</span></small>
+                        <small class="fw-bold text-dark"><i class="fas fa-clock me-1 text-primary"></i> <span
+                                id="clock">--:--</span></small>
                     </div>
                 </div>
             </div>
 
             <!-- ISI TAB KONTEN -->
             <div class="tab-content" id="v-pills-tabContent">
-                
+
                 <!-- 1. DASHBOARD OVERVIEW -->
                 <div class="tab-pane fade show active" id="dashboard-view">
                     <!-- Stats Cards -->
@@ -116,7 +129,8 @@
                         </div>
                         {% if stats.pending > 0 %}
                         <div class="col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100 rounded-4 bg-warning text-dark cursor-pointer" onclick="switchToTab('campaigns-tab')">
+                            <div class="card border-0 shadow-sm p-3 h-100 rounded-4 bg-warning text-dark cursor-pointer"
+                                onclick="switchToTab('campaigns-tab')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h3 class="fw-bold mb-0">{{ stats.pending }}</h3>
@@ -133,9 +147,13 @@
                         <!-- Widget Security (Mini) -->
                         <div class="col-lg-8">
                             <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark text-white">
-                                <div class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
-                                    <h6 class="fw-bold mb-0 text-white"><i class="fas fa-shield-alt text-success me-2"></i> Security Monitor (Live)</h6>
-                                    <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="switchToTab('security-tab')">View Full Logs</button>
+                                <div
+                                    class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold mb-0 text-white"><i
+                                            class="fas fa-shield-alt text-success me-2"></i> Security Monitor (Live)
+                                    </h6>
+                                    <button class="btn btn-sm btn-outline-success rounded-pill px-3"
+                                        onclick="switchToTab('security-tab')">View Full Logs</button>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="list-group list-group-flush">
@@ -143,7 +161,9 @@
                                         <div class="list-group-item bg-dark border-secondary px-3 py-3 text-white">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <span class="badge {{ 'bg-danger' if log.status == 'high' else 'bg-warning text-dark' if log.status == 'medium' else 'bg-success' }} me-2">{{ log.status|upper }}</span>
+                                                    <span
+                                                        class="badge {{ 'bg-danger' if log.status == 'high' else 'bg-warning text-dark' if log.status == 'medium' else 'bg-success' }} me-2">{{
+                                                        log.status|upper }}</span>
                                                     <span class="fw-bold small">{{ log.action }}</span>
                                                 </div>
                                                 <small class="text-white-50 font-monospace">{{ log.time }}</small>
@@ -159,18 +179,21 @@
                         <div class="col-lg-4">
                             <div class="card border-0 shadow-sm rounded-4 h-100">
                                 <div class="card-body">
-                                    <h6 class="fw-bold text-muted mb-4">Traffic Summary</h6>
+                                    <h6 class="fw-bold text-muted mb-4">Traffic Summary (Today)</h6>
                                     <div class="text-center mb-4">
                                         <h2 class="fw-bold text-primary">{{ visitor_stats.total_visits }}</h2>
-                                        <small class="text-muted">Total Visits Today</small>
+                                        <small class="text-muted">New Visitors</small>
                                     </div>
                                     <div class="progress mb-2" style="height: 6px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 30%"></div>
+                                        <div class="progress-bar bg-primary" role="progressbar"
+                                            style="width: {{ visitor_stats.mobile_percent }}%">
+                                        </div>
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                            style="width: {{ visitor_stats.desktop_percent }}%"></div>
                                     </div>
                                     <div class="d-flex justify-content-between x-small text-muted">
-                                        <span>Mobile (70%)</span>
-                                        <span>Desktop (30%)</span>
+                                        <span>Mobile ({{ visitor_stats.mobile_percent }}%)</span>
+                                        <span>Desktop ({{ visitor_stats.desktop_percent }}%)</span>
                                     </div>
                                 </div>
                             </div>
@@ -187,27 +210,47 @@
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
-                                    <tr><th class="ps-4">Judul</th><th>Kreator</th><th>Target</th><th>Status</th><th class="text-end pe-4">Aksi</th></tr>
+                                    <tr>
+                                        <th class="ps-4">Judul</th>
+                                        <th>Kreator</th>
+                                        <th>Target</th>
+                                        <th>Status</th>
+                                        <th class="text-end pe-4">Aksi</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     {% for c in campaigns %}
                                     <tr>
-                                        <td class="ps-4 fw-bold">{{ c.title }} <br><small class="text-muted fw-normal">ID #{{ c.id }}</small></td>
+                                        <td class="ps-4 fw-bold">{{ c.title }} <br><small
+                                                class="text-muted fw-normal">ID #{{ c.id }}</small></td>
                                         <td>{{ c.creator_name }}</td>
                                         <td class="fw-bold text-primary">{{ c.target }} ETH</td>
                                         <td>
-                                            {% if c.status_code == 0 %}<span class="badge bg-warning text-dark">Pending</span>{% elif c.status_code == 1 %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+                                            {% if c.status_code == 0 %}<span
+                                                class="badge bg-warning text-dark">Pending</span>{% elif c.status_code
+                                            == 1 %}<span class="badge bg-success">Active</span>{% else %}<span
+                                                class="badge bg-secondary">Inactive</span>{% endif %}
                                         </td>
                                         <td class="text-end pe-4">
+                                            <button class="btn btn-sm btn-info text-white rounded-pill px-3 me-1"
+                                                onclick='showCampaignDetail({{ c|tojson }})'>
+                                                <i class="fas fa-eye"></i>
+                                            </button>
                                             {% if c.status_code == 0 %}
-                                                <a href="/admin/approve/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 me-1"><i class="fas fa-check"></i></a>
+                                            <a href="/admin/approve/{{ c.id }}"
+                                                class="btn btn-sm btn-success rounded-pill px-3 me-1"><i
+                                                    class="fas fa-check"></i></a>
                                             {% endif %}
                                             {% if c.status_code != 3 %}
-                                                <a href="/admin/delete_campaign/{{ c.id }}" class="btn btn-sm btn-light text-danger rounded-circle" onclick="return confirm('Hapus?')"><i class="fas fa-trash"></i></a>
+                                            <a href="/admin/delete_campaign/{{ c.id }}"
+                                                class="btn btn-sm btn-light text-danger rounded-circle"
+                                                onclick="return confirm('Hapus?')"><i class="fas fa-trash"></i></a>
                                             {% endif %}
                                         </td>
                                     </tr>
-                                    {% else %}<tr><td colspan="5" class="text-center py-4">Data kosong</td></tr>{% endfor %}
+                                    {% else %}<tr>
+                                        <td colspan="5" class="text-center py-4">Data kosong</td>
+                                    </tr>{% endfor %}
                                 </tbody>
                             </table>
                         </div>
@@ -217,19 +260,32 @@
                 <!-- 3. USERS VIEW -->
                 <div class="tab-pane fade" id="users-view">
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white py-3"><h5 class="fw-bold mb-0">Data Pengguna</h5></div>
+                        <div class="card-header bg-white py-3">
+                            <h5 class="fw-bold mb-0">Data Pengguna</h5>
+                        </div>
                         <div class="card-body p-0">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="bg-light"><tr><th class="ps-4">User</th><th>Role</th><th>Wallet</th><th class="text-end pe-4">Aksi</th></tr></thead>
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">User</th>
+                                        <th>Role</th>
+                                        <th>Wallet</th>
+                                        <th class="text-end pe-4">Aksi</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     {% for u in users %}
                                     <tr>
-                                        <td class="ps-4 fw-bold">{{ u.username }}<br><small class="text-muted fw-normal">{{ u.email }}</small></td>
+                                        <td class="ps-4 fw-bold">{{ u.username }}<br><small
+                                                class="text-muted fw-normal">{{ u.email }}</small></td>
                                         <td><span class="badge bg-light text-dark border">{{ u.role }}</span></td>
                                         <td><code class="text-primary">{{ u.wallet_address[:15] }}...</code></td>
                                         <td class="text-end pe-4">
                                             {% if u.role != 'admin' %}
-                                            <a href="/admin/delete_user/{{ u.id }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Hapus user?')"><i class="fas fa-trash-alt"></i></a>
+                                            <a href="/admin/delete_user/{{ u.id }}"
+                                                class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="return confirm('Hapus user?')"><i
+                                                    class="fas fa-trash-alt"></i></a>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -243,17 +299,22 @@
                 <!-- 4. BLOCKCHAIN LOG VIEW -->
                 <div class="tab-pane fade" id="blockchain-view">
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white py-3"><h5 class="fw-bold mb-0">Audit Log (On-Chain)</h5></div>
+                        <div class="card-header bg-white py-3">
+                            <h5 class="fw-bold mb-0">Audit Log (On-Chain)</h5>
+                        </div>
                         <div class="list-group list-group-flush">
                             {% for log in transactions %}
                             <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-0 fw-bold {{ 'text-success' if 'Donasi' in log.type else 'text-primary' }}">{{ log.type }}</h6>
+                                    <h6
+                                        class="mb-0 fw-bold {{ 'text-success' if 'Donasi' in log.type else 'text-primary' }}">
+                                        {{ log.type }}</h6>
                                     <small class="text-muted">{{ log.timestamp }} | Oleh: {{ log.from }}</small>
                                 </div>
                                 <div class="text-end">
                                     <span class="fw-bold">{{ log.amount }} ETH</span><br>
-                                    <small class="badge bg-secondary bg-opacity-10 text-secondary font-monospace">Nonce #{{ log.nonce }}</small>
+                                    <small class="badge bg-secondary bg-opacity-10 text-secondary font-monospace">Nonce
+                                        #{{ log.nonce }}</small>
                                 </div>
                             </div>
                             {% else %}
@@ -269,12 +330,17 @@
                         <!-- Full Logs Table -->
                         <div class="col-lg-8">
                             <div class="card border-0 shadow-sm rounded-4 bg-dark text-white">
-                                <div class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
-                                    <h5 class="fw-bold mb-0 text-white"><i class="fas fa-shield-alt text-success me-2"></i> Security Intelligence Log</h5>
-                                    <button class="btn btn-sm btn-outline-light"><i class="fas fa-download me-1"></i> Export CSV</button>
+                                <div
+                                    class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0 text-white"><i
+                                            class="fas fa-shield-alt text-success me-2"></i> Security Intelligence Log
+                                    </h5>
+                                    <button class="btn btn-sm btn-outline-light"><i class="fas fa-download me-1"></i>
+                                        Export CSV</button>
                                 </div>
                                 <div class="table-responsive" style="max-height: 600px;">
-                                    <table class="table table-dark table-hover align-middle mb-0" style="font-size: 0.9rem;">
+                                    <table class="table table-dark table-hover align-middle mb-0"
+                                        style="font-size: 0.9rem;">
                                         <thead class="sticky-top bg-dark">
                                             <tr>
                                                 <th class="ps-4">Severity</th>
@@ -286,13 +352,16 @@
                                         </thead>
                                         <tbody>
                                             {% for log in security_logs %}
-                                            <tr>
+                                            <tr
+                                                class="{{ 'border-start border-5 border-danger' if log.status == 'high' else '' }}">
                                                 <td class="ps-4">
-                                                    <span class="badge rounded-pill {{ 'bg-danger' if log.status == 'high' else 'bg-warning text-dark' if log.status == 'medium' else 'bg-success' }}">
+                                                    <span
+                                                        class="badge rounded-pill {{ 'bg-danger' if log.status == 'high' else 'bg-warning text-dark' if log.status == 'medium' else 'bg-info' if log.status == 'info' else 'bg-success' }}">
                                                         {{ log.status|upper }}
                                                     </span>
                                                 </td>
-                                                <td class="fw-bold">{{ log.action }}</td>
+                                                <td class="fw-bold {{ 'text-danger' if log.status == 'high' else '' }}">
+                                                    {{ log.action }}</td>
                                                 <td class="text-white-50">{{ log.desc }}</td>
                                                 <td class="font-monospace text-info">{{ log.ip }}</td>
                                                 <td class="text-end pe-4 text-white-50">{{ log.time }}</td>
@@ -309,16 +378,23 @@
                             <!-- Active Wallets -->
                             <div class="card border-0 shadow-sm rounded-4 mb-4">
                                 <div class="card-header bg-white py-3">
-                                    <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-wallet me-2 text-warning"></i> Active Wallets (Ganache)</h6>
+                                    <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-wallet me-2 text-warning"></i>
+                                        Active Wallets (Ganache)</h6>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive" style="max-height: 300px;">
                                         <table class="table table-hover mb-0" style="font-size: 0.8rem;">
-                                            <thead class="table-light sticky-top"><tr><th class="ps-3">Addr</th><th class="text-end pe-3">Bal</th></tr></thead>
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th class="ps-3">Addr</th>
+                                                    <th class="text-end pe-3">Bal</th>
+                                                </tr>
+                                            </thead>
                                             <tbody>
                                                 {% for acc in ganache_accounts %}
                                                 <tr>
-                                                    <td class="ps-3 font-monospace text-primary">{{ acc.address[:8] }}...</td>
+                                                    <td class="ps-3 font-monospace text-primary">{{ acc.address[:8]
+                                                        }}...</td>
                                                     <td class="text-end pe-3 fw-bold">{{ acc.balance }}</td>
                                                 </tr>
                                                 {% endfor %}
@@ -353,7 +429,99 @@
     </div>
 </div>
 
+<!-- MODAL CAMPAIGN DETAIL -->
+<div class="modal fade" id="campaignDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header border-0 bg-light">
+                <h5 class="modal-title fw-bold" style="font-family: 'Outfit', sans-serif;">Detail Kampanye</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-5 bg-light d-flex align-items-center justify-content-center overflow-hidden">
+                        <img id="detail-image" src="" class="img-fluid w-100 h-100"
+                            style="object-fit: cover; min-height: 300px;">
+                    </div>
+                    <div class="col-md-7 p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary mb-2" id="detail-id">ID #</span>
+                            <span class="badge bg-warning text-dark" id="detail-status">PENDING</span>
+                        </div>
+                        <h4 class="fw-bold mb-3" id="detail-title">Judul Kampanye</h4>
+
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <img src="https://ui-avatars.com/api/?name=User&background=random" class="rounded-circle"
+                                width="24" height="24">
+                            <small class="text-muted fw-bold" id="detail-creator">Creator Name</small>
+                            <span class="text-muted mx-1">•</span>
+                            <small class="text-muted"><i class="far fa-clock me-1"></i> Ends: <span
+                                    id="detail-deadline"></span></small>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mb-3 border">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">Target</span>
+                                <span class="fw-bold text-primary" id="detail-target">0 ETH</span>
+                            </div>
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-muted">Terkumpul</span>
+                                <span class="fw-bold text-success" id="detail-collected">0 ETH</span>
+                            </div>
+                        </div>
+
+                        <p class="text-secondary small mb-4" id="detail-desc"
+                            style="max-height: 150px; overflow-y: auto;">
+                            Deskripsi kampanye...
+                        </p>
+
+                        <div class="d-flex gap-2" id="detail-actions">
+                            <!-- Buttons injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    function showCampaignDetail(campaign) {
+        // Populate Data
+        document.getElementById('detail-id').innerText = 'ID #' + campaign.id;
+        document.getElementById('detail-title').innerText = campaign.title;
+        document.getElementById('detail-creator').innerText = campaign.creator_name;
+        document.getElementById('detail-target').innerText = campaign.target + ' ETH';
+        document.getElementById('detail-collected').innerText = campaign.collected + ' ETH';
+        document.getElementById('detail-deadline').innerText = campaign.deadline;
+        document.getElementById('detail-desc').innerText = campaign.description;
+
+        const statusBadge = document.getElementById('detail-status');
+        statusBadge.innerText = campaign.status.toUpperCase();
+        statusBadge.className = campaign.status_code === 1 ? 'badge bg-success' : (campaign.status_code === 0 ? 'badge bg-warning text-dark' : 'badge bg-secondary');
+
+        // Image Handling
+        const imgPath = "{{ url_for('static', filename='uploads/') }}" + campaign.image;
+        document.getElementById('detail-image').src = imgPath;
+        document.getElementById('detail-image').onerror = function () { this.src = 'https://via.placeholder.com/400x300?text=No+Image'; };
+
+        // Action Buttons
+        const actionContainer = document.getElementById('detail-actions');
+        actionContainer.innerHTML = '';
+
+        if (campaign.status_code === 0) { // Pending
+            actionContainer.innerHTML = `
+                <a href="/admin/approve/${campaign.id}" class="btn btn-success flex-fill fw-bold"><i class="fas fa-check me-2"></i>Approve</a>
+                <a href="/admin/delete_campaign/${campaign.id}" class="btn btn-outline-danger flex-fill fw-bold" onclick="return confirm('Reject & Delete?')"><i class="fas fa-times me-2"></i>Reject</a>
+            `;
+        } else {
+            actionContainer.innerHTML = `<button class="btn btn-secondary flex-fill" disabled>No Actions Available</button>`;
+        }
+
+        // Show Modal
+        new bootstrap.Modal(document.getElementById('campaignDetailModal')).show();
+    }
+
     // Fungsi Tab Switching Manual
     function switchToTab(tabId) {
         const triggerEl = document.getElementById(tabId);
@@ -364,39 +532,112 @@
     // Clock
     function updateClock() {
         const now = new Date();
-        document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+        document.getElementById('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
     setInterval(updateClock, 1000); updateClock();
-    
+
     // Auto-click first tab on load to ensure content shows
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         // Check hash to open specific tab if needed
-        if(window.location.hash) {
+        if (window.location.hash) {
             const hash = window.location.hash.replace('#', '');
             const tabBtn = document.getElementById(hash + '-tab');
-            if(tabBtn) new bootstrap.Tab(tabBtn).show();
+            if (tabBtn) new bootstrap.Tab(tabBtn).show();
         }
     });
 </script>
 
 <style>
     /* HIDE GLOBAL FOOTER & NAVBAR ON DASHBOARD */
-    footer, .navbar { display: none !important; }
+    footer,
+    .navbar {
+        display: none !important;
+    }
 
     /* Styling Sidebar */
-    .nav-pills .nav-link { border-radius: 0.5rem; margin-bottom: 0.5rem; transition: all 0.2s; color: rgba(255,255,255,0.7); }
-    .nav-pills .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateX(5px); }
-    .nav-pills .nav-link.active { background: #0d6efd; color: #fff; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); }
-    .hover-glass:hover { backdrop-filter: blur(5px); }
-    .backdrop-blur { backdrop-filter: blur(5px); }
-    .animate-pulse { animation: pulse 2s infinite; }
-    .animate-swing { animation: swing 3s infinite ease-in-out; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-    @keyframes swing { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(15deg); } 40% { transform: rotate(-10deg); } 60% { transform: rotate(5deg); } 80% { transform: rotate(-5deg); } }
-    
+    .nav-pills .nav-link {
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .nav-pills .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        transform: translateX(5px);
+    }
+
+    .nav-pills .nav-link.active {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4);
+    }
+
+    .hover-glass:hover {
+        backdrop-filter: blur(5px);
+    }
+
+    .backdrop-blur {
+        backdrop-filter: blur(5px);
+    }
+
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    .animate-swing {
+        animation: swing 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes swing {
+
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+
+        20% {
+            transform: rotate(15deg);
+        }
+
+        40% {
+            transform: rotate(-10deg);
+        }
+
+        60% {
+            transform: rotate(5deg);
+        }
+
+        80% {
+            transform: rotate(-5deg);
+        }
+    }
+
     /* Scrollbar */
-    .table-responsive::-webkit-scrollbar { width: 6px; height: 6px; }
-    .table-responsive::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .table-responsive::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
 </style>
 {% endblock %}

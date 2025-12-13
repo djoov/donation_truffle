@@ -5,9 +5,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
 
 :root {
-    --primary-color: #4f46e5; /* Indigo Web3 */
-    --secondary-color: #0ea5e9; /* Sky Blue */
-    --accent-color: #8b5cf6; /* Violet */
+    --primary-color: #4f46e5;
+    /* Indigo Web3 */
+    --secondary-color: #0ea5e9;
+    /* Sky Blue */
+    --accent-color: #8b5cf6;
+    /* Violet */
     --dark-bg: #0f172a;
     --light-bg: #f8fafc;
     --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -31,32 +34,39 @@ body {
 
 /* LOGO & BRAND AREA (Updated) */
 .navbar-brand {
-    display: flex; /* Menyusun Logo & Teks bersebelahan */
+    display: flex;
+    /* Menyusun Logo & Teks bersebelahan */
     align-items: center;
-    gap: 12px; /* Jarak antara Logo dan Tulisan */
+    gap: 12px;
+    /* Jarak antara Logo dan Tulisan */
     text-decoration: none;
 }
 
 /* Gambar Logo Persegi */
 .brand-logo {
-    height: 42px;       /* Tinggi fix */
-    width: 42px;        /* Lebar sama dengan tinggi */
-    object-fit: contain; 
-    border-radius: 8px; /* Sudut sedikit melengkung (Soft Square) */
+    height: 42px;
+    /* Tinggi fix */
+    width: 42px;
+    /* Lebar sama dengan tinggi */
+    object-fit: contain;
+    border-radius: 8px;
+    /* Sudut sedikit melengkung (Soft Square) */
 }
 
 /* Teks Nama Platform */
 .brand-text {
-    font-family: 'Outfit', sans-serif; /* Gunakan Font Elegan */
+    font-family: 'Outfit', sans-serif;
+    /* Gunakan Font Elegan */
     font-weight: 700;
     font-size: 1.35rem;
     letter-spacing: -0.5px;
-    
+
     /* Efek Gradasi Teks */
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: #1e293b; /* Fallback color */
+    color: #1e293b;
+    /* Fallback color */
 }
 
 /* MENU LINKS */
@@ -66,7 +76,8 @@ body {
     transition: all 0.3s ease;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: var(--primary-color) !important;
 }
 
@@ -76,7 +87,8 @@ body {
     border: none;
     font-weight: 600;
     padding: 10px 24px;
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
+    /* Pill shape */
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -126,11 +138,18 @@ body {
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.badge-pending { background-color: #fef3c7; color: #d97706; }
-.badge-active { background-color: #dcfce7; color: #166534; }
+.badge-pending {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.badge-active {
+    background-color: #dcfce7;
+    color: #166534;
+}
 
 /* --- PROGRESS BAR --- */
 .progress {
@@ -184,7 +203,8 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.95); /* Putih Bersih */
+    background: rgba(255, 255, 255, 0.95);
+    /* Putih Bersih */
     backdrop-filter: blur(20px);
     z-index: 9999;
     display: flex;
@@ -230,14 +250,30 @@ footer {
 
 /* Animasi Naik Turun Halus */
 @keyframes logo-breathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 /* Animasi Cahaya */
 @keyframes glow-pulse {
-    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
 }
 
 /* Animasi Titik-titik (...) */
@@ -247,11 +283,24 @@ footer {
     animation: dots 1.4s infinite both;
 }
 
-.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes dots {
-    0% { opacity: 0; }
-    20% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }

@@ -2,8 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from web3 import Web3
 import sqlite3
 import os
-import time
 import re
+import json
+import time
 from datetime import datetime, timedelta
 import feedparser
 from time import mktime
@@ -13,6 +14,17 @@ app = Flask(__name__)
 app.secret_key = 'rahasia_donasi_blockchain'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
+# --- CONFIG EMAIL (GMAIL) ---
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'jouvialdalopezgamandi@gmail.com'
+app.config['MAIL_PASSWORD'] = 'flkx busl pzmr fnxu' 
+
+# Imports untuk Email
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 # Import Contract Data
 try:
     from contract_data import contract, web3
@@ -21,31 +33,52 @@ except ImportError:
     web3 = None
     print("Warning: contract_data.py tidak ditemukan. Fitur blockchain tidak aktif.")
 
-# --- 1. CONTEXT PROCESSOR ---
-@app.context_processor
-def inject_blockchain_status():
-    status = {
+# --- 1. CONTEXT PROCESSOR (SMART CACHING) ---
+# Cache sederhana untuk mengurangi beban request ke Ganache
+CACHE_BC = {
+    'last_updated': 0,
+    'data': {
         'connected': False,
-        'user_balance': '0.0000',
         'gas_price': '0',
         'block_number': '0'
     }
-    try:
-        if web3 and web3.is_connected():
-            status['connected'] = True
-            status['block_number'] = web3.eth.block_number
-            gas_wei = web3.eth.gas_price
-            status['gas_price'] = "{:.1f}".format(web3.from_wei(gas_wei, 'gwei'))
-            
-            if 'wallet' in session:
-                try:
-                    bal_wei = web3.eth.get_balance(session['wallet'])
-                    bal_eth = web3.from_wei(bal_wei, 'ether')
-                    status['user_balance'] = "{:.4f}".format(float(bal_eth))
-                except:
-                    status['user_balance'] = "Err"
-    except Exception as e:
-        pass
+}
+CACHE_DURATION = 5 # Update setiap 5 detik
+
+@app.context_processor
+def inject_blockchain_status():
+    global CACHE_BC
+    current_time = time.time()
+    
+    # 1. Update Global Stats (Gas, Block, Status) jika Cache Expired
+    if current_time - CACHE_BC['last_updated'] > CACHE_DURATION:
+        try:
+            if web3 and web3.is_connected():
+                CACHE_BC['data']['connected'] = True
+                CACHE_BC['data']['block_number'] = web3.eth.block_number
+                gas_wei = web3.eth.gas_price
+                CACHE_BC['data']['gas_price'] = "{:.1f}".format(web3.from_wei(gas_wei, 'gwei'))
+            else:
+                CACHE_BC['data']['connected'] = False
+        except:
+            CACHE_BC['data']['connected'] = False
+        
+        CACHE_BC['last_updated'] = current_time
+
+    # Salin data dari cache
+    status = CACHE_BC['data'].copy()
+    status['user_balance'] = '0.0000'
+
+    # 2. Update User Balance (Real-time per request, tapi hanya jika login)
+    # Balance user penting untuk validasi, jadi fetch real-time (bisa di-optimize nanti jika perlu)
+    if 'wallet' in session and status['connected']:
+        try:
+            bal_wei = web3.eth.get_balance(session['wallet'])
+            bal_eth = web3.from_wei(bal_wei, 'ether')
+            status['user_balance'] = "{:.4f}".format(float(bal_eth))
+        except:
+            status['user_balance'] = "Err"
+
     return dict(bc_stat=status)
 
 # --- 2. DATABASE SETUP (DIPERBARUI) ---
@@ -79,6 +112,11 @@ def init_db():
                  (id INTEGER PRIMARY KEY, blockchain_id INTEGER, 
                   donor_name TEXT, amount REAL, message TEXT, timestamp TEXT,
                   tx_hash TEXT, nonce INTEGER)''')
+    
+    # NEW: Security Logs Table
+    c.execute('''CREATE TABLE IF NOT EXISTS security_logs 
+                 (id INTEGER PRIMARY KEY, timestamp TEXT, ip_address TEXT, 
+                  action TEXT, status TEXT, description TEXT, user_id INTEGER)''')
     
     c.execute("SELECT * FROM users WHERE role='admin'")
     if not c.fetchone():
@@ -172,6 +210,75 @@ def cleanhtml(raw_html):
     cleantext = re.sub(cleanr, '', raw_html)
     return cleantext
 
+# --- 3b. SECURITY LOGGING HELPER & WAF ---
+# In-memory storage for Rate Limiting (Reset on restart)
+# Format: { 'ip_address': [timestamp1, timestamp2, ...] }
+login_attempts = {}
+
+def check_rate_limit(ip_addr, limit=5, window=600):
+    """
+    Return True if IP is blocked (too many attempts in window seconds).
+    Clean up old timestamps.
+    """
+    now = time.time()
+    if ip_addr not in login_attempts:
+        login_attempts[ip_addr] = []
+    
+    # Filter attempts within window
+    login_attempts[ip_addr] = [t for t in login_attempts[ip_addr] if now - t < window]
+    
+    if len(login_attempts[ip_addr]) >= limit:
+        return True
+    return False
+
+def record_failed_attempt(ip_addr):
+    if ip_addr not in login_attempts:
+        login_attempts[ip_addr] = []
+    login_attempts[ip_addr].append(time.time())
+
+def detect_suspicious_input(input_str):
+    """
+    Basic WAF: Returns (True, Type) if suspicious pattern found.
+    """
+    if not input_str: return False, None
+    input_str = str(input_str).lower()
+    
+    # SQL Injection Patterns
+    sqli_patterns = ["union select", "' or 1=1", "--", "; drop table", "information_schema"]
+    for pat in sqli_patterns:
+        if pat in input_str: return True, "SQL Injection Attempt"
+    
+    # XSS Patterns
+    xss_patterns = ["<script>", "javascript:", "onload=", "onerror="]
+    for pat in xss_patterns:
+        if pat in input_str: return True, "XSS/Script Attempt"
+        
+    return False, None
+
+def log_security(action, status, description, user_id=None):
+    """
+    Mencatat aktivitas keamanan ke database.
+    Status: 'low' (Info), 'medium' (Warning), 'high' (Critical/Error)
+    Added: User-Agent logging in description.
+    """
+    try:
+        if not user_id and 'user_id' in session:
+            user_id = session['user_id']
+        
+        ip_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
+        ua = request.user_agent.string if request.user_agent else "Unknown"
+        
+        # Append UA to description
+        full_desc = f"{description} [UA: {ua}]"
+        
+        conn = get_db_connection()
+        conn.execute('INSERT INTO security_logs (timestamp, ip_address, action, status, description, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+                     (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ip_addr, action, status, full_desc, user_id))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Failed to log security event: {e}")
+
 # --- FUNGSI FETCH BERITA (MULTI-SOURCE AGGREGATOR) ---
 def get_humanitarian_news():
     rss_sources = [
@@ -222,6 +329,65 @@ def get_humanitarian_news():
         ]
     return final_news
 
+# --- 3c. EMAIL NOTIFICATION HELPER ---
+def send_welcome_email(to_email, username):
+    try:
+        sender_email = app.config['MAIL_USERNAME']
+        password = app.config['MAIL_PASSWORD']
+        
+        # Cek jika kredensial masih default/kosong
+        if 'xxxx' in password:
+            print(f"[MOCK EMAIL] To: {to_email} | Subject: Welcome to DonasiKuy | (Konfigurasi SMTP belum diset)")
+            return
+
+        msg = MIMEMultipart()
+        msg['From'] = f"DonasiKuy Team <{sender_email}>"
+        msg['To'] = to_email
+        msg['Subject'] = "Selamat Datang di Keluarga Besar DonasiKuy! 🌍"
+
+        # HTML Body yang Menarik
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: white; margin: 0;">DonasiKuy</h1>
+                    <p style="color: rgba(255,255,255,0.8);">Platform Donasi Blockchain #1</p>
+                </div>
+                <div style="padding: 30px; background-color: #ffffff;">
+                    <h2 style="color: #4f46e5;">Halo, {username}! 👋</h2>
+                    <p>Terima kasih telah bergabung menjadi bagian dari agen perubahan kebaikan.</p>
+                    <p>Di <strong>DonasiKuy</strong>, setiap donasi Anda tercatat secara abadi di Blockchain Ethereum, menjamin transparansi 100% tanpa ada yang ditutup-tutupi.</p>
+                    
+                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4ade80;">
+                        <strong>Mulai langkah pertama Anda:</strong><br>
+                        Jelajahi kampanye kemanusiaan yang membutuhkan uluran tangan Anda hari ini.
+                    </div>
+                    
+                    <a href="http://localhost:5000/dashboard" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 50px; font-weight: bold; margin-top: 10px;">Mulai Berdonasi</a>
+                </div>
+                <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b;">
+                    &copy; 2025 DonasiKuy Foundation.<br>
+                    Transparency is our currency.
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, 'html'))
+
+        # Kirim via SMTP GMAIL
+        server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        server.starttls()
+        server.login(sender_email, password)
+        server.send_message(msg)
+        server.quit()
+        
+        print(f"[EMAIL SUCCESS] Welcome email sent to {to_email}")
+    except Exception as e:
+        print(f"[EMAIL FAILED] Could not send email to {to_email}: {e}")
+
 # --- 4. ROUTES UTAMA ---
 
 @app.route('/')
@@ -244,6 +410,20 @@ def how_it_works_page(): return render_template('how_it_works.html')
 def login():
     if request.method == 'POST':
         email = request.form['email']; password = request.form['password']
+        ip_addr = request.remote_addr
+
+        # 1. Check Rate Limit
+        if check_rate_limit(ip_addr):
+            log_security('Rate Limit Exceeded', 'high', f"Blocked login attempt from IP: {ip_addr}")
+            flash('Terlalu banyak percobaan login gagal. Silakan coba lagi dalam 10 menit.', 'error')
+            return render_template('auth/login.html', hide_chrome=True)
+
+        # 2. Check WAF (Suspicious Input)
+        is_suspicious, threat_type = detect_suspicious_input(email)
+        if is_suspicious:
+            log_security(threat_type, 'high', f"Blocked suspicious input: {email}")
+            flash('Input terdeteksi berbahaya dan diblokir!', 'error')
+            return render_template('auth/login.html', hide_chrome=True)
         conn = get_db_connection()
         user = conn.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password)).fetchone()
         conn.close()
@@ -251,30 +431,75 @@ def login():
             session['user_id'] = user['id']; session['username'] = user['username']
             session['role'] = user['role']; session['wallet'] = user['wallet_address']
             session['profile_pic'] = user['profile_pic'] if user['profile_pic'] else 'default_user.png'
+            log_security('Login Success', 'low', f"User {user['username']} logged in successfully.", user['id'])
             return redirect(url_for('dashboard'))
-        else: flash('Login gagal! Cek email/password.', 'error')
-    return render_template('auth/login.html')
+        else: 
+            record_failed_attempt(ip_addr)
+            flash('Login gagal! Cek email/password.', 'error')
+            log_security('Login Failed', 'medium', f"Failed login attempt for email: {email}")
+    return render_template('auth/login.html', hide_chrome=True)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     ganache_accounts = []
     if web3 and web3.is_connected():
-        try: ganache_accounts = web3.eth.accounts
+        try: 
+            all_accounts = web3.eth.accounts
+            # Filter Used Wallets
+            conn = get_db_connection()
+            used_wallets_rows = conn.execute("SELECT wallet_address FROM users").fetchall()
+            conn.close()
+            
+            used_wallets = {row['wallet_address'] for row in used_wallets_rows}
+            ganache_accounts = [acc for acc in all_accounts if acc not in used_wallets]
         except: pass
     if request.method == 'POST':
-        username = request.form['username']; email = request.form['email']
-        password = request.form['password']; role = request.form['role']
-        wallet = request.form['wallet_address']; pk = request.form['private_key']
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        role = request.form['role']
+        wallet = request.form['wallet_address']
+        pk = request.form['private_key']
+
+        # 1. STRICT EMAIL VALIDATION (Gmail Only)
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@gmail\.com$", email):
+            # Log threat even if it's just a format mismatch, as it could be an attempt to bypass
+            log_security("Invalid Email Format", 'medium', f"Attempted registration with non-Gmail email: {email}")
+            flash("Registrasi Ditolak: Hanya email Google (@gmail.com) yang diperbolehkan!", "error")
+            return render_template('auth/register.html', accounts=ganache_accounts, hide_chrome=True)
+
+        # 2. STRICT USERNAME VALIDATION (Instagram-like: lowercase, alphanumeric, dot, underscore)
+        if not re.match(r"^[a-z0-9_.]+$", username):
+            log_security("Invalid Username Format", 'medium', f"Invalid username format: {username}")
+            flash("Username tidak valid! Hanya huruf kecil (a-z), angka, titik (.), dan underscore (_) yang diperbolehkan.", "error")
+            return render_template('auth/register.html', accounts=ganache_accounts, hide_chrome=True)
         
+        # WAF Check
+        for field, val in [('Username', username), ('Email', email), ('Wallet', wallet)]:
+            is_suspicious, threat_type = detect_suspicious_input(val)
+            if is_suspicious:
+                log_security(threat_type, 'high', f"Blocked suspicious register input in {field}: {val}")
+                flash(f'Input {field} terdeteksi berbahaya!', 'error')
+                return render_template('auth/register.html', accounts=ganache_accounts, hide_chrome=True)
+
         if web3 and not Web3.is_address(wallet):
             flash('Alamat Wallet Ethereum tidak valid!', 'error')
-            return render_template('auth/register.html', accounts=ganache_accounts)
+            return render_template('auth/register.html', accounts=ganache_accounts, hide_chrome=True)
 
         conn = get_db_connection()
         try:
             conn.execute('INSERT INTO users (username, email, password, role, wallet_address, private_key, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?)',
                          (username, email, password, role, wallet, pk, 'default_user.png'))
             conn.commit()
+            
+            # Ambil ID Pengguna Baru untuk Log
+            new_user_id = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()['id']
+            log_security('Registration', 'low', f"New user registered: {username} ({role})", new_user_id)
+            
+            # KIRIM EMAIL NOTIFIKASI
+            # (Best practice: Gunakan Threading/Celery agar tidak blocking, tapi untuk demo ini sync tidak masalah jika koneksi cepat)
+            send_welcome_email(email, username)
+            
             flash('Registrasi berhasil! Setup Wallet selesai.', 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
@@ -282,7 +507,7 @@ def register():
         except Exception as e:
             flash(f'Gagal Register: {e}', 'error')
         finally: conn.close()
-    return render_template('auth/register.html', accounts=ganache_accounts)
+    return render_template('auth/register.html', accounts=ganache_accounts, hide_chrome=True)
 
 @app.route('/logout')
 def logout(): session.clear(); return redirect(url_for('index'))
@@ -316,7 +541,7 @@ def profile():
         if web3: balance = "{:.4f}".format(web3.from_wei(web3.eth.get_balance(user['wallet_address']), 'ether'))
     except: pass
     conn.close()
-    return render_template('profile.html', user=user, balance=balance, days_wait=0)
+    return render_template('profile.html', user=user, balance=balance, days_wait=0, hide_chrome=True)
 
 # --- 6. ROUTES CAMPAIGN ---
 @app.route('/dashboard')
@@ -421,7 +646,8 @@ def create_campaign():
             # Konversi hari ke menit (karena smart contract pakai menit) -> 1 hari = 1440 menit
             duration_minutes = duration_days * 1440
             
-            nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
+            # UPDATE: Use 'pending' nonce for currency
+            nonce = web3.eth.get_transaction_count(user_data['wallet_address'], 'pending')
             
             # Panggil fungsi Smart Contract
             txn = contract.functions.createCampaign(title, desc, target_wei, filename, duration_minutes).build_transaction({
@@ -429,6 +655,8 @@ def create_campaign():
             })
             signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
             tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
+            
+            # NOTE: Create Campaign tetap Blocking agar kita bisa dapat ID campaign yang valid
             web3.eth.wait_for_transaction_receipt(tx_hash)
             
             new_count = contract.functions.getCampaignCount().call()
@@ -473,20 +701,49 @@ def donate(id):
     if session.get('role') != 'donatur': return redirect(url_for('campaign_detail', id=id))
     amount = request.form.get('amount'); message = request.form.get('message')
     try:
-        amount_eth = float(amount); amount_wei = web3.to_wei(amount_eth, 'ether')
-        conn = get_db_connection(); user_data = conn.execute("SELECT wallet_address, private_key, username FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+        amount_eth = float(amount)
+        amount_wei = web3.to_wei(amount_eth, 'ether')
         
-        # 1. Ambil Nonce Terbaru
-        nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
+        if amount_eth <= 0:
+            flash("Jumlah donasi harus lebih dari 0!", "error")
+            return redirect(url_for('campaign_detail', id=id))
+
+        conn = get_db_connection()
+        user_data = conn.execute("SELECT wallet_address, private_key, username FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+        
+        # 1. Estimasi Gas Fee (Dynamic)
+        try:
+            gas_limit = contract.functions.donateToCampaign(id).estimate_gas({'from': user_data['wallet_address'], 'value': amount_wei})
+            # Tambahkan buffer sedikit untuk keamanan
+            gas_limit = int(gas_limit * 1.1) 
+        except Exception as e:
+            # Fallback jika estimasi gagal (misal saldo 0 di ganache sering fail estimasi)
+            print(f"Gas Estimation Failed: {e}")
+            gas_limit = 200000 # Fallback yang lebih masuk akal daripada 2 juta
+            
+        gas_price = web3.eth.gas_price
+        total_cost_wei = amount_wei + (gas_limit * gas_price)
+        
+        # 2. Pengecekan Saldo
+        sender_balance_wei = web3.eth.get_balance(user_data['wallet_address'])
+        
+        if sender_balance_wei < total_cost_wei:
+            shortage = web3.from_wei(total_cost_wei - sender_balance_wei, 'ether')
+            flash(f"Saldo tidak cukup untuk Donasi + Gas Fee. Estimasi Fee: {web3.from_wei(gas_limit*gas_price, 'gwei')} Gwei. Kekurangan: {shortage:.5f} ETH", "error")
+            log_security('Low Balance', 'medium', f"User {user_data['username']} low balance. Req: {web3.from_wei(total_cost_wei,'ether')} ETH", session['user_id'])
+            return redirect(url_for('campaign_detail', id=id))
+
+        # 3. Eksekusi
+        nonce = web3.eth.get_transaction_count(user_data['wallet_address'], 'pending')
         
         txn = contract.functions.donateToCampaign(id).build_transaction({
-            'chainId': web3.eth.chain_id, 'gas': 2000000, 'gasPrice': web3.eth.gas_price, 'nonce': nonce, 'value': amount_wei 
+            'chainId': web3.eth.chain_id, 'gas': gas_limit, 'gasPrice': gas_price, 'nonce': nonce, 'value': amount_wei 
         })
         signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
         
-        # Kirim Tx
+        # Kirim Tx (ASYNC - No Wait)
         tx_hash_bytes = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-        web3.eth.wait_for_transaction_receipt(tx_hash_bytes)
+        # web3.eth.wait_for_transaction_receipt(tx_hash_bytes) <-- REMOVED BLOCKING CALL
         tx_hash_str = tx_hash_bytes.hex()
         
         # 2. Simpan ke Database (UPDATE: simpan nonce dan hash)
@@ -495,8 +752,11 @@ def donate(id):
                      (id, user_data['username'], amount, message, datetime.now().strftime("%d %b %Y, %H:%M"), tx_hash_str, nonce))
         
         conn.commit(); conn.close()
+        log_security('Donation Initiated', 'medium', f"Donated {amount} ETH to Campaign #{id}. Tx: {tx_hash_str[:10]}...")
         flash(f"Terima kasih! Donasi berhasil. Nonce: #{nonce}", "success")
-    except Exception as e: flash(f"Gagal Donasi: {e}", "error")
+    except Exception as e: 
+        log_security('Donation Failed', 'high', f"Failed to donate: {str(e)}")
+        flash(f"Gagal Donasi: {e}", "error")
     return redirect(url_for('campaign_detail', id=id))
 
 @app.route('/post_update/<int:id>', methods=['POST'])
@@ -520,18 +780,29 @@ def withdraw_funds(id):
     conn = get_db_connection(); user_data = conn.execute("SELECT wallet_address, private_key FROM users WHERE id = ?", (session['user_id'],)).fetchone()
     conn.close()
     try:
-        # 1. Ambil Nonce
-        nonce = web3.eth.get_transaction_count(user_data['wallet_address'])
+        # 1. Ambil Nonce 'pending'
+        nonce = web3.eth.get_transaction_count(user_data['wallet_address'], 'pending')
         
         txn = contract.functions.withdrawFunds(id).build_transaction({
             'chainId': web3.eth.chain_id, 'gas': 2000000, 'gasPrice': web3.eth.gas_price, 'nonce': nonce
         })
         signed_txn = web3.eth.account.sign_transaction(txn, private_key=user_data['private_key'])
         tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-        web3.eth.wait_for_transaction_receipt(tx_hash)
-        flash(f"Dana berhasil ditarik! Nonce Transaksi: #{nonce}", "success")
-    except Exception as e: flash(f"Gagal Tarik Dana: {e}", "error")
+        # web3.eth.wait_for_transaction_receipt(tx_hash) <-- ASYNC
+        log_security('Withdrawal Funds', 'medium', f"Withdrawal initiated for Campaign #{id}. Tx: {tx_hash.hex()[:10]}...")
+        flash(f"Penarikan sedang diproses blockchain (Tx: {tx_hash.hex()[:10]}...)", "success")
+    except Exception as e: 
+        log_security('Withdrawal Failed', 'high', f"Failed to withdraw Campaign #{id}: {str(e)}")
+        flash(f"Gagal Tarik Dana: {e}", "error")
     return redirect(url_for('campaign_detail', id=id))
+
+@app.before_request
+def track_visitor():
+    if not session.get('visited'):
+        session['visited'] = True
+        user_agent = request.user_agent.string
+        device_type = "Mobile" if "Mobile" in user_agent or "Android" in user_agent or "iPhone" in user_agent else "Desktop"
+        log_security('Site Visit', 'info', f"New visitor: {device_type} ({request.user_agent.platform})")
 
 # --- 8. ADMIN PANEL ---
 @app.route('/admin')
@@ -560,9 +831,13 @@ def admin_dashboard():
                 
                 campaigns_data.append({
                     'id': c[0], 'title': c[2],
+                    'description': c[3],
+                    'target': web3.from_wei(c[4], 'ether'),
+                    'collected': web3.from_wei(c[5], 'ether'),
+                    'image': c[6],
+                    'deadline': datetime.fromtimestamp(c[7]).strftime('%d %b %Y'),
                     'creator_name': get_username_by_wallet(creator_addr),
                     'creator_addr': creator_addr,
-                    'target': web3.from_wei(c[4], 'ether'),
                     'status_code': status_code,
                     'status': 'Pending' if status_code==0 else 'Active' if status_code==1 else 'Rejected'
                 })
@@ -579,21 +854,38 @@ def admin_dashboard():
                 ganache_accounts.append({'index': i, 'address': acc, 'balance': "{:.4f}".format(bal)})
         except: pass
 
-    # --- DATA DUMMY DIPERBANYAK UNTUK FULL LOGS ---
-    security_logs = [
-        {'time': 'Baru saja', 'ip': '192.168.1.105', 'action': 'Admin Login Success', 'status': 'low', 'desc': 'Akses valid dari localhost'},
-        {'time': '2 menit lalu', 'ip': '10.0.0.4', 'action': 'Smart Contract Call', 'status': 'medium', 'desc': 'Fungsi donateToCampaign() dipanggil'},
-        {'time': '5 menit lalu', 'ip': '172.16.0.22', 'action': 'Suspicious Rate Limit', 'status': 'high', 'desc': 'Terdeteksi 5 request/detik (Blocked)'},
-        {'time': '10 menit lalu', 'ip': '192.168.1.50', 'action': 'New User Registration', 'status': 'low', 'desc': 'User donatur baru terdaftar'},
-        {'time': '15 menit lalu', 'ip': 'Unknown', 'action': 'Ganache RPC Access', 'status': 'medium', 'desc': 'Koneksi eksternal ke port 7545'},
-        {'time': '30 menit lalu', 'ip': '192.168.1.12', 'action': 'Failed Login Attempt', 'status': 'medium', 'desc': 'Password salah 3x user: admin'},
-        {'time': '1 jam lalu', 'ip': '10.2.2.1', 'action': 'API Key Generated', 'status': 'low', 'desc': 'API Key baru untuk mobile app'},
-        {'time': '2 jam lalu', 'ip': '45.33.22.11', 'action': 'SQL Injection Attempt', 'status': 'high', 'desc': 'Pola serangan terdeteksi di form login (Blocked)'},
-        {'time': '3 jam lalu', 'ip': '192.168.1.105', 'action': 'Campaign Approved', 'status': 'low', 'desc': 'Admin menyetujui kampanye #12'},
-        {'time': '5 jam lalu', 'ip': 'System', 'action': 'Database Backup', 'status': 'low', 'desc': 'Backup otomatis harian berhasil'}
-    ]
+    # --- REAL SECURITY LOGS (FETCH FROM DB) ---
+    security_logs_rows = conn.execute("SELECT * FROM security_logs ORDER BY id DESC LIMIT 20").fetchall()
     
-    visitor_stats = { 'total_visits': 1240, 'unique_visitors': 850, 'avg_session': '4m 32s', 'bounce_rate': '35%' }
+    # Calculate Real Traffic Stats
+    today_visit_count = conn.execute("SELECT COUNT(*) FROM security_logs WHERE action='Site Visit' AND timestamp LIKE ?", (datetime.now().strftime("%d %b %Y") + '%',)).fetchone()[0]
+    mobile_count = conn.execute("SELECT COUNT(*) FROM security_logs WHERE action='Site Visit' AND description LIKE '%Mobile%'").fetchone()[0]
+    all_visits_count = conn.execute("SELECT COUNT(*) FROM security_logs WHERE action='Site Visit'").fetchone()[0]
+    
+    if all_visits_count > 0:
+        mobile_percent = int((mobile_count / all_visits_count) * 100)
+    else:
+        mobile_percent = 0
+    desktop_percent = 100 - mobile_percent
+    
+    visitor_stats = { 
+        'total_visits': today_visit_count, 
+        'unique_visitors': all_visits_count, 
+        'mobile_percent': mobile_percent, 
+        'desktop_percent': desktop_percent 
+    }
+
+    # Mapper untuk format consistent di Frontend
+    security_logs = []
+    for log in security_logs_rows:
+        # log structure: id, timestamp, ip_address, action, status, description, user_id
+        security_logs.append({
+            'time': log['timestamp'],
+            'ip': log['ip_address'],
+            'action': log['action'],
+            'status': log['status'], # low, medium, high, info
+            'desc': log['description']
+        })
 
     conn.close()
     return render_template('admin_dashboard.html', stats=stats, total_users=len(users_rows),
@@ -605,18 +897,26 @@ def admin_dashboard():
 def approve_campaign(id):
     if session.get('role') != 'admin': return redirect(url_for('index'))
     try:
-        tx = contract.functions.approveCampaign(id).transact({'from': web3.eth.accounts[0]})
-        web3.eth.wait_for_transaction_receipt(tx); flash(f"Campaign #{id} Approved!", "success")
-    except: flash("Gagal approve", "error")
+        # ASYNC
+        nonce = web3.eth.get_transaction_count(web3.eth.accounts[0], 'pending')
+        tx = contract.functions.approveCampaign(id).transact({'from': web3.eth.accounts[0], 'nonce': nonce})
+        # web3.eth.wait_for_transaction_receipt(tx); 
+        log_security('Admin Approve', 'high', f"Admin approved Campaign #{id}")
+        flash(f"Campaign #{id} Approve broadcasted..", "success")
+    except Exception as e: flash(f"Gagal approve: {e}", "error")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_campaign/<int:id>')
 def delete_campaign(id):
     if session.get('role') != 'admin': return redirect(url_for('index'))
     try:
-        tx = contract.functions.deleteCampaign(id).transact({'from': web3.eth.accounts[0]})
-        web3.eth.wait_for_transaction_receipt(tx); flash(f"Campaign #{id} Deleted.", "success")
-    except: flash("Gagal hapus", "error")
+        # ASYNC
+        nonce = web3.eth.get_transaction_count(web3.eth.accounts[0], 'pending')
+        tx = contract.functions.deleteCampaign(id).transact({'from': web3.eth.accounts[0], 'nonce': nonce})
+        # web3.eth.wait_for_transaction_receipt(tx); 
+        log_security('Admin Delete', 'high', f"Admin soft-deleted Campaign #{id}")
+        flash(f"Campaign #{id} Delete broadcasted.", "success")
+    except Exception as e: flash(f"Gagal hapus: {e}", "error")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_user/<int:user_id>')
@@ -630,7 +930,7 @@ def delete_user(user_id):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('404.html', hide_chrome=True), 404
 
 @app.route('/explorer')
 def explorer():
@@ -746,4 +1046,5 @@ def get_latest_activity():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # LISTEN ON ALL INTERFACES for Local Network Access
+    app.run(debug=True, host='0.0.0.0', port=5000)

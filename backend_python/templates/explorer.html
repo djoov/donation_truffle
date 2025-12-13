@@ -1,41 +1,149 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonasiKuy Explorer | Live Blockchain Monitor</title>
-    
+
     <!-- Font & Icon -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
-            --bg-dark: #0a0e1a; --bg-secondary: #111827; --card-bg: #1a1f35;
-            --primary: #6366f1; --primary-light: #818cf8; --accent: #14b8a6; --accent-light: #2dd4bf;
-            --success: #10b981; --warning: #f59e0b; --text-light: #f9fafb; --text-secondary: #d1d5db; --text-dim: #9ca3af;
-            --border-color: #2d3548; --border-glow: rgba(99, 102, 241, 0.3);
+            --bg-dark: #0a0e1a;
+            --bg-secondary: #111827;
+            --card-bg: #1a1f35;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #14b8a6;
+            --accent-light: #2dd4bf;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-light: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-dim: #9ca3af;
+            --border-color: #2d3548;
+            --border-glow: rgba(99, 102, 241, 0.3);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: linear-gradient(135deg, var(--bg-dark) 0%, #0f1419 100%); color: var(--text-light); font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0f1419 100%);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
         /* Background Animated Mesh */
-        .bg-mesh { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(ellipse at 20% 30%, rgba(99, 102, 241, 0.15), transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(20, 184, 166, 0.12), transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08), transparent 80%); animation: meshPulse 8s ease-in-out infinite; }
-        @keyframes meshPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.9; } }
+        .bg-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at 20% 30%, rgba(99, 102, 241, 0.15), transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(20, 184, 166, 0.12), transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08), transparent 80%);
+            animation: meshPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes meshPulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 0.9;
+            }
+        }
 
         /* Navbar & Components */
-        .navbar-glass { background: rgba(10, 14, 26, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); position: sticky; top: 0; z-index: 1000; }
-        .brand-logo { font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .brand-icon { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
-        .gas-badge { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 146, 60, 0.15) 100%); border: 1px solid rgba(245, 158, 11, 0.3); backdrop-filter: blur(10px); }
-        .status-indicator { height: 10px; width: 10px; background: linear-gradient(135deg, var(--success) 0%, #34d399 100%); border-radius: 50%; display: inline-block; box-shadow: 0 0 15px var(--success), 0 0 30px rgba(16, 185, 129, 0.3); animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } }
+        .navbar-glass {
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand-logo {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .gas-badge {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 146, 60, 0.15) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-indicator {
+            height: 10px;
+            width: 10px;
+            background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 15px var(--success), 0 0 30px rgba(16, 185, 129, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
 
         /* Cards */
-        .web3-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05); overflow: hidden; }
-        .web3-card:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.1); }
-        .card-header { background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(20, 184, 166, 0.05) 100%); backdrop-filter: blur(10px); }
+        .web3-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .web3-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(20, 184, 166, 0.05) 100%);
+            backdrop-filter: blur(10px);
+        }
 
         /* Contract Vault Card (NEW) */
         .vault-card {
@@ -44,50 +152,265 @@
             position: relative;
             overflow: hidden;
         }
+
         .vault-card::before {
-            content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
-            background: rgba(99, 102, 241, 0.3); filter: blur(50px); border-radius: 50%;
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(99, 102, 241, 0.3);
+            filter: blur(50px);
+            border-radius: 50%;
         }
 
         /* Blockchain Visuals */
-        .chain-container { display: flex; align-items: center; overflow-x: auto; padding: 30px 10px; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; position: relative; }
-        .chain-container::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--border-color) 10%, var(--border-color) 90%, transparent); z-index: 0; }
-        .chain-container::-webkit-scrollbar { height: 10px; }
-        .chain-container::-webkit-scrollbar-thumb { background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 10px; }
-        .chain-container::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        .chain-container {
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            padding: 30px 10px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+            position: relative;
+        }
 
-        .block-node { min-width: 180px; background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary)); border: 2px solid var(--border-color); border-radius: 12px; padding: 20px; position: relative; margin-right: 60px; transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; backdrop-filter: blur(10px); }
-        .block-node:hover { transform: translateY(-8px) scale(1.05); border-color: var(--primary); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3); }
-        .block-node.genesis { border-color: var(--warning); }
-        .block-node.latest { border-color: var(--success); animation: latestPulse 2s ease-in-out infinite; }
-        @keyframes latestPulse { 0% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3); } 50% { box-shadow: 0 8px 40px rgba(16, 185, 129, 0.5); } 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3); } }
-        .block-node::after { content: ''; position: absolute; right: -60px; top: 50%; width: 60px; height: 2px; background: linear-gradient(90deg, var(--border-color), transparent); z-index: 0; }
-        .block-node:last-child::after { display: none; }
-        .block-node:not(:last-child)::before { content: '▶'; position: absolute; right: -40px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 14px; z-index: 1; }
-        .block-number { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, var(--text-light) 0%, var(--text-secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .block-hash { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); background: rgba(255, 255, 255, 0.03); padding: 6px; border-radius: 6px; word-break: break-all; }
+        .chain-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color) 10%, var(--border-color) 90%, transparent);
+            z-index: 0;
+        }
+
+        .chain-container::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .chain-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+        }
+
+        .chain-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .block-node {
+            min-width: 180px;
+            background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            margin-right: 60px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .block-node:hover {
+            transform: translateY(-8px) scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .block-node.genesis {
+            border-color: var(--warning);
+        }
+
+        .block-node.latest {
+            border-color: var(--success);
+            animation: latestPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes latestPulse {
+            0% {
+                box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 8px 40px rgba(16, 185, 129, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            }
+        }
+
+        .block-node::after {
+            content: '';
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--border-color), transparent);
+            z-index: 0;
+        }
+
+        .block-node:last-child::after {
+            display: none;
+        }
+
+        .block-node:not(:last-child)::before {
+            content: '▶';
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .block-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .block-hash {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px;
+            border-radius: 6px;
+            word-break: break-all;
+        }
 
         /* Tables & Typography */
-        .table-web3 { color: var(--text-light) !important; font-size: 0.9rem; background-color: transparent !important; }
-        .table-web3 thead th { background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(20, 184, 166, 0.05) 100%) !important; border-bottom: 2px solid var(--border-color) !important; color: var(--text-light) !important; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.2px; padding: 16px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(5px); }
-        .table-web3 tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.05); background-color: transparent !important; }
-        .table-web3 tbody tr:hover { background-color: rgba(99, 102, 241, 0.1) !important; transform: scale(1.005); }
-        .table-web3 td { border-bottom: 1px solid var(--border-color); color: var(--text-light) !important; padding: 18px 16px; font-weight: 500; background-color: transparent !important; }
-        
-        .hash-pill { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%); color: var(--accent-light); padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.2); display: inline-block; }
-        .table-container { max-height: 500px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
-        .table-container::-webkit-scrollbar { width: 6px; }
-        .table-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-        
-        .stat-card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
-        .stat-value { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .badge-live { background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%); color: var(--accent-light); border: 1px solid var(--accent); animation: livePulse 2s infinite; }
-        .badge-custom { padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; }
-        .info-box { background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 20px; }
-        .btn-outline-light { border: 2px solid var(--border-color); background: rgba(255, 255, 255, 0.05); font-weight: 600; }
-        .btn-outline-light:hover { background: var(--primary); border-color: var(--primary); }
+        .table-web3 {
+            color: var(--text-light) !important;
+            font-size: 0.9rem;
+            background-color: transparent !important;
+        }
+
+        .table-web3 thead th {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(20, 184, 166, 0.05) 100%) !important;
+            border-bottom: 2px solid var(--border-color) !important;
+            color: var(--text-light) !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1.2px;
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+
+        .table-web3 tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: transparent !important;
+        }
+
+        .table-web3 tbody tr:hover {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+            transform: scale(1.005);
+        }
+
+        .table-web3 td {
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-light) !important;
+            padding: 18px 16px;
+            font-weight: 500;
+            background-color: transparent !important;
+        }
+
+        .hash-pill {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
+            color: var(--accent-light);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: inline-block;
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge-live {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%);
+            color: var(--accent-light);
+            border: 1px solid var(--accent);
+            animation: livePulse 2s infinite;
+        }
+
+        .badge-custom {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .btn-outline-light {
+            border: 2px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
+
+        .btn-outline-light:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
     </style>
 </head>
+
 <body>
     <div class="bg-mesh"></div>
 
@@ -95,10 +418,12 @@
     <nav class="navbar navbar-glass px-4 py-3">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center gap-3" href="/">
-                <div class="brand-icon rounded-3 p-2 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                <div class="brand-icon rounded-3 p-2 d-flex justify-content-center align-items-center"
+                    style="width: 40px; height: 40px;">
                     <i class="fas fa-cube text-white" style="font-size: 18px;"></i>
                 </div>
-                <span class="brand-logo fs-3">DonasiKuy <span class="fw-light text-secondary fs-6">Explorer</span></span>
+                <span class="brand-logo fs-3">DonasiKuy <span
+                        class="fw-light text-secondary fs-6">Explorer</span></span>
             </a>
             <div class="d-flex align-items-center gap-3">
                 <div class="d-none d-md-flex align-items-center gap-3 text-light small fw-semibold">
@@ -106,22 +431,25 @@
                         <i class="fas fa-gas-pump text-warning"></i> <span id="gas-price">20</span> Gwei
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="status-indicator"></span> <span class="text-secondary">Ethereum Mainnet (Simulated)</span>
+                        <span class="status-indicator"></span> <span class="text-secondary">Ethereum Mainnet
+                            (Simulated)</span>
                     </div>
                 </div>
-                <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-4 fw-semibold"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
+                <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-4 fw-semibold"><i
+                        class="fas fa-arrow-left me-2"></i>Kembali</a>
             </div>
         </div>
     </nav>
 
     <div class="container-fluid px-4 py-5">
-        
+
         <!-- BLOCKCHAIN VISUALIZATION -->
         <div class="row mb-5">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h4 class="mb-1 fw-bold text-white"><i class="fas fa-link me-2 text-accent"></i> Blockchain Visualization</h4>
+                        <h4 class="mb-1 fw-bold text-white"><i class="fas fa-link me-2 text-accent"></i> Blockchain
+                            Visualization</h4>
                         <p class="text-secondary mb-0 small">Menampilkan seluruh blok dari Genesis hingga Terbaru</p>
                     </div>
                 </div>
@@ -139,12 +467,15 @@
         <div class="row g-4">
             <!-- LIVE TRANSACTIONS -->
             <div class="col-lg-8">
-                <div class="web3-card h-100">
-                    <div class="card-header bg-transparent border-bottom border-secondary p-4 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-list-ul me-2 text-primary"></i> All Network Transactions</h5>
-                        <span class="badge badge-custom badge-live"><i class="fas fa-circle fa-xs me-2"></i>Live Feed</span>
+                <div class="web3-card h-100 d-flex flex-column">
+                    <div
+                        class="card-header bg-transparent border-bottom border-secondary p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-white"><i class="fas fa-list-ul me-2 text-primary"></i> All Network
+                            Transactions</h5>
+                        <span class="badge badge-custom badge-live"><i class="fas fa-circle fa-xs me-2"></i>Live
+                            Feed</span>
                     </div>
-                    <div class="table-container">
+                    <div class="table-container flex-grow-1" style="max-height: none;">
                         <div class="table-responsive">
                             <table class="table table-web3 table-hover mb-0">
                                 <thead>
@@ -158,7 +489,11 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tx-list">
-                                    <tr><td colspan="6" class="text-center py-5 text-dim"><i class="fas fa-clock fa-2x mb-3 d-block"></i>Menunggu transaksi baru...</td></tr>
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-dim"><i
+                                                class="fas fa-clock fa-2x mb-3 d-block"></i>Menunggu transaksi baru...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -168,7 +503,7 @@
 
             <!-- SIDEBAR KANAN: VAULT & STATS -->
             <div class="col-lg-4">
-                
+
                 <!-- 1. SMART CONTRACT VAULT (NEW) -->
                 <div class="web3-card vault-card p-4 mb-4">
                     <div class="d-flex justify-content-between align-items-start mb-4">
@@ -177,7 +512,8 @@
                             <h3 class="fw-bold text-white mb-0 mt-1" id="contract-balance">0.0000 ETH</h3>
                             <small class="text-white-50">Total Value Locked (TVL)</small>
                         </div>
-                        <div class="bg-white bg-opacity-10 p-3 rounded-circle text-white border border-white border-opacity-25">
+                        <div
+                            class="bg-white bg-opacity-10 p-3 rounded-circle text-white border border-white border-opacity-25">
                             <i class="fas fa-university fa-lg"></i>
                         </div>
                     </div>
@@ -189,8 +525,11 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 w-50 py-2">Active</span>
-                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 w-50 py-2"><span id="total-campaigns">0</span> Campaigns</span>
+                        <span
+                            class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 w-50 py-2">Active</span>
+                        <span
+                            class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 w-50 py-2"><span
+                                id="total-campaigns">0</span> Campaigns</span>
                     </div>
                 </div>
 
@@ -214,10 +553,13 @@
                         </div>
                         <div class="col-12">
                             <div class="stat-card">
-                                <small class="text-secondary d-block mb-3 fw-semibold"><i class="fas fa-hashtag me-1"></i>Latest Block Hash</small>
-                                <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary">
+                                <small class="text-secondary d-block mb-3 fw-semibold"><i
+                                        class="fas fa-hashtag me-1"></i>Latest Block Hash</small>
+                                <div
+                                    class="d-flex align-items-center gap-2 bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary">
                                     <i class="fas fa-cube text-accent"></i>
-                                    <span class="font-monospace text-light small text-truncate" id="latest-hash">Waiting...</span>
+                                    <span class="font-monospace text-light small text-truncate"
+                                        id="latest-hash">Waiting...</span>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +572,8 @@
                         <div class="info-icon"><i class="fas fa-shield-alt text-success fa-lg"></i></div>
                         <div>
                             <h6 class="fw-bold text-white mb-2">Apa itu Nonce?</h6>
-                            <p class="small text-secondary mb-0" style="line-height: 1.7;">Nonce adalah nomor urut transaksi dari sebuah dompet untuk mencegah serangan replay (penggandaan transaksi).</p>
+                            <p class="small text-secondary mb-0" style="line-height: 1.7;">Nonce adalah nomor urut
+                                transaksi dari sebuah dompet untuk mencegah serangan replay (penggandaan transaksi).</p>
                         </div>
                     </div>
                 </div>
@@ -240,7 +583,8 @@
 
     <footer class="mt-5 py-4 text-center">
         <p class="mb-0 text-secondary small fw-semibold">
-            <i class="fas fa-cube me-2"></i> DonasiKuy Blockchain Explorer &copy; 2025 <span class="mx-2">|</span> Connected to Local Ganache Node
+            <i class="fas fa-cube me-2"></i> DonasiKuy Blockchain Explorer &copy; 2025 <span class="mx-2">|</span>
+            Connected to Local Ganache Node
         </p>
     </footer>
 
@@ -251,14 +595,14 @@
             try {
                 const response = await fetch('/api/explorer-data');
                 const data = await response.json();
-                
+
                 // Update Network Stats
-                if(data.stats.gasPrice) document.getElementById('gas-price').innerText = data.stats.gasPrice;
+                if (data.stats.gasPrice) document.getElementById('gas-price').innerText = data.stats.gasPrice;
                 document.getElementById('total-blocks').innerText = data.blocks.length;
-                if(data.blocks.length > 0) document.getElementById('latest-hash').innerText = data.blocks[data.blocks.length - 1].hash;
+                if (data.blocks.length > 0) document.getElementById('latest-hash').innerText = data.blocks[data.blocks.length - 1].hash;
 
                 // Update Contract Info (NEW)
-                if(data.contract) {
+                if (data.contract) {
                     document.getElementById('contract-address').innerText = data.contract.address;
                     document.getElementById('contract-balance').innerText = data.contract.balance + " ETH";
                     document.getElementById('total-campaigns').innerText = data.contract.campaign_count;
@@ -290,7 +634,7 @@
                         const isGenesis = index === 0; const isLatest = index === data.blocks.length - 1;
                         let label = isGenesis ? '<span class="badge bg-warning text-dark mb-2 px-3 fw-bold">GENESIS</span>' : (isLatest ? '<span class="badge bg-success mb-2 px-3 fw-bold">LATEST</span>' : `<span class="badge bg-secondary mb-2 px-3">#${blk.number}</span>`);
                         let activeClass = isGenesis ? 'genesis' : (isLatest ? 'latest' : '');
-                        
+
                         chainContainer.innerHTML += `
                             <div class="block-node ${activeClass}" title="Full Hash: ${blk.hash}">
                                 <div class="text-center w-100">${label}<div class="block-number mb-2">BLK</div><div class="block-hash mb-3">${blk.hash.substring(0, 8)}...</div>
@@ -305,4 +649,5 @@
         fetchData(); setInterval(fetchData, 3000);
     </script>
 </body>
+
 </html>
