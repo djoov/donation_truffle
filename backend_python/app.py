@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
 from web3 import Web3
 import sqlite3
 import os
 import re
 import json
 import time
+import csv
+import io
 from datetime import datetime, timedelta
 import feedparser
 from time import mktime
@@ -1393,6 +1395,39 @@ def get_latest_activity():
         print(f"API Error: {e}")
         return ({'status': 'error', 'msg': str(e)}, 200, response_headers)
 
+
+
+@app.route('/admin/export_logs')
+def export_security_logs():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('Akses ditolak!', 'error')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    logs = conn.execute('SELECT * FROM security_logs ORDER BY timestamp DESC').fetchall()
+    conn.close()
+
+    def generate():
+        data = io.StringIO()
+        w = csv.writer(data)
+
+        # Write Header
+        w.writerow(('ID', 'Timestamp', 'IP Address', 'Action', 'Status', 'Description', 'User ID'))
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+        # Write Rows
+        for log in logs:
+            w.writerow((log['id'], log['timestamp'], log['ip_address'], log['action'], log['status'], log['description'], log['user_id']))
+            yield data.getvalue()
+            data.seek(0)
+            data.truncate(0)
+
+    # Use Stream for efficiency
+    response = Response(generate(), mimetype='text/csv')
+    response.headers.set("Content-Disposition", "attachment", filename="security_logs.csv")
+    return response
 
 if __name__ == '__main__':
     # LISTEN ON ALL INTERFACES for Local Network Access

@@ -7,7 +7,31 @@
         .sidebar-premium {
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
             /* Indigo 950 to 900 */
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Desktop: Sidebar is fixed height/sticky */
+        @media (min-width: 768px) {
+            .sidebar-premium {
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+                min-height: 100vh;
+            }
+
+            .sidebar-inner {
+                min-height: 100vh;
+            }
+        }
+
+        /* Mobile: Sidebar allows scrolling */
+        @media (max-width: 767.98px) {
+            .sidebar-premium {
+                min-height: auto;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+
+            .sidebar-inner {
+                min-height: auto !important;
+            }
         }
 
         .nav-link-admin {
@@ -41,18 +65,19 @@
         }
     </style>
 
-    <div class="row flex-nowrap">
+    <div class="row flex-wrap flex-md-nowrap">
 
         <!-- SIDEBAR NAVIGASI (KIRI) -->
-        <div class="col-auto col-md-3 col-xl-2 px-0 shadow-lg sidebar-premium sidebar-sticky">
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
+        <div class="col-12 col-md-3 col-xl-2 px-0 shadow-lg sidebar-premium sticky-md-top">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white sidebar-inner">
                 <a href="/"
                     class="d-flex align-items-center pb-4 mb-2 me-md-auto text-white text-decoration-none px-2 w-100">
                     <img src="{{ url_for('static', filename='img/logo.png') }}" width="28" height="28" class="me-2"
                         style="background: white; border-radius: 6px; padding: 2px;">
-                    <span class="fs-5 d-none d-sm-inline fw-bold font-outfit text-spacing-1">
+                    <span class="fs-5 d-inline fw-bold font-outfit text-spacing-1">
                         Admin<span class="text-primary-light" style="color: #818cf8;">Kuy</span>
                     </span>
+                    <!-- Mobile Hamburger (Optional, keeping simple for now) -->
                 </a>
 
                 <div class="w-100 px-2 mt-2">
@@ -63,19 +88,19 @@
                         <li class="nav-item w-100">
                             <button class="nav-link nav-link-admin active w-100 text-start" id="dashboard-tab"
                                 data-bs-toggle="tab" data-bs-target="#dashboard-view" type="button">
-                                <i class="fas fa-home"></i> <span class="d-none d-sm-inline">Dashboard</span>
+                                <i class="fas fa-home"></i> <span class="d-inline">Dashboard</span>
                             </button>
                         </li>
                         <li class="nav-item w-100">
                             <button class="nav-link nav-link-admin w-100 text-start" id="campaigns-tab"
                                 data-bs-toggle="tab" data-bs-target="#campaigns-view" type="button">
-                                <i class="fas fa-bullhorn"></i> <span class="d-none d-sm-inline">Kampanye</span>
+                                <i class="fas fa-bullhorn"></i> <span class="d-inline">Kampanye</span>
                             </button>
                         </li>
                         <li class="nav-item w-100">
                             <button class="nav-link nav-link-admin w-100 text-start" id="users-tab" data-bs-toggle="tab"
                                 data-bs-target="#users-view" type="button">
-                                <i class="fas fa-users"></i> <span class="d-none d-sm-inline">Users</span>
+                                <i class="fas fa-users"></i> <span class="d-inline">Users</span>
                             </button>
                         </li>
                     </ul>
@@ -87,20 +112,20 @@
                         <li class="nav-item w-100">
                             <button class="nav-link nav-link-admin w-100 text-start" id="blockchain-tab"
                                 data-bs-toggle="tab" data-bs-target="#blockchain-view" type="button">
-                                <i class="fas fa-link"></i> <span class="d-none d-sm-inline">Blockchain Log</span>
+                                <i class="fas fa-link"></i> <span class="d-inline">Blockchain Log</span>
                             </button>
                         </li>
                         <li class="nav-item w-100">
                             <button class="nav-link nav-link-admin w-100 text-start" id="security-tab"
                                 data-bs-toggle="tab" data-bs-target="#security-view" type="button">
-                                <i class="fas fa-lock text-warning"></i> <span class="d-none d-sm-inline">Security
+                                <i class="fas fa-lock text-warning"></i> <span class="d-inline">Security
                                     Center</span>
                             </button>
                         </li>
                     </ul>
                 </div>
 
-                <div class="mt-auto w-100 pb-4 px-2">
+                <div class="mt-4 mt-md-auto w-100 pb-4 px-2">
                     <hr class="border-secondary opacity-25">
                     <div class="dropdown">
                         <a href="#"
@@ -108,7 +133,7 @@
                             id="dropdownUser1" data-bs-toggle="dropdown" style="transition: 0.2s;">
                             <img src="https://ui-avatars.com/api/?name=Admin&background=4f46e5&color=fff" width="32"
                                 height="32" class="rounded-circle shadow-sm">
-                            <div class="d-none d-sm-block ms-2 flex-grow-1">
+                            <div class="d-inline ms-2 flex-grow-1">
                                 <div class="fw-bold" style="font-size: 0.85rem;">SuperAdmin</div>
                                 <div class="text-white-50" style="font-size: 0.7rem;">Verified</div>
                             </div>
@@ -128,7 +153,7 @@
         </div>
 
         <!-- KONTEN UTAMA (KANAN) -->
-        <div class="col py-4 px-4 bg-light" style="min-height: 100vh;">
+        <div class="col-12 col-md py-4 px-4 bg-light" style="min-height: 100vh;">
 
             <!-- Header Atas -->
             <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-3 shadow-sm">
@@ -137,7 +162,7 @@
                     <small class="text-muted" id="current-date"></small>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center bg-light px-3 py-1 rounded-pill border">
+                    <div class="d-none d-md-flex align-items-center bg-light px-3 py-1 rounded-pill border">
                         <span class="badge bg-success rounded-circle p-1 me-2 animate-pulse"> </span>
                         <small class="fw-bold text-success">{{ network_status }}</small>
                     </div>
@@ -396,8 +421,9 @@
                                     <h5 class="fw-bold mb-0 text-white"><i
                                             class="fas fa-shield-alt text-success me-2"></i> Security Intelligence Log
                                     </h5>
-                                    <button class="btn btn-sm btn-outline-light"><i class="fas fa-download me-1"></i>
-                                        Export CSV</button>
+                                    <a href="{{ url_for('export_security_logs') }}"
+                                        class="btn btn-sm btn-outline-light"><i class="fas fa-download me-1"></i>
+                                        Export CSV</a>
                                 </div>
                                 <div class="table-responsive" style="max-height: 600px;">
                                     <table class="table table-dark table-hover align-middle mb-0"
