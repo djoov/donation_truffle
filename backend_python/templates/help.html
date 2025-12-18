@@ -1,190 +1,273 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- HERO SECTION KECIL -->
-<section class="bg-primary text-white py-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-bg) 100%);">
-    <div class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0.1; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
-    <div class="container position-relative z-10 text-center">
-        <h1 class="fw-bold display-5 mb-3" style="font-family: 'Outfit', sans-serif;">Pusat Bantuan & Edukasi</h1>
-        <p class="lead opacity-75 mb-0">Pelajari cara kerja DonasiKuy dan teknologi Blockchain di baliknya.</p>
+<!-- HERO SECTION -->
+<section class="bg-primary text-white py-5 position-relative overflow-hidden"
+    style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100"
+        style="opacity: 0.1; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;">
+    </div>
+    <div class="container position-relative z-10 text-center py-4">
+        <h1 class="fw-bold display-4 mb-3" style="font-family: 'Outfit', sans-serif;">Pusat Bantuan DonasiKuy</h1>
+        <p class="lead opacity-80 mb-0">Panduan lengkap memahami teknologi dan cara menggunakan platform.</p>
     </div>
 </section>
 
 <div class="container py-5">
     <div class="row g-5">
-        <!-- SIDEBAR NAVIGASI -->
+        <!-- SIDEBAR NAVIGASI (Sticky) -->
         <div class="col-lg-3 d-none d-lg-block">
             <div class="sticky-top" style="top: 100px;">
-                <div class="list-group shadow-sm rounded-3 border-0 overflow-hidden">
-                    <a href="#faq-umum" class="list-group-item list-group-item-action p-3 border-0 active">
-                        <i class="fas fa-question-circle me-2"></i> Umum
+                <h6 class="text-uppercase text-muted fw-bold small mb-3 ls-1">Daftar Isi</h6>
+                <div class="list-group shadow-sm rounded-4 border-0 overflow-hidden" id="help-nav">
+                    <a href="#about"
+                        class="list-group-item list-group-item-action p-3 border-0 active d-flex align-items-center gap-2">
+                        <i class="fas fa-info-circle text-primary"></i> Tentang Platform
                     </a>
-                    <a href="#faq-teknis" class="list-group-item list-group-item-action p-3 border-0">
-                        <i class="fas fa-code me-2"></i> Teknis Blockchain
+                    <a href="#blockchain"
+                        class="list-group-item list-group-item-action p-3 border-0 d-flex align-items-center gap-2">
+                        <i class="fas fa-link text-warning"></i> Kenapa Blockchain?
                     </a>
-                    <a href="#faq-donatur" class="list-group-item list-group-item-action p-3 border-0">
-                        <i class="fas fa-heart me-2"></i> Untuk Donatur
+                    <a href="#guide-donor"
+                        class="list-group-item list-group-item-action p-3 border-0 d-flex align-items-center gap-2">
+                        <i class="fas fa-hand-holding-heart text-danger"></i> Panduan Donatur
                     </a>
-                    <a href="#faq-kreator" class="list-group-item list-group-item-action p-3 border-0">
-                        <i class="fas fa-bullhorn me-2"></i> Untuk Kreator
+                    <a href="#guide-creator"
+                        class="list-group-item list-group-item-action p-3 border-0 d-flex align-items-center gap-2">
+                        <i class="fas fa-bullhorn text-success"></i> Panduan Kreator
                     </a>
-                </div>
-                
-                <div class="card border-0 bg-light mt-4 p-3 rounded-3 text-center">
-                    <p class="small text-muted mb-2">Masih bingung?</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3">Hubungi Admin</a>
+                    <a href="#glossary"
+                        class="list-group-item list-group-item-action p-3 border-0 d-flex align-items-center gap-2">
+                        <i class="fas fa-book text-info"></i> Glosarium
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- KONTEN UTAMA -->
         <div class="col-lg-9">
-            
-            <!-- SECTION 1: UMUM -->
-            <div id="faq-umum" class="mb-5">
-                <h3 class="fw-bold mb-4 text-primary" style="font-family: 'Outfit', sans-serif;">
-                    <i class="fas fa-info-circle me-2"></i> Pertanyaan Umum
-                </h3>
-                <div class="accordion shadow-sm rounded-3 overflow-hidden" id="accordionUmum">
-                    <div class="accordion-item border-0 border-bottom">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#c1">
-                                Apa itu DonasiKuy?
-                            </button>
-                        </h2>
-                        <div id="c1" class="accordion-collapse collapse show" data-bs-parent="#accordionUmum">
-                            <div class="accordion-body text-muted">
-                                DonasiKuy adalah platform penggalangan dana (crowdfunding) yang dibangun di atas teknologi <strong>Ethereum Blockchain</strong>. Berbeda dengan platform konvensional, kami tidak menyimpan uang Anda di rekening bank perusahaan. Dana donasi disimpan secara aman di dalam <em>Smart Contract</em> yang transparan dan tidak bisa dimanipulasi.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#c2">
-                                Mengapa harus menggunakan Blockchain?
-                            </button>
-                        </h2>
-                        <div id="c2" class="accordion-collapse collapse" data-bs-parent="#accordionUmum">
-                            <div class="accordion-body text-muted">
-                                Blockchain menawarkan 3 keunggulan utama:
-                                <ul class="mt-2 mb-0">
-                                    <li><strong>Transparansi Total:</strong> Siapa saja bisa melihat riwayat transaksi di jaringan publik.</li>
-                                    <li><strong>Keamanan:</strong> Data yang sudah masuk tidak bisa diubah atau dihapus (Immutable).</li>
-                                    <li><strong>Tanpa Perantara:</strong> Dana langsung dikelola oleh kode program (Smart Contract), meminimalisir risiko korupsi.</li>
-                                </ul>
-                            </div>
+
+            <!-- 1. TENTANG PLATFORM -->
+            <section id="about" class="mb-5 scroll-margin-top">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h3 class="fw-bold text-primary mb-3">Apa itu DonasiKuy?</h3>
+                    <p class="text-muted">
+                        DonasiKuy adalah platform penggalangan dana (Crowdfunding) generasi baru yang dibangun di atas
+                        teknologi <strong>Blockchain Ethereum</strong>.
+                        Kami hadir untuk menjawab masalah terbesar dalam dunia donasi: <span
+                            class="fw-bold text-dark">Transparansi</span>.
+                    </p>
+                    <div class="alert alert-primary border-0 d-flex align-items-center gap-3">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Misi Kami</h6>
+                            <small>Memastikan setiap Rupiah (atau ETH) yang Anda sumbangkan tercatat secara abadi,
+                                transparan, dan tidak bisa dikorupsi oleh siapapun, termasuk kami.</small>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- SECTION 2: TEKNIS (EDUKATIF) -->
-            <div id="faq-teknis" class="mb-5">
-                <h3 class="fw-bold mb-4 text-primary" style="font-family: 'Outfit', sans-serif;">
-                    <i class="fas fa-laptop-code me-2"></i> Teknis Blockchain (Simulasi)
-                </h3>
-                <div class="card border-0 shadow-sm p-4 mb-4 bg-dark text-white rounded-4">
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="fas fa-lightbulb text-warning fa-2x mt-1"></i>
-                        <div>
-                            <h5 class="fw-bold">Apa itu Ganache?</h5>
-                            <p class="small text-white-50 mb-0">
-                                Dalam simulasi ini, kami menggunakan <strong>Ganache</strong> sebagai Blockchain Lokal (Personal Blockchain). Ini adalah lingkungan tes yang aman dimana uangnya (ETH) adalah palsu, sehingga Anda bisa belajar bertransaksi tanpa takut kehilangan uang asli.
+            <!-- 2. KENAPA BLOCKCHAIN -->
+            <section id="blockchain" class="mb-5 scroll-margin-top">
+                <h3 class="fw-bold mb-4">Mengapa Harus Blockchain?</h3>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
+                            <div class="icon-box bg-light text-primary rounded-circle mb-3 d-flex align-items-center justify-content-center"
+                                style="width: 50px; height: 50px;">
+                                <i class="fas fa-eye fa-lg"></i>
+                            </div>
+                            <h5 class="fw-bold">100% Transparan</h5>
+                            <p class="text-muted small">Semua orang bisa melihat "Buku Besar" transaksi. Anda bisa
+                                melacak uang donasi Anda bergerak dari dompet Anda ke Smart Contract, lalu ke Kreator.
                             </p>
                         </div>
                     </div>
-                </div>
-
-                <div class="accordion shadow-sm rounded-3 overflow-hidden" id="accordionTeknis">
-                    <div class="accordion-item border-0 border-bottom">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#t1">
-                                Apa itu Gas Fee?
-                            </button>
-                        </h2>
-                        <div id="t1" class="accordion-collapse collapse" data-bs-parent="#accordionTeknis">
-                            <div class="accordion-body text-muted">
-                                Gas Fee adalah biaya transaksi yang dibayarkan kepada penambang (miners) untuk memproses data Anda di blockchain. Di DonasiKuy, setiap kali Anda membuat kampanye atau berdonasi, sedikit saldo ETH Anda akan terpotong untuk biaya ini.
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
+                            <div class="icon-box bg-light text-warning rounded-circle mb-3 d-flex align-items-center justify-content-center"
+                                style="width: 50px; height: 50px;">
+                                <i class="fas fa-lock fa-lg"></i>
                             </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#t2">
-                                Apa itu Private Key?
-                            </button>
-                        </h2>
-                        <div id="t2" class="accordion-collapse collapse" data-bs-parent="#accordionTeknis">
-                            <div class="accordion-body text-muted">
-                                Private Key adalah "Kunci Brankas" digital Anda. Siapapun yang memilikinya bisa mengontrol dana di dalamnya. Di aplikasi ini, kami meminta Private Key saat registrasi untuk fitur <em>Auto-Signing</em> (kemudahan transaksi), namun di dunia nyata, <strong>JANGAN PERNAH</strong> membagikan Private Key Anda kepada siapapun!
-                            </div>
+                            <h5 class="fw-bold">Anti Manipulasi</h5>
+                            <p class="text-muted small">Data di Blockchain bersifat <em>Immutable</em> (Kekal). Sekali
+                                tercatat, tidak ada admin atau hacker yang bisa mengubah atau menghapusnya.</p>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- SECTION 3: UNTUK DONATUR -->
-            <div id="faq-donatur" class="mb-5">
-                <h3 class="fw-bold mb-4 text-primary" style="font-family: 'Outfit', sans-serif;">
-                    <i class="fas fa-hand-holding-heart me-2"></i> Panduan Donatur
-                </h3>
+            <!-- 3. PANDUAN DONATUR -->
+            <section id="guide-donor" class="mb-5 scroll-margin-top">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                        style="width: 40px; height: 40px;">1</div>
+                    <h3 class="fw-bold mb-0">Panduan Donatur</h3>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="accordion accordion-flush" id="accDonor">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#d1">
+                                        Langkah 1: Hubungkan Wallet
+                                    </button>
+                                </h2>
+                                <div id="d1" class="accordion-collapse collapse show" data-bs-parent="#accDonor">
+                                    <div class="accordion-body text-muted">
+                                        Saat registrasi, Anda akan diberikan <strong>Wallet Address</strong> unik.
+                                        Pastikan saldo ETH Anda (di Ganache) mencukupi. Sistem akan otomatis mendeteksi
+                                        saldo Anda.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#d2">
+                                        Langkah 2: Pilih & Donasi
+                                    </button>
+                                </h2>
+                                <div id="d2" class="accordion-collapse collapse" data-bs-parent="#accDonor">
+                                    <div class="accordion-body text-muted">
+                                        Pilih kampanye yang hati Anda tergerak. Masukkan nominal (misal
+                                        <code>0.1 ETH</code>). Klik tombol <strong>Donasi Sekarang</strong>.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#d3">
+                                        Langkah 3: Verifikasi (PENTING)
+                                    </button>
+                                </h2>
+                                <div id="d3" class="accordion-collapse collapse" data-bs-parent="#accDonor">
+                                    <div class="accordion-body text-muted">
+                                        Setelah berhasil, Anda akan mendapatkan <strong>Transaction Hash</strong>.
+                                        Simpan kode ini! Ini adalah bukti digital sah bahwa Anda telah berdonasi. Anda
+                                        bisa mengeceknya di menu "Explorer".
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. PANDUAN KREATOR -->
+            <section id="guide-creator" class="mb-5 scroll-margin-top">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                        style="width: 40px; height: 40px;">2</div>
+                    <h3 class="fw-bold mb-0">Panduan Kreator</h3>
+                </div>
+                <div class="alert alert-success border-0 rounded-4">
+                    <h6 class="fw-bold"><i class="fas fa-check-circle me-2"></i>Syarat Penggalangan Dana</h6>
+                    <ul class="mb-0 small ps-3">
+                        <li>Memiliki tujuan sosial yang jelas dan dapat dipertanggungjawabkan.</li>
+                        <li>Wajib menyertakan foto asli dan deskripsi lengkap.</li>
+                        <li>Bersedia memberikan update berkala (Kabar Terbaru) kepada donatur.</li>
+                    </ul>
+                </div>
+                <!-- Logic flow visual -->
+                <div class="d-flex justify-content-between text-center mt-4 small fw-bold text-muted position-relative">
+                    <div class="position-absolute top-50 start-0 w-100 border-top z-0"
+                        style="transform: translateY(-50%);"></div>
+                    <div class="bg-white position-relative z-10 px-2"><span
+                            class="badge bg-light text-dark border p-2 rounded-circle"><i
+                                class="fas fa-edit"></i></span><br>Buat</div>
+                    <div class="bg-white position-relative z-10 px-2"><span
+                            class="badge bg-light text-dark border p-2 rounded-circle"><i
+                                class="fas fa-user-check"></i></span><br>Moderasi Admin</div>
+                    <div class="bg-white position-relative z-10 px-2"><span
+                            class="badge bg-light text-dark border p-2 rounded-circle"><i
+                                class="fas fa-globe"></i></span><br>Tayang</div>
+                    <div class="bg-white position-relative z-10 px-2"><span
+                            class="badge bg-light text-dark border p-2 rounded-circle"><i
+                                class="fas fa-money-bill-wave"></i></span><br>Tarik Dana</div>
+                </div>
+            </section>
+
+            <!-- 5. GLOSARIUM -->
+            <section id="glossary" class="scroll-margin-top">
+                <h3 class="fw-bold mb-4">Kamus Istilah (Glosarium)</h3>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="card h-100 border-0 shadow-sm p-3">
-                            <div class="d-flex gap-3">
-                                <div class="bg-blue-100 p-2 rounded text-primary h-100"><span class="fw-bold">1</span></div>
-                                <div>
-                                    <h6 class="fw-bold">Daftar Akun</h6>
-                                    <p class="small text-muted mb-0">Pilih peran sebagai Donatur dan hubungkan wallet Ganache Anda.</p>
-                                </div>
-                            </div>
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <h6 class="fw-bold text-primary">Ether (ETH)</h6>
+                            <p class="small text-muted mb-0">Mata uang digital yang digunakan di jaringan Ethereum. 1
+                                ETH bernilai jutaan rupiah.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card h-100 border-0 shadow-sm p-3">
-                            <div class="d-flex gap-3">
-                                <div class="bg-blue-100 p-2 rounded text-primary h-100"><span class="fw-bold">2</span></div>
-                                <div>
-                                    <h6 class="fw-bold">Pilih Kampanye</h6>
-                                    <p class="small text-muted mb-0">Buka menu "Kampanye" dan pilih yang statusnya Aktif.</p>
-                                </div>
-                            </div>
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <h6 class="fw-bold text-primary">Gas Fee</h6>
+                            <p class="small text-muted mb-0">Biaya admin jaringan ("bensin") agar transaksi Anda
+                                diproses oleh sistem.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card h-100 border-0 shadow-sm p-3">
-                            <div class="d-flex gap-3">
-                                <div class="bg-blue-100 p-2 rounded text-primary h-100"><span class="fw-bold">3</span></div>
-                                <div>
-                                    <h6 class="fw-bold">Input Nominal</h6>
-                                    <p class="small text-muted mb-0">Masukkan jumlah ETH (misal 0.1) di halaman detail.</p>
-                                </div>
-                            </div>
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <h6 class="fw-bold text-primary">Smart Contract</h6>
+                            <p class="small text-muted mb-0">Program robot yang berjalan otomatis di Blockchain.
+                                Mengatur uang masuk/keluar tanpa intervensi manusia.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card h-100 border-0 shadow-sm p-3">
-                            <div class="d-flex gap-3">
-                                <div class="bg-blue-100 p-2 rounded text-primary h-100"><span class="fw-bold">4</span></div>
-                                <div>
-                                    <h6 class="fw-bold">Kirim Donasi</h6>
-                                    <p class="small text-muted mb-0">Klik tombol Kirim. Saldo akan berpindah dalam hitungan detik.</p>
-                                </div>
-                            </div>
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <h6 class="fw-bold text-primary">Nonce</h6>
+                            <p class="small text-muted mb-0">Nomor urut transaksi. Mencegah donasi ganda (Double
+                                Spending) dan memastikan urutan data.</p>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
         </div>
     </div>
 </div>
 
-<!-- Tambahkan smooth scrolling untuk anchor link -->
 <style>
-    html {
-        scroll-behavior: smooth;
+    /* Smooth Scroll dengan offset agar tidak tertutup header */
+    .scroll-margin-top {
+        scroll-margin-top: 120px;
     }
-    .bg-blue-100 { background-color: #e0f2fe; }
+
+    .hover-up {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hover-up:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Active state sidebar */
+    #help-nav .active {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-left: 4px solid #4f46e5;
+        font-weight: bold;
+    }
+
+    #help-nav .list-group-item {
+        color: #64748b;
+        transition: all 0.2s;
+    }
+
+    #help-nav .list-group-item:hover:not(.active) {
+        background-color: #f8fafc;
+        padding-left: 20px !important;
+    }
 </style>
+
+<script>
+    // Script simple untuk highlight menu aktif saat scroll (Spy Scroll)
+    // Bisa ditambahkan nanti jika diperlukan
+</script>
+
 {% endblock %}

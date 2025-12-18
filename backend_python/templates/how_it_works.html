@@ -2,217 +2,197 @@
 
 {% block content %}
 <!-- HERO SECTION -->
-<section class="bg-light py-5 position-relative overflow-hidden">
-    <div class="container position-relative z-10 text-center">
-        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3 fw-bold">
-            Panduan Pemula
-        </span>
-        <h1 class="fw-bold display-5 mb-3" style="font-family: 'Outfit', sans-serif;">Cara Kerja DonasiKuy</h1>
-        <p class="lead text-muted mb-0" style="max-width: 600px; margin: 0 auto;">
-            Memahami bagaimana teknologi Blockchain menjamin donasi Anda sampai ke tujuan dengan transparan dan aman.
-        </p>
+<section class="bg-primary text-white py-5 position-relative overflow-hidden"
+    style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100"
+        style="opacity: 0.1; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;">
+    </div>
+
+    <!-- Animated particle effect (Simple CSS) -->
+    <div class="position-absolute top-50 start-50 translate-middle w-50 h-50 rounded-circle"
+        style="background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(0,0,0,0) 70%); filter: blur(40px);">
+    </div>
+
+    <div class="container position-relative z-10 text-center py-5">
+        <h1 class="fw-bold display-4 mb-3" style="font-family: 'Outfit', sans-serif;">Cara Kerja DonasiKuy</h1>
+        <p class="lead opacity-80 mb-4">Memahami perjalanan donasi Anda dari Dompet Digital hingga sampai ke Tangan yang
+            Membutuhkan.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('register') }}"
+                class="btn btn-warning fw-bold px-4 rounded-pill shadow-lg hover-scale">Mulai Sekarang</a>
+            <a href="#flow" class="btn btn-outline-light fw-bold px-4 rounded-pill hover-scale">Lihat Alur</a>
+        </div>
     </div>
 </section>
 
-<div class="container py-5">
-    
-    <!-- NAV TABS (Peran) -->
-    <ul class="nav nav-pills nav-fill mb-5 justify-content-center" id="pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active rounded-pill px-4 py-2 fw-bold" id="pills-donor-tab" data-bs-toggle="pill" data-bs-target="#pills-donor" type="button">
-                <i class="fas fa-heart me-2"></i> Saya Ingin Berdonasi
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link rounded-pill px-4 py-2 fw-bold" id="pills-creator-tab" data-bs-toggle="pill" data-bs-target="#pills-creator" type="button">
-                <i class="fas fa-bullhorn me-2"></i> Saya Ingin Galang Dana
-            </button>
-        </li>
-    </ul>
-
-    <div class="tab-content" id="pills-tabContent">
-        
-        <!-- TAB 1: UNTUK DONATUR -->
-        <div class="tab-pane fade show active" id="pills-donor">
-            <div class="row g-4">
-                <!-- Langkah 1 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm p-4 text-center step-card">
-                        <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-4">1</div>
-                        <h5 class="fw-bold mb-3">Daftar Akun</h5>
-                        <p class="text-muted small">Buat akun sebagai <strong>Donatur</strong>. Anda akan diminta menghubungkan alamat dompet digital (Wallet Address) dari Ganache untuk keperluan transaksi.</p>
-                    </div>
-                </div>
-                <!-- Langkah 2 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm p-4 text-center step-card">
-                        <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-4">2</div>
-                        <h5 class="fw-bold mb-3">Pilih Kampanye</h5>
-                        <p class="text-muted small">Jelajahi daftar kampanye yang sudah diverifikasi (Status: Aktif). Baca cerita, rencana penggunaan dana, dan profil kreatornya.</p>
-                    </div>
-                </div>
-                <!-- Langkah 3 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm p-4 text-center step-card">
-                        <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-4">3</div>
-                        <h5 class="fw-bold mb-3">Kirim Donasi</h5>
-                        <p class="text-muted small">Masukkan jumlah ETH. Sistem kami akan menggunakan Private Key Anda (yang tersimpan aman) untuk menandatangani transaksi secara otomatis.</p>
-                    </div>
-                </div>
-                <!-- Langkah 4 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm p-4 text-center step-card">
-                        <div class="step-number bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-4"><i class="fas fa-check"></i></div>
-                        <h5 class="fw-bold mb-3">Tercatat di Blockchain</h5>
-                        <p class="text-muted small">Donasi Anda langsung masuk ke Smart Contract. Anda bisa melihat buktinya di riwayat transaksi yang tidak bisa diubah.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center mt-5">
-                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg rounded-pill shadow-lg px-5">
-                    Mulai Berdonasi <i class="fas fa-arrow-right ms-2"></i>
-                </a>
-            </div>
+<!-- SECTION: THE JOURNEY (TIMELINE) -->
+<section id="flow" class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h6 class="text-uppercase text-primary fw-bold ls-1">Transparent Workflow</h6>
+            <h2 class="fw-bold" style="font-family: 'Outfit', sans-serif;">Perjalanan 1 ETH Donasi</h2>
         </div>
 
-        <!-- TAB 2: UNTUK KREATOR -->
-        <div class="tab-pane fade" id="pills-creator">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    
-                    <!-- Timeline Vertical -->
-                    <div class="timeline-steps">
-                        <div class="timeline-step">
-                            <div class="timeline-content">
-                                <div class="d-flex align-items-center gap-3 mb-2">
-                                    <div class="bg-primary text-white rounded p-2"><i class="fas fa-user-plus"></i></div>
-                                    <h5 class="fw-bold mb-0">Registrasi Kreator</h5>
-                                </div>
-                                <p class="text-muted">Daftar sebagai <strong>Kreator</strong>. Pastikan Anda memiliki saldo ETH sedikit untuk biaya Gas (Gas Fee) pembuatan kontrak kampanye.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="timeline-step">
-                            <div class="timeline-content">
-                                <div class="d-flex align-items-center gap-3 mb-2">
-                                    <div class="bg-primary text-white rounded p-2"><i class="fas fa-edit"></i></div>
-                                    <h5 class="fw-bold mb-0">Buat Kampanye</h5>
-                                </div>
-                                <p class="text-muted">Isi formulir lengkap: Judul, Target Dana, Durasi, Cerita, dan Rencana Penggunaan Dana. Transparansi adalah kunci sukses.</p>
-                            </div>
-                        </div>
+        <div class="row g-0 justify-content-center position-relative">
+            <!-- Connecting Line (Desktop) -->
+            <div class="d-none d-lg-block position-absolute start-0 top-50 translate-middle-y w-100 border-top border-3 border-primary z-0"
+                style="border-style: dashed !important; opacity: 0.2;"></div>
 
-                        <div class="timeline-step">
-                            <div class="timeline-content">
-                                <div class="d-flex align-items-center gap-3 mb-2">
-                                    <div class="bg-warning text-dark rounded p-2"><i class="fas fa-clock"></i></div>
-                                    <h5 class="fw-bold mb-0">Menunggu Verifikasi</h5>
-                                </div>
-                                <p class="text-muted">Kampanye Anda akan berstatus <strong>Pending</strong>. Admin akan memeriksa kelengkapan data sebelum menyetujuinya (Approve) agar tampil di publik.</p>
-                            </div>
-                        </div>
-
-                        <div class="timeline-step">
-                            <div class="timeline-content">
-                                <div class="d-flex align-items-center gap-3 mb-2">
-                                    <div class="bg-success text-white rounded p-2"><i class="fas fa-bullseye"></i></div>
-                                    <h5 class="fw-bold mb-0">Penggalangan Dana</h5>
-                                </div>
-                                <p class="text-muted">Setelah aktif, bagikan link kampanye Anda. Dana donatur akan terkumpul di dalam Smart Contract, bukan di rekening pribadi Anda.</p>
-                            </div>
-                        </div>
-
-                        <div class="timeline-step">
-                            <div class="timeline-content">
-                                <div class="d-flex align-items-center gap-3 mb-2">
-                                    <div class="bg-primary text-white rounded p-2"><i class="fas fa-money-bill-wave"></i></div>
-                                    <h5 class="fw-bold mb-0">Pencairan (Withdraw)</h5>
-                                </div>
-                                <p class="text-muted">Jika target tercapai atau durasi habis, Anda bisa melakukan <strong>Withdraw</strong>. Smart Contract akan mengirimkan ETH yang terkumpul ke dompet Anda.</p>
-                            </div>
-                        </div>
+            <!-- STEP 1 -->
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 position-relative z-10">
+                <div class="text-center px-3">
+                    <div class="icon-box bg-white text-primary shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 border border-4 border-light position-relative"
+                        style="width: 80px; height: 80px; z-index: 2;">
+                        <i class="fas fa-wallet fa-2x"></i>
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">1</span>
                     </div>
-
+                    <h5 class="fw-bold">Donatur Mengirim</h5>
+                    <p class="small text-muted">Anda memilih kampanye dan menandatangani transaksi menggunakan Private
+                        Key / Wallet Anda (Metamask/Ganache).</p>
                 </div>
             </div>
-            
-            <div class="text-center mt-5">
-                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg rounded-pill shadow-lg px-5">
-                    Jadi Kreator <i class="fas fa-arrow-right ms-2"></i>
-                </a>
+
+            <!-- STEP 2 -->
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 position-relative z-10">
+                <div class="text-center px-3">
+                    <div class="icon-box bg-white text-warning shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 border border-4 border-light position-relative"
+                        style="width: 80px; height: 80px; z-index: 2;">
+                        <i class="fas fa-cube fa-2x"></i>
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">2</span>
+                    </div>
+                    <h5 class="fw-bold">Smart Contract</h5>
+                    <p class="small text-muted">Dana masuk ke "Brankas Digital" (Smart Contract). Dana terkunci & aman.
+                        Transaksi dicatat di Blockchain.</p>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 position-relative z-10">
+                <div class="text-center px-3">
+                    <div class="icon-box bg-white text-info shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 border border-4 border-light position-relative"
+                        style="width: 80px; height: 80px; z-index: 2;">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">3</span>
+                    </div>
+                    <h5 class="fw-bold">Verifikasi Publik</h5>
+                    <p class="small text-muted">Semua orang bisa melihat saldo kampanye bertambah secara
+                        <em>Real-Time</em>. Tidak ada pembukuan ganda.</p>
+                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 position-relative z-10">
+                <div class="text-center px-3">
+                    <div class="icon-box bg-white text-success shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 border border-4 border-light position-relative"
+                        style="width: 80px; height: 80px; z-index: 2;">
+                        <i class="fas fa-hand-holding-usd fa-2x"></i>
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">4</span>
+                    </div>
+                    <h5 class="fw-bold">Pencairan Dana</h5>
+                    <p class="small text-muted">Kreator menarik dana untuk kebutuhan sosial. Anda mendapat notifikasi
+                        email & bukti penggunaan dana.</p>
+                </div>
             </div>
         </div>
-
     </div>
+</section>
 
-    <!-- FAQ TEKNOLOGI -->
-    <div class="mt-5 pt-5 border-top">
-        <div class="row align-items-center">
-            <div class="col-lg-5 mb-4 mb-lg-0">
-                <h2 class="fw-bold display-6 mb-3" style="font-family: 'Outfit', sans-serif;">Teknologi di Balik Layar</h2>
-                <p class="text-muted">Kami menggunakan arsitektur <strong>Hybrid DApp</strong> yang menggabungkan kecepatan Web Tradisional dengan keamanan Blockchain.</p>
-                <a href="{{ url_for('help_page') }}" class="btn btn-outline-primary rounded-pill">Pelajari Teknisnya</a>
-            </div>
-            <div class="col-lg-7">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="p-4 bg-white rounded-4 shadow-sm h-100">
-                            <i class="fas fa-link fa-2x text-primary mb-3"></i>
-                            <h5 class="fw-bold">Smart Contract</h5>
-                            <p class="small text-muted mb-0">Kode program otomatis yang mengatur aliran dana. Tidak ada admin yang bisa mengambil uang diam-diam.</p>
+<!-- SECTION: WHY DIFFERENT (Visual Comparison) -->
+<section class="py-5">
+    <div class="container py-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <!-- ILLUSTRATION / MOCKUP -->
+                <div class="position-relative p-4 rounded-4 bg-primary bg-opacity-10">
+                    <div class="card border-0 shadow-lg rounded-4 p-4 position-relative z-10">
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                            <div><i class="fas fa-university text-muted me-2"></i>Bank Transfer</div>
+                            <span class="badge bg-secondary">Lambat & Tertutup</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                            <div><i class="fas fa-box text-muted me-2"></i>Platform Biasa</div>
+                            <span class="badge bg-secondary">Potongan Tinggi</span>
+                        </div>
+                        <div
+                            class="d-flex align-items-center justify-content-between bg-primary text-white p-3 rounded-3 shadow-sm transform-scale">
+                            <div class="fw-bold"><i class="fas fa-cubes me-2"></i>DonasiKuy Blockchain</div>
+                            <span class="badge bg-warning text-dark"><i class="fas fa-bolt me-1"></i>Instant &
+                                Transparan</span>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="p-4 bg-white rounded-4 shadow-sm h-100">
-                            <i class="fas fa-database fa-2x text-primary mb-3"></i>
-                            <h5 class="fw-bold">Immutable Ledger</h5>
-                            <p class="small text-muted mb-0">Setiap donasi tercatat permanen. Anda bisa mengeceknya kapan saja sebagai bukti transparansi.</p>
+                    <!-- Decor element -->
+                    <div
+                        class="position-absolute top-0 end-0 translate-middle-y me-n3 mt-n3 rounded-circle bg-warning p-3 shadow wow bounceIn">
+                        <i class="fas fa-star text-white fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h6 class="text-uppercase text-primary fw-bold ls-1">Kenapa Berbeda?</h6>
+                <h2 class="fw-bold mb-4" style="font-family: 'Outfit', sans-serif;">Teknologi untuk Kepercayaan</h2>
+                <p class="text-muted lead mb-4">
+                    Kami menghilangkan "Kepercayaan Buta". Anda tidak perlu percaya pada kami, cukup percaya pada Kode
+                    dan Matematika.
+                </p>
+
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex gap-3">
+                        <i class="fas fa-check-circle text-primary fa-lg mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold">Tidak Bisa Dihapus</h6>
+                            <p class="small text-muted mb-0">Sekali tercatat di Blockchain, data donasi Anda abadi
+                                selamanya.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <i class="fas fa-check-circle text-primary fa-lg mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold">Langsung Peer-to-Contract</h6>
+                            <p class="small text-muted mb-0">Tidak ada admin yang memegang uang tunai Anda secara
+                                manual.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <i class="fas fa-check-circle text-primary fa-lg mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold">Jejak Digital Audit</h6>
+                            <p class="small text-muted mb-0">Setiap sen memiliki ID transaksi yang bisa dilacak publik.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-</div>
+<!-- CTA -->
+<section class="py-5 bg-dark text-white position-relative overflow-hidden">
+    <div class="position-absolute top-0 end-0 w-50 h-100 bg-primary opacity-25"
+        style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);"></div>
+    <div class="container position-relative z-10 text-center py-4">
+        <h2 class="fw-bold mb-4">Siap untuk Berdonasi dengan Aman?</h2>
+        <a href="{{ url_for('index') }}"
+            class="btn btn-lg btn-light text-primary rounded-pill px-5 fw-bold hover-scale"> <i
+                class="fas fa-heart me-2"></i> Cari Kampanye</a>
+    </div>
+</section>
 
 <style>
-    /* Step Card Styles */
-    .step-number {
-        width: 50px;
-        height: 50px;
-        line-height: 50px;
-    }
-    .step-card:hover {
-        transform: translateY(-5px);
-        transition: all 0.3s ease;
+    .hover-scale {
+        transition: transform 0.2s ease;
     }
 
-    /* Vertical Timeline Styles */
-    .timeline-steps {
-        border-left: 2px solid #e2e8f0;
-        margin-left: 20px;
-        padding-left: 30px;
+    .hover-scale:hover {
+        transform: scale(1.05);
     }
-    .timeline-step {
-        position: relative;
-        margin-bottom: 40px;
-    }
-    .timeline-step::before {
-        content: '';
-        position: absolute;
-        left: -39px;
-        top: 5px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        border: 4px solid white;
-        box-shadow: 0 0 0 1px #e2e8f0;
-    }
-    .timeline-step:last-child {
-        margin-bottom: 0;
+
+    .transform-scale {
+        transform: scale(1.02);
     }
 </style>
 {% endblock %}

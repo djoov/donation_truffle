@@ -111,7 +111,6 @@ def init_db():
                  (id INTEGER PRIMARY KEY, blockchain_id INTEGER, 
                   title TEXT, content TEXT, image TEXT, created_at TEXT)''')
 
-    # UPDATE: Menambahkan kolom tx_hash dan nonce
     c.execute('''CREATE TABLE IF NOT EXISTS donations 
                  (id INTEGER PRIMARY KEY, blockchain_id INTEGER, 
                   donor_name TEXT, amount REAL, message TEXT, timestamp TEXT,
