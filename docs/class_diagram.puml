@@ -1,0 +1,83 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Off-Chain Storage (SQLite)" {
+    class User {
+        +id: Integer (PK)
+        +username: String
+        +email: String
+        +password: String
+        +role: String (admin, donatur, kreator)
+        +wallet_address: String
+        +private_key: String
+        +profile_pic: String
+    }
+
+    class CampaignDetail {
+        +id: Integer (PK)
+        +blockchain_id: Integer (FK)
+        +category: String
+        +usage_plan: String
+        +social_link: String
+        +tagline: String
+    }
+
+    class CampaignUpdate {
+        +id: Integer (PK)
+        +blockchain_id: Integer (FK)
+        +title: String
+        +content: Text
+        +image: String
+        +created_at: DateTime
+    }
+
+    class DonationHistory {
+        +id: Integer (PK)
+        +blockchain_id: Integer (FK)
+        +donor_name: String
+        +amount: Float
+        +message: Text
+        +tx_hash: String
+        +timestamp: DateTime
+    }
+}
+
+package "On-Chain Storage (Ethereum Smart Contract)" {
+    class DonationPlatform {
+        +campaignCount: uint256
+        +campaigns: mapping(uint => Campaign)
+        
+        +createCampaign(title, desc, target, image, duration)
+        +donateToCampaign(id)
+        +withdrawFunds(id)
+        +approveCampaign(id)
+        +deleteCampaign(id)
+        +getCampaign(id): Tuple
+    }
+
+    struct Campaign {
+        +id: uint256
+        +creator: address
+        +title: string
+        +description: string
+        +targetAmount: uint256
+        +collectedAmount: uint256
+        +imageHash: string
+        +deadline: uint256
+        +status: Enum (Pending, Active, Rejected, Deleted)
+        +fundsWithdrawn: bool
+    }
+}
+
+' Relationships
+User "1" -- "0..*" CampaignDetail : creates >
+CampaignDetail "1" -- "1" Campaign : maps to >
+User "1" -- "0..*" DonationHistory : makes >
+DonationHistory "0..*" -- "1" CampaignDetail : supports >
+
+DonationPlatform *-- "0..*" Campaign : manages >
+
+note "Hybrid Architecture:\nSQLite stores Metadata (Profiles, Updates);\nBlockchain stores Critical Financial Data." as N1
+
+@enduml

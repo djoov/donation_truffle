@@ -1,0 +1,95 @@
+@startuml
+autonumber
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+
+actor "Donatur" as User
+participant "Web Interface\n(Browser)" as UI
+participant "Flask Backend\n(Controller)" as Backend
+database "SQLite DB" as DB
+participant "Ethereum Blockchain\n(Smart Contract)" as Blockchain
+participant "Email Service\n(SMTP)" as Email
+
+title Sequence Diagram: Proses Donasi (Donation Flow)
+
+activate User
+User -> UI: Buka Halaman Detail Kampanye
+activate UI
+UI -> Backend: GET /campaign/<id>
+activate Backend
+Backend -> Blockchain: getCampaign(id) (Call)
+activate Blockchain
+Blockchain --> Backend: Return Campaign Data
+deactivate Blockchain
+Backend -> DB: SELECT donations WHERE id=...
+activate DB
+DB --> Backend: Return History
+deactivate DB
+Backend --> UI: Render campaign_detail.html
+deactivate Backend
+
+User -> UI: Input Amount & Message -> Click "Donasi"
+UI -> Backend: POST /donate/<id>
+activate Backend
+
+group Validation Layer
+    Backend -> Backend: Check Session (Role=Donatur)
+    Backend -> Backend: Validate Amount > 0
+    Backend -> Blockchain: Estimate Gas Fee
+    activate Blockchain
+    Blockchain --> Backend: Gas Limit
+    deactivate Blockchain
+    Backend -> Blockchain: Get Donor Balance (Wei)
+    activate Blockchain
+    Blockchain --> Backend: Balance
+    deactivate Blockchain
+    
+    alt Balance < Amount + Gas
+        Backend --> UI: Flash Error "Saldo Tidak Cukup"
+        UI --> User: Show Error Message
+    else Balance OK
+        
+        group Transaction Execution (Custodial)
+            Backend -> DB: Get User Private Key
+            activate DB
+            DB --> Backend: Private Key
+            deactivate DB
+            
+            Backend -> Backend: Build Transaction (donateToCampaign)
+            Backend -> Backend: Sign Transaction (Private Key)
+            
+            Backend -> Blockchain: Send Raw Transaction
+            activate Blockchain
+            Blockchain --/ Backend: Transaction Hash (TxHash)
+            deactivate Blockchain
+            
+            note right of Backend
+                Backend tidak menunggu (Async) 
+                untuk menghindari blocking, 
+                tapi menyimpan TxHash segera.
+            end note
+            
+            Backend -> DB: INSERT INTO donations (tx_hash, amount, ...)
+            activate DB
+            DB --> Backend: Success
+            deactivate DB
+            
+            Backend -> Backend: Log Security Event (Donation Initiated)
+            
+            Backend --> UI: Flash Success "Donasi Berhasil"
+        end
+        
+        par Async Task: Notifications
+            Backend -> Email: Send "Thank You" Email to Donor
+            Backend -> Email: Send "New Donation" Email to Creator
+        end
+    end
+end
+
+Backend --> UI: Redirect to Campaign Detail
+deactivate Backend
+UI --> User: Show Updated Page & Success Message
+deactivate UI
+deactivate User
+
+@enduml

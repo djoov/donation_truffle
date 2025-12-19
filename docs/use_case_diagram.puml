@@ -1,0 +1,72 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+' Actor Definitions
+actor "Guest / Public" as Guest
+actor "Donatur" as Donor
+actor "Kreator" as Creator
+actor "Admin" as Admin
+
+package "DonasiKuy Platform" {
+    
+    ' Common Use Cases
+    usecase "View Landing Page" as UC1
+    usecase "View Campaign List" as UC2
+    usecase "View Campaign Details" as UC3
+    usecase "Register Account" as UC4
+    usecase "Login" as UC5
+    usecase "View Blockchain Explorer" as UC6
+    
+    ' Donor Use Cases
+    usecase "Donate Ether (via Metamask/Ganache)" as UC7
+    usecase "View My Donations" as UC8
+    
+    ' Creator Use Cases
+    usecase "Create Campaign" as UC9
+    usecase "Post Updates (Kabar Terbaru)" as UC10
+    usecase "Withdraw Funds (Tarik Dana)" as UC11
+    
+    ' Admin Use Cases
+    usecase "Approve/Reject Campaign" as UC12
+    usecase "Soft Delete Campaign" as UC13
+    usecase "View Security Logs" as UC14
+    usecase "Export Logs (CSV)" as UC15
+    usecase "Manage Users" as UC16
+
+    ' Relationships
+    Guest --> UC1
+    Guest --> UC2
+    Guest --> UC3
+    Guest --> UC6
+    Guest --> UC4
+    Guest --> UC5
+
+    ' Inheritance: All logged in users are also Guests (can view basic pages)
+    Donor --|> Guest
+    Creator --|> Guest
+    Admin --|> Guest
+
+    Donor --> UC7
+    Donor --> UC8
+
+    Creator --> UC9
+    Creator --> UC10
+    Creator --> UC11
+
+    Admin --> UC12
+    Admin --> UC13
+    Admin --> UC14
+    Admin --> UC15
+    Admin --> UC16
+    
+    ' Includes & Extends (Optional Logic)
+    UC7 ..> UC5 : <<include>>
+    UC9 ..> UC5 : <<include>>
+    UC12 ..> UC5 : <<include>>
+    UC11 ..> UC3 : <<extend>> (If target reached/needed)
+
+}
+
+@enduml
