@@ -17,18 +17,46 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{ "key": "username", "value": "kreator_budi", "type": "text" },
-								{ "key": "email", "value": "budi@test.com", "type": "text" },
-								{ "key": "password", "value": "rahasia123", "type": "text" },
-								{ "key": "role", "value": "kreator", "type": "text" },
-								{ "key": "wallet_address", "value": "0xYourGanacheAddressHere", "type": "text" },
-								{ "key": "private_key", "value": "YourPrivateKeyHere", "type": "text" }
+								{
+									"key": "username",
+									"value": "kreator_budi",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "budi@test.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "rahasia123",
+									"type": "text"
+								},
+								{
+									"key": "role",
+									"value": "kreator",
+									"type": "text"
+								},
+								{
+									"key": "wallet_address",
+									"value": "0xYourGanacheAddressHere",
+									"type": "text"
+								},
+								{
+									"key": "private_key",
+									"value": "YourPrivateKeyHere",
+									"type": "text"
+								}
 							]
 						},
 						"url": {
 							"raw": "{{base_url}}/register",
-							"host": ["{{base_url}}"],
-							"path": ["register"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"register"
+							]
 						},
 						"description": "Mendaftar user baru. Pastikan wallet address unik."
 					},
@@ -54,131 +82,292 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{ "key": "email", "value": "budi@test.com", "type": "text" },
-								{ "key": "password", "value": "rahasia123", "type": "text" }
+								{
+									"key": "email",
+									"value": "budi@test.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "rahasia123",
+									"type": "text"
+								}
 							]
 						},
 						"url": {
 							"raw": "{{base_url}}/login",
-							"host": ["{{base_url}}"],
-							"path": ["login"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "2. Campaign Management",
-			"item": [
-				{
-					"name": "Create Campaign (Positif)",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{ "key": "title", "value": "Bantuan Bencana Alam Test", "type": "text" },
-								{ "key": "description", "value": "Testing via Postman", "type": "text" },
-								{ "key": "target", "value": "10", "type": "text" },
-								{ "key": "duration", "value": "30", "type": "text" },
-								{ "key": "category", "value": "Bencana Alam", "type": "text" },
-								{ "key": "tagline", "value": "Bantu sesama", "type": "text" },
-								{ "key": "usage_plan", "value": "Logistik 100%", "type": "text" },
-								{ "key": "social_link", "value": "http://instagram.com", "type": "text" },
-								{ "key": "image", "type": "file", "src": [] }
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
 							]
-						},
-						"url": {
-							"raw": "{{base_url}}/create_campaign",
-							"host": ["{{base_url}}"],
-							"path": ["create_campaign"]
 						}
-					},
-					"response": []
+					}
 				},
-				{
-					"name": "Create Campaign (Negatif - Tanpa Login)",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{ "key": "title", "value": "Hacker Campaign", "type": "text" }
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/create_campaign",
-							"host": ["{{base_url}}"],
-							"path": ["create_campaign"]
-						},
-						"description": "Coba tembak API ini TANPA login sebelumnya. Harusnya gagal/redirect."
+				"response": []
+			},
+			{
+				"name": "Forgot Password",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "formdata",
+						"formdata": [
+							{
+								"key": "email",
+								"value": "budi@test.com",
+								"type": "text"
+							}
+						]
 					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "3. Admin Actions (Security Test)",
-			"item": [
-				{
-					"name": "Approve Campaign (Unauthorized)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/admin/approve/0",
-							"host": ["{{base_url}}"],
-							"path": ["admin", "approve", "0"]
-						},
-						"description": "Coba approve saat login sebagai user biasa. Harusnya 'Unauthorized'."
+					"url": {
+						"raw": "{{base_url}}/forgot_password",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"forgot_password"
+						]
 					},
-					"response": []
+					"description": "Trigger reset password email"
 				},
-				{
-					"name": "Login Admin",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{ "key": "email", "value": "admin@donasi.com", "type": "text" },
-								{ "key": "password", "value": "admin123", "type": "text" }
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/login",
-							"host": ["{{base_url}}"],
-							"path": ["login"]
-						}
+				"response": []
+			},
+			{
+				"name": "Reset Password",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "formdata",
+						"formdata": [
+							{
+								"key": "password",
+								"value": "newpassword123",
+								"type": "text"
+							}
+						]
 					},
-					"response": []
+					"url": {
+						"raw": "{{base_url}}/reset_password/TOKEN_DUMMY",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"reset_password",
+							"TOKEN_DUMMY"
+						]
+					},
+					"description": "Reset password with token (Replace TOKEN_DUMMY with real token from email log)"
 				},
-				{
-					"name": "Approve Campaign (Authorized)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/admin/approve/0",
-							"host": ["{{base_url}}"],
-							"path": ["admin", "approve", "0"]
-						},
-						"description": "Approve campaign ID 0 (Pastikan ID valid sesuai Ganache)."
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "2. Campaign Management",
+		"item": [
+			{
+				"name": "Create Campaign (Positif)",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "formdata",
+						"formdata": [
+							{
+								"key": "title",
+								"value": "Bantuan Bencana Alam Test",
+								"type": "text"
+							},
+							{
+								"key": "description",
+								"value": "Testing via Postman",
+								"type": "text"
+							},
+							{
+								"key": "target",
+								"value": "10",
+								"type": "text"
+							},
+							{
+								"key": "duration",
+								"value": "30",
+								"type": "text"
+							},
+							{
+								"key": "category",
+								"value": "Bencana Alam",
+								"type": "text"
+							},
+							{
+								"key": "tagline",
+								"value": "Bantu sesama",
+								"type": "text"
+							},
+							{
+								"key": "usage_plan",
+								"value": "Logistik 100%",
+								"type": "text"
+							},
+							{
+								"key": "social_link",
+								"value": "http://instagram.com",
+								"type": "text"
+							},
+							{
+								"key": "image",
+								"type": "file",
+								"src": []
+							}
+						]
 					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://127.0.0.1:5000",
-			"type": "string"
-		}
-	]
+					"url": {
+						"raw": "{{base_url}}/create_campaign",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"create_campaign"
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Create Campaign (Negatif - Tanpa Login)",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "formdata",
+						"formdata": [
+							{
+								"key": "title",
+								"value": "Hacker Campaign",
+								"type": "text"
+							}
+						]
+					},
+					"url": {
+						"raw": "{{base_url}}/create_campaign",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"create_campaign"
+						]
+					},
+					"description": "Coba tembak API ini TANPA login sebelumnya. Harusnya gagal/redirect."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "3. Admin Actions (Security Test)",
+		"item": [
+			{
+				"name": "Approve Campaign (Unauthorized)",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/admin/approve/0",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"admin",
+							"approve",
+							"0"
+						]
+					},
+					"description": "Coba approve saat login sebagai user biasa. Harusnya 'Unauthorized'."
+				},
+				"response": []
+			},
+			{
+				"name": "Login Admin",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "formdata",
+						"formdata": [
+							{
+								"key": "email",
+								"value": "admin@donasi.com",
+								"type": "text"
+							},
+							{
+								"key": "password",
+								"value": "admin123",
+								"type": "text"
+							}
+						]
+					},
+					"url": {
+						"raw": "{{base_url}}/login",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"login"
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Approve Campaign (Authorized)",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/admin/approve/0",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"admin",
+							"approve",
+							"0"
+						]
+					},
+					"description": "Approve campaign ID 0 (Pastikan ID valid sesuai Ganache)."
+				},
+				"response": []
+			},
+			{
+				"name": "Export Security Logs (CSV)",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/admin/export_logs",
+						"host": [
+							"{{base_url}}"
+						],
+						"path": [
+							"admin",
+							"export_logs"
+						]
+					},
+					"description": "Download logs as CSV"
+				},
+				"response": []
+			}
+		]
+	}
+],
+"variable": [
+	{
+		"key": "base_url",
+		"value": "http://127.0.0.1:5000",
+		"type": "string"
+	}
+]
 }
